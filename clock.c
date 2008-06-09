@@ -243,7 +243,8 @@ get_time(void) {
 /* RUN FUCTION */
 /* *********** */
 
-void run(void) {
+void 
+run(void) {
     get_time();
     arrange_clock(hour[0], hour[1], min[0], min[1], sec[0], sec[1]);
     refresh();
