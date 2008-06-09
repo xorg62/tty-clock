@@ -223,19 +223,14 @@ check_key(void) {
 void
 get_time(void) {
     int i;
+	int ihour;
     tm = localtime(&lt);
     lt = time(NULL);
-	int ihour;
-	
+
 	ihour = tm->tm_hour;
 
-	if(enable_tw && ihour > 12) {
-		ihour -= 12;
-	}
-
-	if(enable_tw && !ihour){
-		ihour = 12;
-	}
+	ihour = (enable_tw && ihour > 12) ? ihour - 12 : ihour;
+    ihour = (enable_tw && !ihour) ? 12 : ihour;
 
 	hour[0] = ihour / 10;
 	hour[1] = ihour % 10;
