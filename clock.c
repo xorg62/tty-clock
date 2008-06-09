@@ -1,6 +1,6 @@
-/*        clock.c    - TTY-Clock main function
+/*      clock.c    - TTY-Clock main function
  *
- *         Copyright © 2008 Duquesnoy Martin <xorg62@gmail.com>
+ *      Copyright © 2008 Duquesnoy Martin <xorg62@gmail.com>
  *
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -16,9 +16,6 @@
  *      along with this program; if not, write to the Free Software
  *      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  *      MA 02110-1301, USA.
- *
- *      gcc -lncursesw clock.c -o tty-clock
- *
  */
 
 #include <stdlib.h>
@@ -62,13 +59,12 @@ static const long number[10][LGNUM] = {
 int hour[2];
 int min[2];
 int sec[2];
-
 int defx=1;
 int defy=1;
 int bg = COLOR_BLACK;
 int SCHANGE = 19;
 bool enable_sec = 0;
-struct tm *ptr;
+struct tm *tm;
 time_t lt;
 
 /* ***************** */
@@ -107,11 +103,13 @@ print_number(int num, int x, int y) {
 
     for (i = 0; i < LGNUM; ++i) {
         c =    (tab[i] != 1) ? 2 : 1;
-        if(count == 6){ 
+     
+		if(count == 6){ 
             ++lx;
             ly=y;
             count = 0;
         }
+
         move(lx, ly);
         attron(COLOR_PAIR(c));
         printw(" ");
@@ -217,26 +215,20 @@ check_key(void) {
 void
 get_time(void) {
     int i;
-    ptr = localtime(&lt);
+    tm = localtime(&lt);
     lt = time(NULL);
-    
-    char ho[3];
-    char mi[3];
-    char se[3];
 
-    strftime(ho, 3, "%H", ptr);
-    strftime(mi, 3, "%M", ptr);
+	hour[0] = tm->tm_hour / 10;
+	hour[1] = tm->tm_hour % 10;
+
+	min[0] = tm->tm_min / 10;
+	min[1] = tm->tm_min % 10;
+
     if(enable_sec);
-        strftime(se, 3, "%S", ptr);
     
-    for (i = 0; i < 2; ++i){
-        hour[i] = ho[i] - '0';
-        min[i] = mi[i] - '0';
+		sec[0] = tm->tm_sec / 10;
+		sec[1] = tm->tm_sec % 10;
     
-        if(enable_sec);
-            sec[i] = se[i] - '0';
-
-    }
 }
 
 /* *********** */
@@ -246,7 +238,9 @@ get_time(void) {
 void 
 run(void) {
     get_time();
-    arrange_clock(hour[0], hour[1], min[0], min[1], sec[0], sec[1]);
+    arrange_clock(hour[0], hour[1],
+                  min[0], min[1],
+                  sec[0], sec[1]);
     refresh();
     halfdelay(1);
 }
@@ -314,7 +308,7 @@ main(int argc,char **argv) {
 /* endless loop */
 
     while(1) {
-        usleep(5000);
+        usleep(10000);
         check_key();
         run();
     }
