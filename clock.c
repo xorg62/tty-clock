@@ -96,7 +96,7 @@ start(void) {
 void 
 print_number(int num, int x, int y) {
     int i,u,count=0;
-    /char c;
+    char c;
     int tab[LGNUM];
     int lx=x;
     int ly=y;
