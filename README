@@ -1,0 +1,8 @@
+tty-clock usage : tty-clock -[option] -[option] <arg>
+  -s, --second        Show seconds
+  -x  <integer>       Set the clock to X
+  -y  <integer>       Set the clock to Y
+  -v, --version       Show tty-clock version
+  -i, --info          Show some info about tty-clock
+  -h, --help          Show this page
+Try keypad arrow for move the clock ;)

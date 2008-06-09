@@ -26,6 +26,7 @@
 
 #define printh() printf("tty-clock usage : tty-clock -[option] -[option] <arg>\n\n\
   -s, --second        Show seconds\n\
+  -t, --tw            Set the hour in 12h format\n\
   -x  <integer>       Set the clock to X\n\
   -y  <integer>       Set the clock to Y\n\
   -v, --version       Show tty-clock version\n\
@@ -63,7 +64,9 @@ int defx=1;
 int defy=1;
 int bg = COLOR_BLACK;
 int SCHANGE = 19;
+
 bool enable_sec = 0;
+bool enable_tw = 0;
 struct tm *tm;
 time_t lt;
 
@@ -222,9 +225,20 @@ get_time(void) {
     int i;
     tm = localtime(&lt);
     lt = time(NULL);
+	int ihour;
+	
+	ihour = tm->tm_hour;
 
-	hour[0] = tm->tm_hour / 10;
-	hour[1] = tm->tm_hour % 10;
+	if(enable_tw && ihour > 12) {
+		ihour -= 12;
+	}
+
+	if(enable_tw && !ihour){
+		ihour = 12;
+	}
+
+	hour[0] = ihour / 10;
+	hour[1] = ihour % 10;
 
 	min[0] = tm->tm_min / 10;
 	min[1] = tm->tm_min % 10;
@@ -263,10 +277,11 @@ main(int argc,char **argv) {
         {"version", 0, NULL, 'v'},
         {"info",    0, NULL, 'i'},
         {"second",  0, NULL, 's'},
+		{"twelve",	0, NULL, 't'},
         {NULL,      0, NULL, 0}
        };
 
-     while ((c = getopt_long(argc,argv,"x:y:vsih",
+     while ((c = getopt_long(argc,argv,"tx:y:vsih",
                      long_options,NULL)) != -1) {
         switch(c) {
             case 'h':
@@ -300,7 +315,9 @@ main(int argc,char **argv) {
                 SCHANGE = 0;
                 enable_sec = 1;
                 break;
-
+			case 't':
+				enable_tw = 1;
+				break;
         }
      }
 
