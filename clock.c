@@ -125,7 +125,7 @@ print_number(int num, int x, int y) {
 /* ARRANGE FINAL POSITION OF NUMBER */
 /* ******************************** */
 
-void 
+void  
 arrange_clock(int h1, int h2, 
               int m1, int m2, 
               int s1, int s2) {
