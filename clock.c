@@ -205,6 +205,11 @@ check_key(void) {
             ++defy;
             clear();
             break;
+		case 'q':
+		case 'Q':
+			endwin();
+			exit(EXIT_SUCCESS);
+			break;
     }
 }
 
