@@ -57,14 +57,14 @@ static const long number[10][LGNUM] = {
 	 {1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1}  /* 9 */
 };
 
+char *meridiem;
+int SCHANGE = 19;
 int hour[2];
 int min[2];
 int sec[2];
 int defx=1;
 int defy=1;
 int bg = COLOR_BLACK;
-int SCHANGE = 19;
-
 bool enable_sec = 0;
 bool enable_tw = 0;
 struct tm *tm;
@@ -83,7 +83,7 @@ start(void) {
 	 refresh();
 	 if (use_default_colors() == OK);
 	 bg = -1;
-	 init_pair(1,COLOR_GREEN, COLOR_GREEN);
+	 init_pair(1,COLOR_BLACK, COLOR_GREEN);
 	 init_pair(2, bg, bg);
 	 curs_set(0);
 }
@@ -130,42 +130,46 @@ void
 arrange_clock(int h1, int h2, 
 			  int m1, int m2, 
 			  int s1, int s2) {
-	 int i;
+	int i;
 
-	 for(i = defy + DEPTHB; i < defy + YLENGTH - SCHANGE; ++i){
-		  mvaddch(defx + DEPTHB, i, ACS_HLINE);
-		  mvaddch(defx + XLENGTH, i,ACS_HLINE);
-	 }
+	for(i = defy + DEPTHB; i < defy + YLENGTH - SCHANGE; ++i){
+		 mvaddch(defx + DEPTHB, i, ACS_HLINE);
+		 mvaddch(defx + XLENGTH, i,ACS_HLINE);
+	}
 
-	 for (i = defx + DEPTHB; i < defx + XLENGTH; ++i){
-		  mvaddch(i, defy + DEPTHB, ACS_VLINE);
-		  mvaddch(i, defy + YLENGTH - SCHANGE, ACS_VLINE);
-	 }
+	for (i = defx + DEPTHB; i < defx + XLENGTH; ++i){
+		 mvaddch(i, defy + DEPTHB, ACS_VLINE);
+		 mvaddch(i, defy + YLENGTH - SCHANGE, ACS_VLINE);
+	}
 	 
-	 mvaddch(defx + DEPTHB, defy + DEPTHB, ACS_ULCORNER);
-	 mvaddch(defx + XLENGTH, defy + DEPTHB, ACS_LLCORNER);
-	 mvaddch(defx + DEPTHB, defy + YLENGTH - SCHANGE, ACS_URCORNER);
-	 mvaddch(defx + XLENGTH, defy + YLENGTH - SCHANGE, ACS_LRCORNER);
+	mvaddch(defx + DEPTHB, defy + DEPTHB, ACS_ULCORNER);
+	mvaddch(defx + XLENGTH, defy + DEPTHB, ACS_LLCORNER);
+	mvaddch(defx + DEPTHB, defy + YLENGTH - SCHANGE, ACS_URCORNER);
+	mvaddch(defx + XLENGTH, defy + YLENGTH - SCHANGE, ACS_LRCORNER);
 
-	 print_number(h1, defx, defy);
-	 print_number(h2, defx, defy + 7);
+	print_number(h1, defx, defy);
+	print_number(h2, defx, defy + 7);
 	 
-	 attron(COLOR_PAIR(1));
-	 mvaddstr(defx + 1, defy + 15,"  ");
-	 mvaddstr(defx + 3, defy + 15,"  ");
-	 attroff(COLOR_PAIR(1));
+	attron(COLOR_PAIR(1));
+	
+	move(defx + 1, defy + 15);
+	printw("%s",meridiem);
+	mvaddstr(defx + 3, defy + 15,"  ");
 
-	 print_number(m1, defx, defy + 19);
-	 print_number(m2, defx, defy + 26);
+	attroff(COLOR_PAIR(1));
 
-	 if(enable_sec){
-		  attron(COLOR_PAIR(1));
-		  mvaddstr(defx + 1, defy + 34,"  ");
-		  mvaddstr(defx + 3, defy + 34,"  ");
-		  attroff(COLOR_PAIR(1));
+	print_number(m1, defx, defy + 19);
+	print_number(m2, defx, defy + 26);
+
+	if(enable_sec){
+
+		 attron(COLOR_PAIR(1));
+	     mvaddstr(defx + 1, defy + 34,"  ");
+		 mvaddstr(defx + 3, defy + 34,"  ");
+		 attroff(COLOR_PAIR(1));
 	 
-		  print_number(s1, defx, defy + 38);
-		  print_number(s2, defx, defy + 45);
+		 print_number(s1, defx, defy + 38);
+		 print_number(s2, defx, defy + 45);
 	 }
 }
 
@@ -176,44 +180,43 @@ arrange_clock(int h1, int h2,
 
 void
 check_key(void) {
-	 int c;
-	 c = getch();
-
-	 switch(c) {
-		  case KEY_UP:
-		  case 'k':
-		  case 'K':
-				if(defx > 1) {
-					 --defx;
-					 clear();
-				}
-				break;
-		  case KEY_DOWN:
-		  case 'j':
-		  case 'J':
-				++defx;
+	int c;
+	c = getch();
+	switch(c) {
+		case KEY_UP:
+		case 'k':
+		case 'K':
+			if(defx > 1) {
+				--defx;
 				clear();
-				break;
-		  case KEY_LEFT:
-		  case 'h':
-		  case 'H':
-				if(defy > 1) {
-					 --defy;
-					 clear();
-				}
-				break;
-		  case KEY_RIGHT:	 
-		  case 'l':
-		  case 'L':
-				++defy;
+			}
+			break;
+		case KEY_DOWN:
+		case 'j':
+		case 'J':
+			++defx;
+			clear();
+			break;
+		case KEY_LEFT:
+		case 'h':
+		case 'H':
+			if(defy > 1) {
+				--defy;
 				clear();
-				break;
+			}
+			break;
+		case KEY_RIGHT:	 
+		case 'l':
+		case 'L':
+			++defy;
+			clear();
+			break;
 		case 'q':
 		case 'Q':
 			endwin();
 			exit(EXIT_SUCCESS);
 			break;
-	 }
+		}
 }
 
 /* ********************* */
@@ -222,12 +225,19 @@ check_key(void) {
 
 void
 get_time(void) {
-	int i;
 	int ihour;
 	tm = localtime(&lt);
 	lt = time(NULL);
 
 	ihour = tm->tm_hour;
+	
+	if (enable_tw && ihour > 12) {
+		meridiem = "PM";
+	} else if (enable_tw && ihour < 12) {
+		meridiem = "AM";
+	} else {
+		meridiem = "  ";
+	}
 
 	ihour = (enable_tw && ihour > 12) ? ihour - 12 : ihour;
 	ihour = (enable_tw && !ihour) ? 12 : ihour;
