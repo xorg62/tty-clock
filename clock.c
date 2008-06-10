@@ -62,6 +62,10 @@ int SCHANGE = 19;
 int hour[2];
 int min[2];
 int sec[2];
+int mday;
+int mon;
+int year;
+
 int defx=1;
 int defy=1;
 int bg = COLOR_BLACK;
@@ -85,6 +89,8 @@ start(void) {
 	 bg = -1;
 	 init_pair(1,COLOR_BLACK, COLOR_GREEN);
 	 init_pair(2, bg, bg);
+	 init_pair(3,COLOR_GREEN, COLOR_BLACK);
+
 	 curs_set(0);
 }
 
@@ -94,18 +100,19 @@ start(void) {
 
 void 
 print_number(int num, int x, int y) {
-	 int i,u,count=0;
-	 char c;
-	 int tab[LGNUM];
-	 int lx=x;
-	 int ly=y;
+	int i,u,count=0;
+	char c;
+	int tab[LGNUM];
+	int lx=x;
+	int ly=y;
 	 
-	 for (u = 0; u < LGNUM; ++u){
-		  tab[u] = number[num][u];
-	 }
+	for (u = 0; u < LGNUM; ++u){
+		tab[u] = number[num][u];
+	}
+	
 
-	 for (i = 0; i < LGNUM; ++i) {
-		  c =	 (tab[i] != 1) ? 2 : 1;
+	for (i = 0; i < LGNUM; ++i) {
+		c = (tab[i] != 1) ? 2 : 1;
 	  
 		if(count == 6){ 
 			++lx;
@@ -119,7 +126,7 @@ print_number(int num, int x, int y) {
 		attroff(COLOR_PAIR(c));
 		++ly;
 		++count;
-	 }
+	}
 }
 
 /* ******************************** */
@@ -131,6 +138,9 @@ arrange_clock(int h1, int h2,
 			  int m1, int m2, 
 			  int s1, int s2) {
 	int i;
+	int temp_dp;
+
+	temp_dp = (enable_sec) ? 21 : 12;
 
 	for(i = defy + DEPTHB; i < defy + YLENGTH - SCHANGE; ++i){
 		 mvaddch(defx + DEPTHB, i, ACS_HLINE);
@@ -160,9 +170,9 @@ arrange_clock(int h1, int h2,
 
 	print_number(m1, defx, defy + 19);
 	print_number(m2, defx, defy + 26);
-
+	
 	if(enable_sec){
-
+		
 		 attron(COLOR_PAIR(1));
 	     mvaddstr(defx + 1, defy + 34,"  ");
 		 mvaddstr(defx + 3, defy + 34,"  ");
@@ -171,6 +181,12 @@ arrange_clock(int h1, int h2,
 		 print_number(s1, defx, defy + 38);
 		 print_number(s2, defx, defy + 45);
 	 }
+		
+	move(defx + XLENGTH + 1,defy + temp_dp);
+ 	attron(COLOR_PAIR(3));
+	printw("%d/%d/%d",mday,mon,year);
+	attroff(COLOR_PAIR(3));
+
 }
 
 
@@ -242,11 +258,16 @@ get_time(void) {
 	ihour = (enable_tw && ihour > 12) ? ihour - 12 : ihour;
 	ihour = (enable_tw && !ihour) ? 12 : ihour;
 
+
 	hour[0] = ihour / 10;
 	hour[1] = ihour % 10;
 
 	min[0] = tm->tm_min / 10;
 	min[1] = tm->tm_min % 10;
+
+	mday = tm->tm_mday;
+	mon = tm->tm_mon + 1;
+	year = tm->tm_year + 1900;
 
 	if(enable_sec) {
 		sec[0] = tm->tm_sec / 10;
