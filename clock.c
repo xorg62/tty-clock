@@ -59,9 +59,6 @@ static const long number[10][LGNUM] = {
 
 char *meridiem;
 
-char *cols;
-char *lines;
-
 int SCHANGE = 19;
 int maxcol;
 int maxlin;
@@ -87,18 +84,19 @@ time_t lt;
 
 void 
 start(void) {
-	 initscr ();	 
-	 noecho ();
-	 keypad (stdscr, TRUE);	 
-	 start_color ();
-	 refresh();
-	 if (use_default_colors() == OK);
-	 bg = -1;
-	 init_pair(1,COLOR_BLACK, COLOR_GREEN);
-	 init_pair(2, bg, bg);
-	 init_pair(3,COLOR_GREEN, bg);
-
-	 curs_set(0);
+	initscr ();	 
+	noecho ();
+	keypad (stdscr, TRUE);	 
+	start_color ();
+	refresh();
+	if (use_default_colors() == OK);
+	bg = -1;
+	init_pair(1,COLOR_BLACK, COLOR_GREEN);
+	init_pair(2, bg, bg);
+	init_pair(3,COLOR_GREEN, bg);
+	curs_set(0);
+	maxcol = getmaxy(stdscr);
+ 	maxlin = getmaxx(stdscr);
 }
 
 /* **************************** */
@@ -155,7 +153,8 @@ arrange_clock(int h1, int h2,
 	
 	move(defx + 1, defy + 15);
 	printw("%s",meridiem);
-	mvaddstr(defx + 3, defy + 15,"  ");
+	move(defx + 3, defy + 15);
+	printw("  ");
 
 	attroff(COLOR_PAIR(1));
 
@@ -217,8 +216,10 @@ check_key(void) {
 		case KEY_DOWN:
 		case 'j':
 		case 'J':
+			if(defx + XLENGTH + 2 < maxcol) {
 				++defx;
 				clear();
+			}
 			break;
 		case KEY_LEFT:
 		case 'h':
@@ -231,8 +232,10 @@ check_key(void) {
 		case KEY_RIGHT:	 
 		case 'l':
 		case 'L':
+			if(defy + YLENGTH - SCHANGE + 1 < maxlin) {
 				++defy;
 				clear();
+			}
 			break;
 		case 's':
 		case 'S':
