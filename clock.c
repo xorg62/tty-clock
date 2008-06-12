@@ -58,7 +58,13 @@ static const long number[10][LGNUM] = {
 };
 
 char *meridiem;
+
+char *cols;
+char *lines;
+
 int SCHANGE = 19;
+int maxcol;
+int maxlin;
 int hour[2];
 int min[2];
 int sec[2];
@@ -66,6 +72,7 @@ int mday;
 int mon;
 int year;
 
+int temp_dp;
 int defx=1;
 int defy=1;
 int bg = COLOR_BLACK;
@@ -89,7 +96,7 @@ start(void) {
 	 bg = -1;
 	 init_pair(1,COLOR_BLACK, COLOR_GREEN);
 	 init_pair(2, bg, bg);
-	 init_pair(3,COLOR_GREEN, COLOR_BLACK);
+	 init_pair(3,COLOR_GREEN, bg);
 
 	 curs_set(0);
 }
@@ -138,9 +145,33 @@ arrange_clock(int h1, int h2,
 			  int m1, int m2, 
 			  int s1, int s2) {
 	int i;
-	int temp_dp;
 
 	temp_dp = (enable_sec) ? 21 : 12;
+
+	print_number(h1, defx, defy);
+	print_number(h2, defx, defy + 7);
+	 
+	attron(COLOR_PAIR(1));
+	
+	move(defx + 1, defy + 15);
+	printw("%s",meridiem);
+	mvaddstr(defx + 3, defy + 15,"  ");
+
+	attroff(COLOR_PAIR(1));
+
+	print_number(m1, defx, defy + 19);
+	print_number(m2, defx, defy + 26);
+
+	if(enable_sec){
+		
+		 attron(COLOR_PAIR(1));
+	     mvaddstr(defx + 1, defy + 34,"  ");
+		 mvaddstr(defx + 3, defy + 34,"  ");
+		 attroff(COLOR_PAIR(1));
+	 
+		 print_number(s1, defx, defy + 38);
+		 print_number(s2, defx, defy + 45);
+	 }
 
 	for(i = defy + DEPTHB; i < defy + YLENGTH - SCHANGE; ++i){
 		 mvaddch(defx + DEPTHB, i, ACS_HLINE);
@@ -157,31 +188,7 @@ arrange_clock(int h1, int h2,
 	mvaddch(defx + DEPTHB, defy + YLENGTH - SCHANGE, ACS_URCORNER);
 	mvaddch(defx + XLENGTH, defy + YLENGTH - SCHANGE, ACS_LRCORNER);
 
-	print_number(h1, defx, defy);
-	print_number(h2, defx, defy + 7);
-	 
-	attron(COLOR_PAIR(1));
 	
-	move(defx + 1, defy + 15);
-	printw("%s",meridiem);
-	mvaddstr(defx + 3, defy + 15,"  ");
-
-	attroff(COLOR_PAIR(1));
-
-	print_number(m1, defx, defy + 19);
-	print_number(m2, defx, defy + 26);
-	
-	if(enable_sec){
-		
-		 attron(COLOR_PAIR(1));
-	     mvaddstr(defx + 1, defy + 34,"  ");
-		 mvaddstr(defx + 3, defy + 34,"  ");
-		 attroff(COLOR_PAIR(1));
-	 
-		 print_number(s1, defx, defy + 38);
-		 print_number(s2, defx, defy + 45);
-	 }
-		
 	move(defx + XLENGTH + 1,defy + temp_dp);
  	attron(COLOR_PAIR(3));
 	printw("%d/%d/%d",mday,mon,year);
@@ -210,8 +217,8 @@ check_key(void) {
 		case KEY_DOWN:
 		case 'j':
 		case 'J':
-			++defx;
-			clear();
+				++defx;
+				clear();
 			break;
 		case KEY_LEFT:
 		case 'h':
@@ -224,8 +231,20 @@ check_key(void) {
 		case KEY_RIGHT:	 
 		case 'l':
 		case 'L':
-			++defy;
-			clear();
+				++defy;
+				clear();
+			break;
+		case 's':
+		case 'S':
+			if(!enable_sec){
+				SCHANGE = 0;
+				clear();
+				enable_sec = 1;
+			} else {
+				SCHANGE = 19;
+				clear();
+				enable_sec = 0;
+			}
 			break;
 		case 'q':
 		case 'Q':
@@ -295,8 +314,8 @@ run(void) {
 
 int 
 main(int argc,char **argv) {
-	 int c;
-	 
+	int c;
+
 	static struct option long_options[] ={
 		{"help",	 0, NULL, 'h'},
 		{"version", 0, NULL, 'v'},
