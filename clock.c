@@ -95,8 +95,6 @@ start(void) {
 	init_pair(2, bg, bg);
 	init_pair(3,COLOR_GREEN, bg);
 	curs_set(0);
-	maxcol = getmaxy(stdscr);
- 	maxlin = getmaxx(stdscr);
 }
 
 /* **************************** */
@@ -313,12 +311,14 @@ get_time(void) {
 
 void 
 run(void) {
-	 get_time();
-	 arrange_clock(hour[0], hour[1],
+	get_time();
+	arrange_clock(hour[0], hour[1],
 					min[0], min[1],
 					sec[0], sec[1]);
-	 refresh();
-	 halfdelay(1);
+	maxcol = getmaxy(stdscr);
+	maxlin = getmaxx(stdscr);
+	refresh();
+	halfdelay(1);
 }
 
 /* ************ */
@@ -372,25 +372,25 @@ main(int argc,char **argv) {
 				 SCHANGE = 0;
 				 enable_sec = 1;
 				 break;
-		case 't':
-			enable_tw = 1;
-			break;
-	  }
-  }
+			case 't':
+				enable_tw = 1;
+				break;
+			}
+		}
 
 	 start();
 
 /* first time init */	 
 
- run();
+	run();
 
  /* endless loop */
 
- while(1) {
-	  usleep(10000);
-	  check_key();
-	  run();
- }
+	while(1) {
+		usleep(10000);
+		check_key();
+		run();
+	}
 	 endwin();
 	 return 0;
 }
