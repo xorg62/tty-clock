@@ -249,6 +249,16 @@ check_key(void) {
 				enable_sec = 0;
 			}
 			break;
+		case 't':
+		case 'T':
+			if(!enable_tw) {
+				clear();
+				enable_tw = 1;
+			} else {
+				clear();
+				enable_tw = 0;
+			}
+			break;
 		case 'q':
 		case 'Q':
 			endwin();
@@ -341,7 +351,7 @@ main(int argc,char **argv) {
 				 exit(EXIT_SUCCESS);
 				 break;
 			case 'v':
-				 printf("TTY-Clock v0.1alpha2\n");
+				 printf("TTY-Clock v0.1.4\n");
 				 exit(EXIT_SUCCESS);
 				 break;
 			case 'x':
