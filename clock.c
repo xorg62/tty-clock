@@ -25,14 +25,15 @@
 #include <getopt.h>	 
 
 #define printh() printf("tty-clock usage : tty-clock -[option] -[option] <arg>\n\n\
-  -s, --second		  Show seconds\n\
-  -t, --tw				Set the hour in 12h format\n\
+  -s, --second		 Show seconds\n\
+  -t, --tw		 Set the hour in 12h format\n\
   -x  <integer>		 Set the clock to X\n\
   -y  <integer>		 Set the clock to Y\n\
   -v, --version		 Show tty-clock version\n\
-  -i, --info			 Show some info about tty-clock\n\
-  -h, --help			 Show this page\n\n\
-Try keypad arrow for move the clock ;)\n");\
+  -i, --info		 Show some info about tty-clock\n\
+  -h, --help		 Show this page\n\n\
+Try keypad arrow for move the clock :-)\n\
+push S for enable the second and T for enable the 12H hours format.\n");\
 							 
 
 #define LGNUM 30
@@ -44,7 +45,7 @@ Try keypad arrow for move the clock ;)\n");\
 /* BIG NUMBER INIT */
 /* *************** */
 
-static const long number[10][LGNUM] = {
+static const char number[10][LGNUM] = {
 	 {1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1}, /* 0 */
 	 {0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1}, /* 1 */
 	 {1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1}, /* 2 */
@@ -57,24 +58,43 @@ static const long number[10][LGNUM] = {
 	 {1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1}  /* 9 */
 };
 
+static struct option long_options[] ={
+	{"help",	 0, NULL, 'h'},
+	{"version", 0, NULL, 'v'},
+	{"info",	 0, NULL, 'i'},
+	{"second",  0, NULL, 's'},
+	{"twelve",	0, NULL, 't'},
+	{NULL,		0, NULL, 0}
+};
+
+typedef struct {
+	bool second;
+	bool twelve;
+} OPTIONS;
+
+OPTIONS option;
+
+typedef struct {
+	unsigned int hour[2];
+	unsigned int minute[2];
+	unsigned int second[2];
+	unsigned int month_day;
+	unsigned int month;
+	unsigned int year;
+}  TIME;
+
+TIME sdate;
+
 char *meridiem;
 
 int SCHANGE = 19;
 int maxcol;
 int maxlin;
-int hour[2];
-int min[2];
-int sec[2];
-int mday;
-int mon;
-int year;
-
 int temp_dp;
 int defx=1;
 int defy=1;
 int bg = COLOR_BLACK;
-bool enable_sec = 0;
-bool enable_tw = 0;
+
 struct tm *tm;
 time_t lt;
 
@@ -116,7 +136,7 @@ print_number(int num, int x, int y) {
 
 	for (i = 0; i < LGNUM; ++i) {
 		c = (tab[i] != 1) ? 2 : 1;
-	  
+  
 		if(count == 6){ 
 			++lx;
 			ly=y;
@@ -125,7 +145,7 @@ print_number(int num, int x, int y) {
 
 		move(lx, ly);
 		attron(COLOR_PAIR(c));
-		printw(" ");
+		addch(' ');
 		attroff(COLOR_PAIR(c));
 		++ly;
 		++count;
@@ -142,7 +162,7 @@ arrange_clock(int h1, int h2,
 			  int s1, int s2) {
 	int i;
 
-	temp_dp = (enable_sec) ? 21 : 12;
+	temp_dp = (option.second) ? 21 : 12;
 
 	print_number(h1, defx, defy);
 	print_number(h2, defx, defy + 7);
@@ -159,7 +179,7 @@ arrange_clock(int h1, int h2,
 	print_number(m1, defx, defy + 19);
 	print_number(m2, defx, defy + 26);
 
-	if(enable_sec){
+	if(option.second){
 		
 		 attron(COLOR_PAIR(1));
 	     mvaddstr(defx + 1, defy + 34,"  ");
@@ -188,7 +208,7 @@ arrange_clock(int h1, int h2,
 	
 	move(defx + XLENGTH + 1,defy + temp_dp);
  	attron(COLOR_PAIR(3));
-	printw("%d/%d/%d",mday,mon,year);
+	printw("%d/%d/%d",sdate.month_day,sdate.month,sdate.year);
 	attroff(COLOR_PAIR(3));
 
 }
@@ -206,55 +226,51 @@ check_key(void) {
 		case KEY_UP:
 		case 'k':
 		case 'K':
-			if(defx > 1) {
+			if(defx > 1) 
 				--defx;
 				clear();
-			}
 			break;
 		case KEY_DOWN:
 		case 'j':
 		case 'J':
-			if(defx + XLENGTH + 2 < maxcol) {
+			if(defx + XLENGTH + 2 < maxcol) 
 				++defx;
 				clear();
-			}
 			break;
 		case KEY_LEFT:
 		case 'h':
 		case 'H':
-			if(defy > 1) {
+			if(defy > 1) 
 				--defy;
 				clear();
-			}
 			break;
 		case KEY_RIGHT:	 
 		case 'l':
 		case 'L':
-			if(defy + YLENGTH - SCHANGE + 1 < maxlin) {
+			if(defy + YLENGTH - SCHANGE + 1 < maxlin) 
 				++defy;
 				clear();
-			}
 			break;
 		case 's':
 		case 'S':
-			if(!enable_sec){
+			if(!option.second ){
 				SCHANGE = 0;
 				clear();
-				enable_sec = 1;
+				option.second = 1;
 			} else {
 				SCHANGE = 19;
 				clear();
-				enable_sec = 0;
+				option.second = 0;
 			}
 			break;
 		case 't':
 		case 'T':
-			if(!enable_tw) {
+			if(!option.twelve) {
 				clear();
-				enable_tw = 1;
+				option.twelve = 1;
 			} else {
 				clear();
-				enable_tw = 0;
+				option.twelve = 0;
 			}
 			break;
 		case 'q':
@@ -277,31 +293,31 @@ get_time(void) {
 
 	ihour = tm->tm_hour;
 	
-	if (enable_tw && ihour > 12) {
+	if (option.twelve && ihour > 12) {
 		meridiem = "PM";
-	} else if (enable_tw && ihour < 12) {
+	} else if (option.twelve && ihour < 12) {
 		meridiem = "AM";
 	} else {
 		meridiem = "  ";
 	}
 
-	ihour = (enable_tw && ihour > 12) ? ihour - 12 : ihour;
-	ihour = (enable_tw && !ihour) ? 12 : ihour;
+	ihour = (option.twelve && ihour > 12) ? ihour - 12 : ihour;
+	ihour = (option.twelve && !ihour) ? 12 : ihour;
 
 
-	hour[0] = ihour / 10;
-	hour[1] = ihour % 10;
+	sdate.hour[0] = ihour / 10;
+	sdate.hour[1] = ihour % 10;
 
-	min[0] = tm->tm_min / 10;
-	min[1] = tm->tm_min % 10;
+	sdate.minute[0] = tm->tm_min / 10;
+	sdate.minute[1] = tm->tm_min % 10;
 
-	mday = tm->tm_mday;
-	mon = tm->tm_mon + 1;
-	year = tm->tm_year + 1900;
+	sdate.month_day = tm->tm_mday;
+	sdate.month = tm->tm_mon + 1;
+	sdate.year = tm->tm_year + 1900;
 
-	if(enable_sec) {
-		sec[0] = tm->tm_sec / 10;
-		sec[1] = tm->tm_sec % 10;
+	if(option.second) {
+		sdate.second[0] = tm->tm_sec / 10;
+		sdate.second[1] = tm->tm_sec % 10;
 	}
 }
 
@@ -312,9 +328,9 @@ get_time(void) {
 void 
 run(void) {
 	get_time();
-	arrange_clock(hour[0], hour[1],
-					min[0], min[1],
-					sec[0], sec[1]);
+	arrange_clock(sdate.hour[0], sdate.hour[1],
+					sdate.minute[0], sdate.minute[1],
+					sdate.second[0], sdate.second[1]);
 	maxcol = getmaxy(stdscr);
 	maxlin = getmaxx(stdscr);
 	refresh();
@@ -370,10 +386,10 @@ main(int argc,char **argv) {
 				 break;
 			case 's':
 				 SCHANGE = 0;
-				 enable_sec = 1;
+				 option.second = 1;
 				 break;
 			case 't':
-				enable_tw = 1;
+				option.twelve = 1;
 				break;
 			}
 		}
