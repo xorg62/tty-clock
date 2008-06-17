@@ -1,5 +1,6 @@
 tty-clock usage : tty-clock -[option] -[option] <arg>
   -s, --second        Show seconds
+  -b, --block         Lock the keyboard\n\
   -t, --tw            Set the hour in 12h format
   -x  <integer>       Set the clock to X
   -y  <integer>       Set the clock to Y

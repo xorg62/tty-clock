@@ -26,6 +26,7 @@
 
 #define printh() printf("tty-clock usage : tty-clock -[option] -[option] <arg>\n\n\
   -s, --second		 Show seconds\n\
+  -b, --block        	 Lock the keyboard\n\
   -t, --tw		 Set the hour in 12h format\n\
   -x  <integer>		 Set the clock to X\n\
   -y  <integer>		 Set the clock to Y\n\
@@ -70,6 +71,7 @@ static struct option long_options[] ={
 typedef struct {
 	bool second;
 	bool twelve;
+	bool keylock;
 } OPTIONS;
 
 OPTIONS option;
@@ -219,65 +221,68 @@ arrange_clock(int h1, int h2,
 /* ********************* */
 
 void
-check_key(void) {
-	int c;
-	c = getch();
-	switch(c) {
-		case KEY_UP:
-		case 'k':
-		case 'K':
-			if(defx > 1) 
-				--defx;
-				clear();
-			break;
-		case KEY_DOWN:
-		case 'j':
-		case 'J':
-			if(defx + XLENGTH + 2 < maxcol) 
-				++defx;
-				clear();
-			break;
-		case KEY_LEFT:
-		case 'h':
-		case 'H':
-			if(defy > 1) 
-				--defy;
-				clear();
-			break;
-		case KEY_RIGHT:	 
-		case 'l':
-		case 'L':
-			if(defy + YLENGTH - SCHANGE + 1 < maxlin) 
+check_key(int keylock) {
+	
+	if (keylock) {
+		int c;
+		c = getch();
+		switch(c) {
+			case KEY_UP:
+			case 'k':
+			case 'K':
+				if(defx > 1) 
+					--defx;
+					clear();
+				break;
+			case KEY_DOWN:
+			case 'j':
+			case 'J':
+				if(defx + XLENGTH + 2 < maxcol) 
+					++defx;
+					clear();
+				break;
+			case KEY_LEFT:
+			case 'h':
+			case 'H':
+				if(defy > 1) 
+					--defy;
+					clear();
+					break;
+			case KEY_RIGHT:	 
+			case 'l':
+			case 'L':
+				if(defy + YLENGTH - SCHANGE + 1 < maxlin) 
 				++defy;
 				clear();
-			break;
-		case 's':
-		case 'S':
-			if(!option.second ){
-				SCHANGE = 0;
-				clear();
-				option.second = 1;
-			} else {
-				SCHANGE = 19;
-				clear();
-				option.second = 0;
+				break;
+			case 's':
+			case 'S':
+				if(!option.second){
+					SCHANGE = 0;
+					clear();
+					option.second = 1;
+				} else {
+					SCHANGE = 19;
+					clear();
+					option.second = 0;
+				}
+				break;
+			case 't':
+			case 'T':
+				if(!option.twelve) {
+					clear();
+					option.twelve = 1;
+				} else {
+					clear();
+					option.twelve = 0;
+				}
+				break;
+			case 'q':
+			case 'Q':
+				endwin();
+				exit(EXIT_SUCCESS);
+				break;
 			}
-			break;
-		case 't':
-		case 'T':
-			if(!option.twelve) {
-				clear();
-				option.twelve = 1;
-			} else {
-				clear();
-				option.twelve = 0;
-			}
-			break;
-		case 'q':
-		case 'Q':
-			endwin();
-			exit(EXIT_SUCCESS);
-			break;
 		}
 }
 
@@ -287,6 +292,7 @@ check_key(void) {
 
 void
 get_time(void) {
+
 	int ihour;
 	tm = localtime(&lt);
 	lt = time(NULL);
@@ -344,17 +350,18 @@ run(void) {
 int 
 main(int argc,char **argv) {
 	int c;
-
+	option.keylock = 1;
 	static struct option long_options[] ={
 		{"help",	 0, NULL, 'h'},
 		{"version", 0, NULL, 'v'},
 		{"info",	 0, NULL, 'i'},
 		{"second",  0, NULL, 's'},
 		{"twelve",	0, NULL, 't'},
+		{"block",	0, NULL, 'b'},
 		{NULL,		0, NULL, 0}
 		};
 
-	  while ((c = getopt_long(argc,argv,"tx:y:vsih",
+	  while ((c = getopt_long(argc,argv,"tx:y:vsbih",
 			long_options,NULL)) != -1) {
 		switch(c) {
 			case 'h':
@@ -391,6 +398,9 @@ main(int argc,char **argv) {
 			case 't':
 				option.twelve = 1;
 				break;
+			case 'b':
+				option.keylock = 0;
+				break;
 			}
 		}
 
@@ -404,7 +414,7 @@ main(int argc,char **argv) {
 
 	while(1) {
 		usleep(10000);
-		check_key();
+		check_key(option.keylock);
 		run();
 	}
 	 endwin();
