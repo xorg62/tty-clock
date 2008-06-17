@@ -36,7 +36,6 @@
 Try keypad arrow for move the clock :-)\n\
 push S for enable the second and T for enable the 12H hours format.\n");\
 							 
-
 #define LGNUM 30
 #define XLENGTH 5
 #define YLENGTH 52
@@ -59,12 +58,17 @@ static const char number[10][LGNUM] = {
 	 {1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1}  /* 9 */
 };
 
+/* ************* */
+/* VARIABLE INIT */
+/* ************* */
+
 static struct option long_options[] ={
-	{"help",	 0, NULL, 'h'},
+	{"help",	0, NULL, 'h'},
 	{"version", 0, NULL, 'v'},
-	{"info",	 0, NULL, 'i'},
+	{"info",	0, NULL, 'i'},
 	{"second",  0, NULL, 's'},
 	{"twelve",	0, NULL, 't'},
+	{"block",	0, NULL, 'b'},
 	{NULL,		0, NULL, 0}
 };
 
@@ -83,7 +87,7 @@ typedef struct {
 	unsigned int month_day;
 	unsigned int month;
 	unsigned int year;
-}  TIME;
+} TIME;
 
 TIME sdate;
 
@@ -134,7 +138,6 @@ print_number(int num, int x, int y) {
 	for (u = 0; u < LGNUM; ++u){
 		tab[u] = number[num][u];
 	}
-	
 
 	for (i = 0; i < LGNUM; ++i) {
 		c = (tab[i] != 1) ? 2 : 1;
@@ -206,7 +209,6 @@ arrange_clock(int h1, int h2,
 	mvaddch(defx + XLENGTH, defy + DEPTHB, ACS_LLCORNER);
 	mvaddch(defx + DEPTHB, defy + YLENGTH - SCHANGE, ACS_URCORNER);
 	mvaddch(defx + XLENGTH, defy + YLENGTH - SCHANGE, ACS_LRCORNER);
-
 	
 	move(defx + XLENGTH + 1,defy + temp_dp);
  	attron(COLOR_PAIR(3));
@@ -214,7 +216,6 @@ arrange_clock(int h1, int h2,
 	attroff(COLOR_PAIR(3));
 
 }
-
 
 /* ********************* */
 /* KEY CHECKING FUNCTION */
@@ -310,7 +311,6 @@ get_time(void) {
 	ihour = (option.twelve && ihour > 12) ? ihour - 12 : ihour;
 	ihour = (option.twelve && !ihour) ? 12 : ihour;
 
-
 	sdate.hour[0] = ihour / 10;
 	sdate.hour[1] = ihour % 10;
 
@@ -351,17 +351,8 @@ int
 main(int argc,char **argv) {
 	int c;
 	option.keylock = 1;
-	static struct option long_options[] ={
-		{"help",	 0, NULL, 'h'},
-		{"version", 0, NULL, 'v'},
-		{"info",	 0, NULL, 'i'},
-		{"second",  0, NULL, 's'},
-		{"twelve",	0, NULL, 't'},
-		{"block",	0, NULL, 'b'},
-		{NULL,		0, NULL, 0}
-		};
 
-	  while ((c = getopt_long(argc,argv,"tx:y:vsbih",
+	while ((c = getopt_long(argc,argv,"tx:y:vsbih",
 			long_options,NULL)) != -1) {
 		switch(c) {
 			case 'h':
@@ -404,13 +395,8 @@ main(int argc,char **argv) {
 			}
 		}
 
-	 start();
-
-/* first time init */	 
-
+	start();
 	run();
-
- /* endless loop */
 
 	while(1) {
 		usleep(10000);
