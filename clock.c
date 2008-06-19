@@ -27,6 +27,7 @@
 #define printh() printf("tty-clock usage : tty-clock -[option] -[option] <arg>\n\n\
   -s, --second		 Show seconds\n\
   -b, --block        	 Lock the keyboard\n\
+  -c, --center		 Set the clock at the center of the terminal\n\
   -t, --tw		 Set the hour in 12h format\n\
   -x  <integer>		 Set the clock to X\n\
   -y  <integer>		 Set the clock to Y\n\
@@ -40,6 +41,12 @@ push S for enable the second and T for enable the 12H hours format.\n");\
 #define XLENGTH 5
 #define YLENGTH 52
 #define DEPTHB -1
+
+void start(void);
+void check_key(bool);
+void get_time(void);
+void set_center(void);
+void run(void);
 
 /* *************** */
 /* BIG NUMBER INIT */
@@ -69,6 +76,7 @@ static struct option long_options[] ={
 	{"second",  0, NULL, 's'},
 	{"twelve",	0, NULL, 't'},
 	{"block",	0, NULL, 'b'},
+	{"center",	0, NULL, 'c'},
 	{NULL,		0, NULL, 0}
 };
 
@@ -166,7 +174,7 @@ arrange_clock(int h1, int h2,
 			  int m1, int m2, 
 			  int s1, int s2) {
 	int i;
-
+	
 	temp_dp = (option.second) ? 21 : 12;
 
 	print_number(h1, defx, defy);
@@ -222,7 +230,7 @@ arrange_clock(int h1, int h2,
 /* ********************* */
 
 void
-check_key(int keylock) {
+check_key(bool keylock) {
 	
 	if (keylock) {
 		int c;
@@ -278,6 +286,12 @@ check_key(int keylock) {
 					option.twelve = 0;
 				}
 				break;
+			case 'c':
+			case 'C':
+				clear();
+				set_center();
+				
+				break;
 			case 'q':
 			case 'Q':
 				endwin();
@@ -327,6 +341,20 @@ get_time(void) {
 	}
 }
 
+/* ******************* */
+/* SET CENTER FUNCTION */
+/* ******************* */
+
+void
+set_center(void) {
+	start();
+	maxcol = getmaxy(stdscr);
+	maxlin = getmaxx(stdscr);
+	
+	defy = maxlin / 2 - SCHANGE + 2;
+	defx = maxcol / 2 - XLENGTH + 2;
+}
+
 /* *********** */
 /* RUN FUCTION */
 /* *********** */
@@ -352,7 +380,7 @@ main(int argc,char **argv) {
 	int c;
 	option.keylock = 1;
 
-	while ((c = getopt_long(argc,argv,"tx:y:vsbih",
+	while ((c = getopt_long(argc,argv,"tx:y:vsbcih",
 			long_options,NULL)) != -1) {
 		switch(c) {
 			case 'h':
@@ -391,6 +419,9 @@ main(int argc,char **argv) {
 				break;
 			case 'b':
 				option.keylock = 0;
+				break;
+			case 'c':
+				set_center();
 				break;
 			}
 		}
