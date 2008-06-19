@@ -1,7 +1,7 @@
 tty-clock : clock.c
 
 	@echo "*** Building ***"
-	@cc -lncurses $^ -o tty-clock -Wall -v
+	@cc -lncurses $^ -o tty-clock -Wall 
 	@echo "*** TTY-Clock build ***"
 	@echo ""
 
