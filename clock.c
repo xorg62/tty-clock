@@ -290,7 +290,6 @@ check_key(bool keylock) {
 			case 'C':
 				clear();
 				set_center();
-				
 				break;
 			case 'q':
 			case 'Q':
@@ -351,7 +350,7 @@ set_center(void) {
 	maxcol = getmaxy(stdscr);
 	maxlin = getmaxx(stdscr);
 	
-	defy = maxlin / 2 - SCHANGE + 2;
+	defy = maxlin / 2 - SCHANGE + 3;
 	defx = maxcol / 2 - XLENGTH + 2;
 }
 
