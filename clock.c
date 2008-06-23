@@ -84,9 +84,9 @@ typedef struct {
 	bool second;
 	bool twelve;
 	bool keylock;
-} OPTIONS;
+} option_t;
 
-OPTIONS option;
+option_t option;
 
 typedef struct {
 	unsigned int hour[2];
@@ -95,9 +95,9 @@ typedef struct {
 	unsigned int month_day;
 	unsigned int month;
 	unsigned int year;
-} TIME;
+} date_t;
 
-TIME sdate;
+date_t sdate;
 
 char *meridiem;
 
@@ -123,8 +123,7 @@ start(void) {
 	keypad (stdscr, TRUE);	 
 	start_color ();
 	refresh();
-	if (use_default_colors() == OK);
-	bg = -1;
+	bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK;
 	init_pair(1,COLOR_BLACK, COLOR_GREEN);
 	init_pair(2, bg, bg);
 	init_pair(3,COLOR_GREEN, bg);
@@ -138,10 +137,10 @@ start(void) {
 void 
 print_number(int num, int x, int y) {
 	int i,u,count=0;
-	char c;
 	int tab[LGNUM];
 	int lx=x;
 	int ly=y;
+	char c;
 	 
 	for (u = 0; u < LGNUM; ++u){
 		tab[u] = number[num][u];
@@ -433,6 +432,6 @@ main(int argc,char **argv) {
 		check_key(option.keylock);
 		run();
 	}
-	 endwin();
-	 return 0;
+	endwin();
+	return 0;
 }
