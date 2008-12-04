@@ -49,8 +49,6 @@ Try keypad arrow for move the clock :-)\n                               \
 push S for enable the second and T for enable the 12H hours format.\n");\
 
 #define LGNUM 30
-#define CHEIGHT 5 /* Clock height */
-#define CWIDTH 52 /* Clock width */
 #define DEPTHB -1
 #define MAXW getmaxx(stdscr)
 #define MAXH getmaxy(stdscr)
@@ -64,7 +62,7 @@ void run(void);
 /* *************** */
 /* BIG NUMBER INIT */
 /* *************** */
-static const char number[10][LGNUM] =
+static const bool number[10][LGNUM] =
 {
      {1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1}, /* 0 */
      {0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1}, /* 1 */
@@ -119,11 +117,9 @@ typedef struct
 } date_t;
 
 option_t option;
-geo_t geo = {1, 1, 33, 5};
+geo_t geo = {1, 1, 33, 5}; /* Base position of the clock */
 date_t sdate;
-
 char *meridiem;
-
 int temp_dp;
 int bg;
 
@@ -142,9 +138,9 @@ start(void)
      start_color();
      refresh();
      bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK;
-     init_pair(1,COLOR_BLACK, COLOR_GREEN);
+     init_pair(1, COLOR_BLACK, COLOR_GREEN);
      init_pair(2, bg, bg);
-     init_pair(3,COLOR_GREEN, bg);
+     init_pair(3, COLOR_GREEN, bg);
      curs_set(0);
      clear();
 }
@@ -157,14 +153,13 @@ print_number(int num, int x, int y)
 {
      int i, u, count = 0;
      int tab[LGNUM];
-     int lx = x;
-     int ly = y;
+     int lx = x, ly = y;
      char c;
 
-     for (u = 0; u < LGNUM; ++u)
+     for(u = 0; u < LGNUM; ++u)
           tab[u] = number[num][u];
 
-     for (i = 0; i < LGNUM; ++i)
+     for(i = 0; i < LGNUM; ++i)
      {
           c = (tab[i] != 1) ? 2 : 1;
 
@@ -232,7 +227,7 @@ arrange_clock(int h1, int h2,
 
      for (i = geo.x + DEPTHB; i < geo.x + geo.height; ++i)
      {
-          mvaddch(i, geo.y + DEPTHB, ACS_VLINE);
+          mvaddch(i, geo.y + DEPTHB,    ACS_VLINE);
           mvaddch(i, geo.y + geo.width, ACS_VLINE);
      }
 
@@ -366,8 +361,6 @@ get_time(void)
 void
 set_center(void)
 {
-     start();
-
      geo.y = MAXW / 2 - ((geo.width) / 2);
      geo.x = MAXH / 2 - (geo.height / 2);
 }
@@ -428,7 +421,6 @@ main(int argc, char **argv)
                     geo.y = atoi(optarg) + 1;
                break;
                case 's':
-                    // SCHANGE = 0;
                     option.second = 1;
                     break;
           case 't':
@@ -438,6 +430,7 @@ main(int argc, char **argv)
                option.keylock = 0;
                break;
           case 'c':
+               start();
                set_center();
                break;
           }
