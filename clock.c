@@ -84,14 +84,14 @@ static const char number[10][LGNUM] =
 
 static struct option long_options[] =
 {
-     {"help",	0, NULL, 'h'},
+     {"help",    0, NULL, 'h'},
      {"version", 0, NULL, 'v'},
-     {"info",	0, NULL, 'i'},
+     {"info",	 0, NULL, 'i'},
      {"second",  0, NULL, 's'},
-     {"twelve",	0, NULL, 't'},
-     {"block",	0, NULL, 'b'},
-     {"center",	0, NULL, 'c'},
-     {NULL,		0, NULL, 0}
+     {"twelve",  0, NULL, 't'},
+     {"block",	 0, NULL, 'b'},
+     {"center",	 0, NULL, 'c'},
+     {NULL,	 0, NULL, 0}
 };
 
 typedef struct
@@ -123,7 +123,7 @@ int maxlin;
 int temp_dp;
 int defx = 1;
 int defy = 1;
-int bg = COLOR_BLACK;
+int bg;
 
 struct tm *tm;
 time_t lt;
@@ -144,6 +144,7 @@ start(void)
      init_pair(2, bg, bg);
      init_pair(3,COLOR_GREEN, bg);
      curs_set(0);
+     clear();
 }
 
 /* **************************** */
