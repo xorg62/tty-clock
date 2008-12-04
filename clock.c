@@ -29,7 +29,6 @@
  *      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <stdlib.h>
 #include <time.h>
 #include <ncurses.h>
@@ -50,8 +49,8 @@ Try keypad arrow for move the clock :-)\n                               \
 push S for enable the second and T for enable the 12H hours format.\n");\
 
 #define LGNUM 30
-#define XLENGTH 5
-#define YLENGTH 52
+#define CHEIGHT 5 /* Clock height */
+#define CWIDTH 52 /* Clock width */
 #define DEPTHB -1
 #define MAXW getmaxx(stdscr)
 #define MAXH getmaxy(stdscr)
@@ -65,7 +64,6 @@ void run(void);
 /* *************** */
 /* BIG NUMBER INIT */
 /* *************** */
-
 static const char number[10][LGNUM] =
 {
      {1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1}, /* 0 */
@@ -83,7 +81,6 @@ static const char number[10][LGNUM] =
 /* ************* */
 /* VARIABLE INIT */
 /* ************* */
-
 static struct option long_options[] =
 {
      {"help",    0, NULL, 'h'},
@@ -103,7 +100,13 @@ typedef struct
      bool keylock;
 } option_t;
 
-option_t option;
+typedef struct
+{
+     int x;
+     int y;
+     int width;
+     int height;
+} geo_t;
 
 typedef struct
 {
@@ -115,14 +118,13 @@ typedef struct
      unsigned int year;
 } date_t;
 
+option_t option;
+geo_t geo = {1, 1, 33, 5};
 date_t sdate;
 
 char *meridiem;
 
-int SCHANGE = 19;
 int temp_dp;
-int defx = 1;
-int defy = 1;
 int bg;
 
 struct tm *tm;
@@ -134,10 +136,10 @@ time_t lt;
 void
 start(void)
 {
-     initscr ();
-     noecho ();
-     keypad (stdscr, TRUE);
-     start_color ();
+     initscr();
+     noecho();
+     keypad(stdscr, TRUE);
+     start_color();
      refresh();
      bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK;
      init_pair(1,COLOR_BLACK, COLOR_GREEN);
@@ -153,7 +155,7 @@ start(void)
 void
 print_number(int num, int x, int y)
 {
-     int i,u,count=0;
+     int i, u, count = 0;
      int tab[LGNUM];
      int lx = x;
      int ly = y;
@@ -169,7 +171,7 @@ print_number(int num, int x, int y)
           if(count == 6)
           {
                ++lx;
-               ly=y;
+               ly = y;
                count = 0;
           }
           move(lx, ly);
@@ -195,54 +197,58 @@ arrange_clock(int h1, int h2,
 
      temp_dp = (option.second) ? 21 : 12;
 
-     print_number(h1, defx, defy);
-     print_number(h2, defx, defy + 7);
+     print_number(h1, geo.x, geo.y);
+     print_number(h2, geo.x, geo.y + 7);
 
      attron(COLOR_PAIR(1));
 
-     move(defx + 1, defy + 15);
-     printw("%s",meridiem);
-     move(defx + 3, defy + 15);
+     move(geo.x + 1, geo.y + 15);
+     printw("%s", meridiem);
+     move(geo.x + 3, geo.y + 15);
      printw("  ");
 
      attroff(COLOR_PAIR(1));
 
-     print_number(m1, defx, defy + 19);
-     print_number(m2, defx, defy + 26);
+     print_number(m1, geo.x, geo.y + 19);
+     print_number(m2, geo.x, geo.y + 26);
 
      if(option.second)
      {
           attron(COLOR_PAIR(1));
-          mvaddstr(defx + 1, defy + 34,"  ");
-          mvaddstr(defx + 3, defy + 34,"  ");
+          mvaddstr(geo.x + 1, geo.y + 34,"  ");
+          mvaddstr(geo.x + 3, geo.y + 34,"  ");
           attroff(COLOR_PAIR(1));
 
-          print_number(s1, defx, defy + 38);
-          print_number(s2, defx, defy + 45);
+          print_number(s1, geo.x, geo.y + 38);
+          print_number(s2, geo.x, geo.y + 45);
      }
 
-	for(i = defy + DEPTHB; i < defy + YLENGTH - SCHANGE; ++i)
-        {
-             mvaddch(defx + DEPTHB, i, ACS_HLINE);
-             mvaddch(defx + XLENGTH, i,ACS_HLINE);
-	}
+     /* Frame border */
+     for(i = geo.y + DEPTHB; i < geo.y + geo.width; ++i)
+     {
+          mvaddch(geo.x + DEPTHB, i, ACS_HLINE);
+          mvaddch(geo.x + geo.height, i, ACS_HLINE);
+     }
 
-	for (i = defx + DEPTHB; i < defx + XLENGTH; ++i)
-        {
-             mvaddch(i, defy + DEPTHB, ACS_VLINE);
-             mvaddch(i, defy + YLENGTH - SCHANGE, ACS_VLINE);
-	}
+     for (i = geo.x + DEPTHB; i < geo.x + geo.height; ++i)
+     {
+          mvaddch(i, geo.y + DEPTHB, ACS_VLINE);
+          mvaddch(i, geo.y + geo.width, ACS_VLINE);
+     }
 
-	mvaddch(defx + DEPTHB, defy + DEPTHB, ACS_ULCORNER);
-	mvaddch(defx + XLENGTH, defy + DEPTHB, ACS_LLCORNER);
-	mvaddch(defx + DEPTHB, defy + YLENGTH - SCHANGE, ACS_URCORNER);
-	mvaddch(defx + XLENGTH, defy + YLENGTH - SCHANGE, ACS_LRCORNER);
+     /* Frame corner */
+     mvaddch(geo.x + DEPTHB,     geo.y + DEPTHB,    ACS_ULCORNER);
+     mvaddch(geo.x + geo.height, geo.y + DEPTHB,    ACS_LLCORNER);
+     mvaddch(geo.x + DEPTHB,     geo.y + geo.width, ACS_URCORNER);
+     mvaddch(geo.x + geo.height, geo.y + geo.width, ACS_LRCORNER);
 
-	move(defx + XLENGTH + 1,defy + temp_dp);
- 	attron(COLOR_PAIR(3));
-	printw("%d/%d/%d",sdate.month_day,sdate.month,sdate.year);
-	attroff(COLOR_PAIR(3));
-
+     move(geo.x + geo.height + 1, geo.y + temp_dp);
+     attron(COLOR_PAIR(3));
+     printw("%d/%d/%d",
+            sdate.month_day,
+            sdate.month,
+            sdate.year);
+     attroff(COLOR_PAIR(3));
 }
 
 /* ********************* */
@@ -251,78 +257,67 @@ arrange_clock(int h1, int h2,
 void
 check_key(bool keylock)
 {
+     int c;
 
-     if (keylock)
+     if(!keylock)
+          return;
+
+     c = getch();
+
+     switch(c)
      {
-          int c;
-          c = getch();
-          switch(c)
-          {
-          case KEY_UP:
-          case 'k':
-          case 'K':
-               if(defx > 1)
-                    --defx;
-               clear();
-               break;
-          case KEY_DOWN:
-          case 'j':
-          case 'J':
-               if(defx + XLENGTH + 2 < MAXH)
-                    ++defx;
-               clear();
-               break;
-          case KEY_LEFT:
-          case 'h':
-          case 'H':
-               if(defy > 1)
-                    --defy;
-               clear();
-               break;
-          case KEY_RIGHT:
-          case 'l':
-          case 'L':
-               if(defy + YLENGTH - SCHANGE + 1 < MAXW)
-                    ++defy;
-               clear();
-               break;
-          case 's':
-          case 'S':
-               if(!option.second)
-               {
-                    SCHANGE = 0;
-                    clear();
-                    option.second = 1;
-               } else {
-                    SCHANGE = 19;
-                    clear();
-                    option.second = 0;
-               }
-               break;
-          case 't':
-          case 'T':
-               if(!option.twelve)
-               {
-                    clear();
-                    option.twelve = 1;
-               }
-               else
-               {
-                    clear();
-                    option.twelve = 0;
-               }
-               break;
-          case 'c':
-          case 'C':
-               clear();
-               set_center();
-               break;
-          case 'q':
-          case 'Q':
-               endwin();
-               exit(EXIT_SUCCESS);
-               break;
-          }
+     case KEY_UP:
+     case 'k':
+     case 'K':
+          if(geo.x > 1)
+               --geo.x;
+          clear();
+          break;
+     case KEY_DOWN:
+     case 'j':
+     case 'J':
+          if(geo.x + geo.height + 2 < MAXH)
+               ++geo.x;
+          clear();
+          break;
+     case KEY_LEFT:
+     case 'h':
+     case 'H':
+          if(geo.y > 1)
+               --geo.y;
+          clear();
+          break;
+     case KEY_RIGHT:
+     case 'l':
+     case 'L':
+          if(geo.y + geo.width + 1 < MAXW)
+               ++geo.y;
+          clear();
+          break;
+     case 's':
+     case 'S':
+          if(!option.second)
+               geo.width += 19;
+          else
+               geo.width -= 19;
+          clear();
+          option.second = !option.second;
+          break;
+     case 't':
+     case 'T':
+          clear();
+          option.twelve = !option.twelve;
+          break;
+     case 'c':
+     case 'C':
+          clear();
+          set_center();
+          break;
+     case 'q':
+     case 'Q':
+          endwin();
+          exit(EXIT_SUCCESS);
+          break;
      }
 }
 
@@ -373,8 +368,8 @@ set_center(void)
 {
      start();
 
-     defy = MAXW / 2 - ((YLENGTH - SCHANGE) / 2);
-     defx = MAXH / 2 - (XLENGTH / 2);
+     geo.y = MAXW / 2 - ((geo.width) / 2);
+     geo.x = MAXH / 2 - (geo.height / 2);
 }
 
 /* *********** */
@@ -396,13 +391,13 @@ run(void)
 /* ************ */
 
 int
-main(int argc,char **argv)
+main(int argc, char **argv)
 {
      int c;
      option.keylock = 1;
 
      while ((c = getopt_long(argc,argv,"tx:y:vsbcih",
-                             long_options,NULL)) != -1)
+                             long_options, NULL)) != -1)
      {
           switch(c)
           {
@@ -423,17 +418,17 @@ main(int argc,char **argv)
                if(atoi(optarg)<0)
                     exit(EXIT_FAILURE);
                else
-                    defx = atoi(optarg) + 1;
+                    geo.x = atoi(optarg) + 1;
 
                break;
           case 'y':
                if(atoi(optarg)<0)
                     exit(EXIT_FAILURE);
                else
-                    defy = atoi(optarg) + 1;
+                    geo.y = atoi(optarg) + 1;
                break;
                case 's':
-                    SCHANGE = 0;
+                    // SCHANGE = 0;
                     option.second = 1;
                     break;
           case 't':
@@ -457,6 +452,8 @@ main(int argc,char **argv)
           check_key(option.keylock);
           run();
      }
+
      endwin();
+
      return 0;
 }
