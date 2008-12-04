@@ -53,6 +53,8 @@ push S for enable the second and T for enable the 12H hours format.\n");\
 #define XLENGTH 5
 #define YLENGTH 52
 #define DEPTHB -1
+#define MAXW getmaxx(stdscr)
+#define MAXH getmaxy(stdscr)
 
 void start(void);
 void check_key(bool);
@@ -118,8 +120,6 @@ date_t sdate;
 char *meridiem;
 
 int SCHANGE = 19;
-int maxcol;
-int maxlin;
 int temp_dp;
 int defx = 1;
 int defy = 1;
@@ -268,7 +268,7 @@ check_key(bool keylock)
           case KEY_DOWN:
           case 'j':
           case 'J':
-               if(defx + XLENGTH + 2 < maxcol)
+               if(defx + XLENGTH + 2 < MAXH)
                     ++defx;
                clear();
                break;
@@ -282,7 +282,7 @@ check_key(bool keylock)
           case KEY_RIGHT:
           case 'l':
           case 'L':
-               if(defy + YLENGTH - SCHANGE + 1 < maxlin)
+               if(defy + YLENGTH - SCHANGE + 1 < MAXW)
                     ++defy;
                clear();
                break;
@@ -372,11 +372,9 @@ void
 set_center(void)
 {
      start();
-     maxcol = getmaxy(stdscr);
-     maxlin = getmaxx(stdscr);
 
-     defy = maxlin / 2 - SCHANGE + 3;
-     defx = maxcol / 2 - XLENGTH + 2;
+     defy = MAXW / 2 - ((YLENGTH - SCHANGE) / 2);
+     defx = MAXH / 2 - (XLENGTH / 2);
 }
 
 /* *********** */
@@ -389,8 +387,6 @@ run(void)
      arrange_clock(sdate.hour[0], sdate.hour[1],
                    sdate.minute[0], sdate.minute[1],
                    sdate.second[0], sdate.second[1]);
-     maxcol = getmaxy(stdscr);
-     maxlin = getmaxx(stdscr);
      refresh();
      halfdelay(1);
 }
