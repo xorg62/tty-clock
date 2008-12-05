@@ -54,7 +54,7 @@ push S for enable the second and T for enable the 12H hours format.\n");\
 #define MAXW getmaxx(stdscr)
 #define MAXH getmaxy(stdscr)
 
-typedef enum { True = 1, False = 0} Bool;
+typedef enum { False, True } Bool;
 
 void start(void);
 void check_key(Bool);
@@ -421,13 +421,13 @@ main(int argc, char **argv)
                     geo.y = atoi(optarg) + 1;
                break;
                case 's':
-                    option.second = 1;
+                    option.second = True;
                     break;
           case 't':
-               option.twelve = 1;
+               option.twelve = True;
                break;
           case 'b':
-               option.keylock = 0;
+               option.keylock = False;
                break;
           case 'c':
                start();
