@@ -54,8 +54,10 @@ push S for enable the second and T for enable the 12H hours format.\n");\
 #define MAXW getmaxx(stdscr)
 #define MAXH getmaxy(stdscr)
 
+typedef enum { True = 1, False = 0} Bool;
+
 void start(void);
-void check_key(bool);
+void check_key(Bool);
 void get_time(void);
 void set_center(void);
 void run(void);
@@ -63,7 +65,7 @@ void run(void);
 /* *************** */
 /* BIG NUMBER INIT */
 /* *************** */
-static const bool number[10][LGNUM] =
+static const Bool number[10][LGNUM] =
 {
      {1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1}, /* 0 */
      {0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1}, /* 1 */
@@ -94,9 +96,9 @@ static struct option long_options[] =
 
 typedef struct
 {
-     bool second;
-     bool twelve;
-     bool keylock;
+     Bool second;
+     Bool twelve;
+     Bool keylock;
 } option_t;
 
 typedef struct
@@ -248,7 +250,7 @@ arrange_clock(int h1, int h2,
 /* KEY CHECKING FUNCTION */
 /* ********************* */
 void
-check_key(bool keylock)
+check_key(Bool keylock)
 {
      int c;
 
