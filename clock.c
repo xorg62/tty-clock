@@ -120,6 +120,7 @@ typedef struct
 option_t option = { False, False, True };
 geo_t geo = {1, 1, 33, 5}; /* Base position of the clock */
 Bool fixcenter = False;
+Bool running = True;
 date_t sdate;
 char *meridiem;
 int temp_dp;
@@ -151,6 +152,8 @@ start(void)
      sig.sa_handler = handle_sig;
      sig.sa_flags   = 0;
      sigaction(SIGWINCH, &sig, NULL);
+     sigaction(SIGTERM, &sig, NULL);
+     sigaction(SIGINT, &sig, NULL);
 }
 
 /* BIG NUMBER PRINTING FUNCTION */
@@ -320,8 +323,7 @@ check_key(Bool keylock)
           break;
      case 'q':
      case 'Q':
-          endwin();
-          exit(EXIT_SUCCESS);
+          raise(SIGTERM);
           break;
      }
 }
@@ -377,7 +379,7 @@ set_center(void)
           fixcenter = !fixcenter;
 }
 
-/* SIGWINCH SIGNAL MANAGE FUNCTION */
+/* SIGNAL HANDLE FUNCTION */
 void
 handle_sig(int num)
 {
@@ -388,6 +390,8 @@ handle_sig(int num)
           fixcenter = !fixcenter;
           set_center();
      }
+     else if(num == SIGINT || num == SIGTERM)
+          running = False;
 }
 
 /* RUN FUCTION */
@@ -447,7 +451,7 @@ main(int argc, char **argv)
      start();
      run();
 
-     for(;;)
+     while(running)
      {
           usleep(10000);
           check_key(option.keylock);
