@@ -48,11 +48,11 @@
 Try keypad arrow for move the clock :-)\n                               \
 push S for enable the second and T for enable the 12H hours format.\n");\
 
-#define LGNUM 30
+#define LGNUM   30
 #define DIFFSEC 19
-#define DEPTHB -1
-#define MAXW getmaxx(stdscr)
-#define MAXH getmaxy(stdscr)
+#define DEPTHB  -1
+#define MAXW    getmaxx(stdscr)
+#define MAXH    getmaxy(stdscr)
 
 typedef enum { False, True } Bool;
 
@@ -62,10 +62,8 @@ void get_time(void);
 void set_center(void);
 void run(void);
 
-/* *************** */
 /* BIG NUMBER INIT */
-/* *************** */
-static const Bool number[10][LGNUM] =
+static const Bool number[][LGNUM] =
 {
      {1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1}, /* 0 */
      {0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,1,1}, /* 1 */
@@ -79,9 +77,7 @@ static const Bool number[10][LGNUM] =
      {1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1}  /* 9 */
 };
 
-/* ************* */
 /* VARIABLE INIT */
-/* ************* */
 static struct option long_options[] =
 {
      {"help",    0, NULL, 'h'},
@@ -119,19 +115,19 @@ typedef struct
      unsigned int year;
 } date_t;
 
-option_t option;
+option_t option = { False, False, True };
 geo_t geo = {1, 1, 33, 5}; /* Base position of the clock */
+Bool fixcenter = False;
 date_t sdate;
 char *meridiem;
 int temp_dp;
 int bg;
 
+
 struct tm *tm;
 time_t lt;
 
-/* ***************** */
 /* STARTING FUNCTION */
-/* ***************** */
 void
 start(void)
 {
@@ -148,9 +144,7 @@ start(void)
      clear();
 }
 
-/* **************************** */
 /* BIG NUMBER PRINTING FUNCTION */
-/* **************************** */
 void
 print_number(int num, int x, int y)
 {
@@ -181,11 +175,7 @@ print_number(int num, int x, int y)
      }
 }
 
-
-/* ******************************** */
 /* ARRANGE FINAL POSITION OF NUMBER */
-/* ******************************** */
-
 void
 arrange_clock(int h1, int h2,
               int m1, int m2,
@@ -246,9 +236,7 @@ arrange_clock(int h1, int h2,
      attroff(COLOR_PAIR(3));
 }
 
-/* ********************* */
 /* KEY CHECKING FUNCTION */
-/* ********************* */
 void
 check_key(Bool keylock)
 {
@@ -264,30 +252,42 @@ check_key(Bool keylock)
      case KEY_UP:
      case 'k':
      case 'K':
-          if(geo.x > 1)
-               --geo.x;
-          clear();
+          if(!fixcenter)
+          {
+               if(geo.x > 1)
+                    --geo.x;
+               clear();
+          }
           break;
      case KEY_DOWN:
      case 'j':
      case 'J':
-          if(geo.x + geo.height + 2 < MAXH)
-               ++geo.x;
-          clear();
+          if(!fixcenter)
+          {
+               if(geo.x + geo.height + 2 < MAXH)
+                    ++geo.x;
+               clear();
+          }
           break;
      case KEY_LEFT:
      case 'h':
      case 'H':
-          if(geo.y > 1)
-               --geo.y;
-          clear();
+          if(!fixcenter)
+          {
+               if(geo.y > 1)
+                    --geo.y;
+               clear();
+          }
           break;
      case KEY_RIGHT:
      case 'l':
      case 'L':
-          if(geo.y + geo.width + 1 < MAXW)
-               ++geo.y;
-          clear();
+          if(!fixcenter)
+          {
+               if(geo.y + geo.width + 1 < MAXW)
+                    ++geo.y;
+               clear();
+          }
           break;
      case 's':
      case 'S':
@@ -297,6 +297,11 @@ check_key(Bool keylock)
                geo.width -= DIFFSEC;
           clear();
           option.second = !option.second;
+          if(fixcenter)
+          {
+               fixcenter = False;
+               set_center();
+          }
           break;
      case 't':
      case 'T':
@@ -316,9 +321,7 @@ check_key(Bool keylock)
      }
 }
 
-/* ********************* */
 /* GETTING TIME FUNCTION */
-/* ********************* */
 void
 get_time(void)
 {
@@ -355,19 +358,21 @@ get_time(void)
      }
 }
 
-/* ******************* */
 /* SET CENTER FUNCTION */
-/* ******************* */
 void
 set_center(void)
 {
-     geo.y = MAXW / 2 - ((geo.width) / 2);
-     geo.x = MAXH / 2 - (geo.height / 2);
+     if(!fixcenter)
+     {
+          geo.y = MAXW / 2 - ((geo.width) / 2);
+          geo.x = MAXH / 2 - (geo.height / 2);
+          fixcenter = True;
+     }
+     else
+          fixcenter = !fixcenter;
 }
 
-/* *********** */
 /* RUN FUCTION */
-/* *********** */
 void
 run(void)
 {
@@ -379,15 +384,12 @@ run(void)
      halfdelay(1);
 }
 
-/* ************ */
 /* MAIN FUCTION */
-/* ************ */
 
 int
 main(int argc, char **argv)
 {
      int c;
-     option.keylock = 1;
 
      while ((c = getopt_long(argc,argv,"tx:y:vsbcih",
                              long_options, NULL)) != -1)
@@ -395,10 +397,7 @@ main(int argc, char **argv)
           switch(c)
           {
           case 'h':
-          default:
-               printh();
-               exit(EXIT_SUCCESS);
-               break;
+          default: printh(); exit(EXIT_SUCCESS); break;
           case 'i':
                printf("TTY-Clock ,Martin Duquesnoy© (xorg62@gmail.com)\n");
                exit(EXIT_SUCCESS);
@@ -420,19 +419,10 @@ main(int argc, char **argv)
                else
                     geo.y = atoi(optarg) + 1;
                break;
-               case 's':
-                    option.second = True;
-                    break;
-          case 't':
-               option.twelve = True;
-               break;
-          case 'b':
-               option.keylock = False;
-               break;
-          case 'c':
-               start();
-               set_center();
-               break;
+          case 's': option.second = True; break;
+          case 't': option.twelve = True; break;
+          case 'b': option.keylock = False; break;
+          case 'c': start(); set_center(); break;
           }
      }
 
