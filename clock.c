@@ -31,6 +31,7 @@
  */
 #include <stdlib.h>
 #include <time.h>
+#include <signal.h>
 #include <ncurses.h>
 #include <unistd.h>
 #include <getopt.h>
@@ -60,6 +61,7 @@ void start(void);
 void check_key(Bool);
 void get_time(void);
 void set_center(void);
+void handle_sig(int);
 void run(void);
 
 /* BIG NUMBER INIT */
@@ -131,6 +133,8 @@ time_t lt;
 void
 start(void)
 {
+     struct sigaction sig;
+
      initscr();
      noecho();
      keypad(stdscr, TRUE);
@@ -142,6 +146,11 @@ start(void)
      init_pair(3, COLOR_GREEN, bg);
      curs_set(0);
      clear();
+
+     /* Set signal handle */
+     sig.sa_handler = handle_sig;
+     sig.sa_flags   = 0;
+     sigaction(SIGWINCH, &sig, NULL);
 }
 
 /* BIG NUMBER PRINTING FUNCTION */
@@ -370,6 +379,19 @@ set_center(void)
      }
      else
           fixcenter = !fixcenter;
+}
+
+/* SIGWINCH SIGNAL MANAGE FUNCTION */
+void
+handle_sig(int num)
+{
+     if(num == SIGWINCH && fixcenter)
+     {
+          endwin();
+          start();
+          fixcenter = !fixcenter;
+          set_center();
+     }
 }
 
 /* RUN FUCTION */
