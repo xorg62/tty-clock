@@ -249,14 +249,10 @@ arrange_clock(int h1, int h2,
 void
 check_key(Bool keylock)
 {
-     int c;
-
      if(!keylock)
           return;
 
-     c = getch();
-
-     switch(c)
+     switch(getch())
      {
      case KEY_UP:
      case 'k':
