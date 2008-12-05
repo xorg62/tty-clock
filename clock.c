@@ -136,12 +136,13 @@ start(void)
 {
      struct sigaction sig;
 
+     /* Init curses stuff */
      initscr();
      noecho();
      keypad(stdscr, TRUE);
      start_color();
      refresh();
-     bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK;
+     bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK; /* -1 = default term bg */
      init_pair(1, COLOR_BLACK, COLOR_GREEN);
      init_pair(2, bg, bg);
      init_pair(3, COLOR_GREEN, bg);
@@ -240,7 +241,7 @@ arrange_clock(int h1, int h2,
 
      move(geo.x + geo.height + 1, geo.y + temp_dp);
      attron(COLOR_PAIR(3));
-     printw("%d/%d/%d %s",
+     printw("%.2d/%.2d/%d %s",
             sdate.month_day,
             sdate.month,
             sdate.year,
