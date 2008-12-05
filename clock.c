@@ -29,6 +29,7 @@
  *      (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <stdlib.h>
 #include <time.h>
 #include <signal.h>
@@ -36,18 +37,18 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#define printh() printf("tty-clock usage : tty-clock -[option] -[option] <arg>\n\n\
-  -s, --second		 Show seconds\n                                 \
-  -b, --block        	 Lock the keyboard\n                            \
-  -c, --center		 Set the clock at the center of the terminal\n  \
-  -t, --tw		 Set the hour in 12h format\n                   \
-  -x  <integer>		 Set the clock to X\n                           \
-  -y  <integer>		 Set the clock to Y\n                           \
-  -v, --version		 Show tty-clock version\n                       \
-  -i, --info		 Show some info about tty-clock\n               \
-  -h, --help		 Show this page\n\n                             \
-Try keypad arrow for move the clock :-)\n                               \
-push S for enable the second and T for enable the 12H hours format.\n");\
+#define HELPSTR "tty-clock usage : tty-clock -[option] -[option] <arg>\n\n\
+  -s, --second           Show seconds                                 \n \
+  -b, --block            Lock the keyboard                            \n \
+  -c, --center           Set the clock at the center of the terminal  \n \
+  -t, --tw               Set the hour in 12h format                   \n \
+  -x  <integer>          Set the clock to X                           \n \
+  -y  <integer>          Set the clock to Y                           \n \
+  -v, --version          Show tty-clock version                       \n \
+  -i, --info             Show some info about tty-clock               \n \
+  -h, --help             Show this page                             \n\n \
+Try keypad arrow for move the clock :-)                               \n \
+push S for enable the second and T for enable the 12H hours format.\n"
 
 #define LGNUM   30
 #define DIFFSEC 19
@@ -324,7 +325,7 @@ check_key(Bool keylock)
           break;
      case 'q':
      case 'Q':
-          raise(SIGTERM);
+          running = False;
           break;
      }
 }
@@ -336,15 +337,17 @@ get_time(void)
      int ihour;
      tm = localtime(&lt);
      lt = time(NULL);
-
      ihour = tm->tm_hour;
 
-     if (option.twelve && ihour > 12)
-          meridiem = "(PM)";
-     else if (option.twelve && ihour < 12)
-          meridiem = "(AM)";
+     if(option.twelve)
+     {
+          if(ihour > 12)
+               meridiem = "(PM)";
+          else if(ihour < 12)
+               meridiem = "(AM)";
+     }
      else
-          meridiem = "  ";
+          meridiem = " ";
 
      ihour = (option.twelve && ihour > 12) ? ihour - 12 : ihour;
      ihour = (option.twelve && !ihour) ? 12 : ihour;
@@ -420,26 +423,25 @@ main(int argc, char **argv)
           switch(c)
           {
           case 'h':
-          default: printh(); exit(EXIT_SUCCESS); break;
+          default:
+               fprintf(stderr, HELPSTR);
+               exit(EXIT_SUCCESS);
+               break;
           case 'i':
-               printf("TTY-Clock ,Martin Duquesnoy© (xorg62@gmail.com)\n");
+               printf("TTY-Clock by Martin Duquesnoy (xorg62@gmail.com)\n");
                exit(EXIT_SUCCESS);
                break;
           case 'v':
-               printf("TTY-Clock v0.1.4\n");
+               printf("TTY-Clock devel\n");
                exit(EXIT_SUCCESS);
                break;
           case 'x':
-               if(atoi(optarg)<0)
-                    exit(EXIT_FAILURE);
-               else
+               if(atoi(optarg) > 0)
                     geo.x = atoi(optarg) + 1;
 
                break;
           case 'y':
-               if(atoi(optarg)<0)
-                    exit(EXIT_FAILURE);
-               else
+               if(atoi(optarg) > 0)
                     geo.y = atoi(optarg) + 1;
                break;
           case 's': option.second = True; break;
