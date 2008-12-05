@@ -49,6 +49,7 @@ Try keypad arrow for move the clock :-)\n                               \
 push S for enable the second and T for enable the 12H hours format.\n");\
 
 #define LGNUM 30
+#define DIFFSEC 19
 #define DEPTHB -1
 #define MAXW getmaxx(stdscr)
 #define MAXH getmaxy(stdscr)
@@ -196,12 +197,8 @@ arrange_clock(int h1, int h2,
      print_number(h2, geo.x, geo.y + 7);
 
      attron(COLOR_PAIR(1));
-
-     move(geo.x + 1, geo.y + 15);
-     printw("%s", meridiem);
-     move(geo.x + 3, geo.y + 15);
-     printw("  ");
-
+     mvaddstr(geo.x + 1, geo.y + 15, "  ");
+     mvaddstr(geo.x + 3, geo.y + 15, "  ");
      attroff(COLOR_PAIR(1));
 
      print_number(m1, geo.x, geo.y + 19);
@@ -210,8 +207,8 @@ arrange_clock(int h1, int h2,
      if(option.second)
      {
           attron(COLOR_PAIR(1));
-          mvaddstr(geo.x + 1, geo.y + 34,"  ");
-          mvaddstr(geo.x + 3, geo.y + 34,"  ");
+          mvaddstr(geo.x + 1, geo.y + 34, "  ");
+          mvaddstr(geo.x + 3, geo.y + 34, "  ");
           attroff(COLOR_PAIR(1));
 
           print_number(s1, geo.x, geo.y + 38);
@@ -239,10 +236,11 @@ arrange_clock(int h1, int h2,
 
      move(geo.x + geo.height + 1, geo.y + temp_dp);
      attron(COLOR_PAIR(3));
-     printw("%d/%d/%d",
+     printw("%d/%d/%d %s",
             sdate.month_day,
             sdate.month,
-            sdate.year);
+            sdate.year,
+            meridiem);
      attroff(COLOR_PAIR(3));
 }
 
@@ -292,9 +290,9 @@ check_key(bool keylock)
      case 's':
      case 'S':
           if(!option.second)
-               geo.width += 19;
+               geo.width += DIFFSEC;
           else
-               geo.width -= 19;
+               geo.width -= DIFFSEC;
           clear();
           option.second = !option.second;
           break;
@@ -329,9 +327,9 @@ get_time(void)
      ihour = tm->tm_hour;
 
      if (option.twelve && ihour > 12)
-          meridiem = "PM";
+          meridiem = "(PM)";
      else if (option.twelve && ihour < 12)
-          meridiem = "AM";
+          meridiem = "(AM)";
      else
           meridiem = "  ";
 
