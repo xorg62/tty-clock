@@ -16,7 +16,7 @@ install : ${BIN}
 
 	@echo "installing binary file to ${INSTALLPATH}${BIN}"
 	@cp ${BIN} ${INSTALLPATH}
-	@chmod 777 ${INSTALLPATH}${BIN}
+	@chmod 755 ${INSTALLPATH}${BIN}
 	@echo "installed."
 
 uninstall :
