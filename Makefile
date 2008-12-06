@@ -12,7 +12,7 @@ tty-clock : ${SRC}
 	@echo "CC ${CFLAGS} ${SRC}"
 	@${CC} ${CFLAGS} ${SRC} -o ${BIN}
 
-install : tty-clock
+install : ${BIN}
 
 	@echo "installing binary file to ${INSTALLPATH}${BIN}"
 	@cp ${BIN} ${INSTALLPATH}
