@@ -1,30 +1,33 @@
-tty-clock : clock.c
+SRC = clock.c
+CC = cc
+NCURSESFLAG = -lncurses
+BIN = tty-clock
+INSTALLPATH = /usr/local/bin/
+CFLAGS = -Wall ${NCURSESFLAG}
 
-	@echo "*** Building ***"
-	@cc -lncurses $^ -o tty-clock -Wall 
-	@echo "*** TTY-Clock build ***"
-	@echo ""
+
+tty-clock : ${SRC}
+
+	@echo "build ${SRC}"
+	@echo "CC ${CFLAGS} ${SRC}"
+	@${CC} ${CFLAGS} ${SRC} -o ${BIN}
 
 install : tty-clock
-  
-	@echo "*** Moving TTY-Clock ***"
-	@cp tty-clock /usr/local/bin/
-	@echo "*** Clock moved ***"
-	@echo ""
-	@echo "*** Chmod TTY-Clock ***"
-	@chmod 777 /usr/local/bin/tty-clock
-	@echo "*** TTY-Clock is now installed ***"
-	@echo ""
+
+	@echo "installing binary file to ${INSTALLPATH}${BIN}"
+	@cp ${BIN} ${INSTALLPATH}
+	@chmod 777 ${INSTALLPATH}${BIN}
+	@echo "installed."
 
 uninstall :
 
-	@echo "*** Uninstall TTY-Clock ***"
-	@rm -f /usr/local/bin/tty-clock
-	@echo "*** TTY-Clock uninstalled :'( ***"
+	@echo "uninstalling binary file (${INSTALLPATH}${BIN})"
+	@rm -f ${INSTALLPATH}${BIN}
+	@echo "uninstalled :'(."
 
 clean :
 
-	@echo "*** Cleaning TTY-clock ***"
-	@rm tty-clock
-	@echo "*** Your TTY-Clock is clean ;) ***"
+	@echo "cleaning"
+	@rm ${BIN}
+	@echo "cleaned."
 

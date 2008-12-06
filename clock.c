@@ -424,7 +424,7 @@ main(int argc, char **argv)
           {
           case 'h':
           default:
-               fprintf(stderr, HELPSTR);
+               printf(HELPSTR);
                exit(EXIT_SUCCESS);
                break;
           case 'i':
