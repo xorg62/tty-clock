@@ -85,12 +85,12 @@ static struct option long_options[] =
 {
      {"help",    0, NULL, 'h'},
      {"version", 0, NULL, 'v'},
-     {"info",	 0, NULL, 'i'},
+     {"info",    0, NULL, 'i'},
      {"second",  0, NULL, 's'},
      {"twelve",  0, NULL, 't'},
-     {"block",	 0, NULL, 'b'},
-     {"center",	 0, NULL, 'c'},
-     {NULL,	 0, NULL, 0}
+     {"block",   0, NULL, 'b'},
+     {"center",  0, NULL, 'c'},
+     {NULL,      0, NULL, 0}
 };
 
 typedef struct
@@ -127,9 +127,9 @@ char *meridiem;
 int temp_dp;
 int bg;
 
-
 struct tm *tm;
 time_t lt;
+
 
 /* STARTING FUNCTION */
 void
@@ -152,7 +152,7 @@ start(void)
 
      /* Set signal handle */
      sig.sa_handler = handle_sig;
-     sig.sa_flags   = 0;
+     sig.sa_flags = 0;
      sigaction(SIGWINCH, &sig, NULL);
      sigaction(SIGTERM, &sig, NULL);
      sigaction(SIGINT, &sig, NULL);
@@ -162,22 +162,21 @@ start(void)
 void
 print_number(int num, int x, int y)
 {
-     int i;
-     int lx = x, ly = y;
+     int i, sy = y;
 
-     for(i = 0; i < LGNUM; ++i)
+     for(i = 0; i < LGNUM; ++i, ++sy)
      {
-          if(ly == y + 6)
+          if(sy == y + 6)
           {
-               ++lx;
-               ly = y;
+               sy = y;
+               ++x;
           }
-          move(lx, ly);
+          move(x, sy);
           attron(COLOR_PAIR(number[num][i]));
           addch(' ');
           attroff(COLOR_PAIR(number[num][i]));
-          ++ly;
      }
+
 }
 
 /* ARRANGE FINAL POSITION OF NUMBER */
@@ -326,17 +325,13 @@ void
 get_time(void)
 {
      int ihour;
+
      tm = localtime(&lt);
      lt = time(NULL);
      ihour = tm->tm_hour;
 
      if(option.twelve)
-     {
-          if(ihour > 12)
-               meridiem = "(PM)";
-          else if(ihour < 12)
-               meridiem = "(AM)";
-     }
+          meridiem = (ihour > 12) ? "(PM)" : "(AM)";
      else
           meridiem = " ";
 
