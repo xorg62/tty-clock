@@ -124,7 +124,6 @@ geo_t geo = { 1, 1, 33, 5 }; /* Base position of the clock */
 Bool running = True;
 date_t sdate;
 char *meridiem;
-int temp_dp;
 int bg, i;
 struct tm *tm;
 time_t lt;
@@ -184,8 +183,6 @@ arrange_clock(int h1, int h2,
               int m1, int m2,
               int s1, int s2)
 {
-     temp_dp = (option.second) ? 21 : 12;
-
      print_number(h1, geo.x, geo.y);
      print_number(h2, geo.x, geo.y + 7);
 
@@ -227,7 +224,8 @@ arrange_clock(int h1, int h2,
      mvaddch(geo.x + DEPTHB,     geo.y + geo.width, ACS_URCORNER);
      mvaddch(geo.x + geo.height, geo.y + geo.width, ACS_LRCORNER);
 
-     move(geo.x + geo.height + 1, geo.y + temp_dp);
+     /* Print the date */
+     move(geo.x + geo.height + 1, geo.y + ((option.second) ? 21 : 12));
      attron(COLOR_PAIR(2));
      printw("%.2d/%.2d/%d %s",
             sdate.month_day,
