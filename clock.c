@@ -163,7 +163,7 @@ void
 print_number(int num, int x, int y)
 {
      int i, u, count = 0;
-     int tab[LGNUM];
+     Bool tab[LGNUM];
      int lx = x, ly = y;
      char c;
 
