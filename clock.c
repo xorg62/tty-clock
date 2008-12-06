@@ -119,7 +119,7 @@ typedef struct
 } date_t;
 
 option_t option = { False, False, True };
-geo_t geo = {1, 1, 33, 5}; /* Base position of the clock */
+geo_t geo = { 1, 1, 33, 5 }; /* Base position of the clock */
 Bool fixcenter = False;
 Bool running = True;
 date_t sdate;
@@ -144,9 +144,9 @@ start(void)
      start_color();
      refresh();
      bg = (use_default_colors() == OK) ? -1 : COLOR_BLACK; /* -1 = default term bg */
+     init_pair(0, bg, bg);
      init_pair(1, COLOR_BLACK, COLOR_GREEN);
-     init_pair(2, bg, bg);
-     init_pair(3, COLOR_GREEN, bg);
+     init_pair(2, COLOR_GREEN, bg);
      curs_set(0);
      clear();
 
@@ -162,30 +162,21 @@ start(void)
 void
 print_number(int num, int x, int y)
 {
-     int i, u, count = 0;
-     Bool tab[LGNUM];
+     int i;
      int lx = x, ly = y;
-     char c;
-
-     for(u = 0; u < LGNUM; ++u)
-          tab[u] = number[num][u];
 
      for(i = 0; i < LGNUM; ++i)
      {
-          c = (tab[i] != 1) ? 2 : 1;
-
-          if(count == 6)
+          if(ly == y + 6)
           {
                ++lx;
                ly = y;
-               count = 0;
           }
           move(lx, ly);
-          attron(COLOR_PAIR(c));
+          attron(COLOR_PAIR(number[num][i]));
           addch(' ');
-          attroff(COLOR_PAIR(c));
+          attroff(COLOR_PAIR(number[num][i]));
           ++ly;
-          ++count;
      }
 }
 
@@ -241,13 +232,13 @@ arrange_clock(int h1, int h2,
      mvaddch(geo.x + geo.height, geo.y + geo.width, ACS_LRCORNER);
 
      move(geo.x + geo.height + 1, geo.y + temp_dp);
-     attron(COLOR_PAIR(3));
+     attron(COLOR_PAIR(2));
      printw("%.2d/%.2d/%d %s",
             sdate.month_day,
             sdate.month,
             sdate.year,
             meridiem);
-     attroff(COLOR_PAIR(3));
+     attroff(COLOR_PAIR(2));
 }
 
 /* KEY CHECKING FUNCTION */
@@ -375,7 +366,7 @@ set_center(void)
 {
      if(!fixcenter)
      {
-          geo.y = MAXW / 2 - ((geo.width) / 2);
+          geo.y = MAXW / 2 - (geo.width / 2);
           geo.x = MAXH / 2 - (geo.height / 2);
           fixcenter = True;
      }
