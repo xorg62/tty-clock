@@ -98,6 +98,7 @@ typedef struct
      Bool second;
      Bool twelve;
      Bool keylock;
+     Bool center;
 } option_t;
 
 typedef struct
@@ -120,13 +121,11 @@ typedef struct
 
 option_t option = { False, False, True };
 geo_t geo = { 1, 1, 33, 5 }; /* Base position of the clock */
-Bool fixcenter = False;
 Bool running = True;
 date_t sdate;
 char *meridiem;
 int temp_dp;
-int bg;
-
+int bg, i;
 struct tm *tm;
 time_t lt;
 
@@ -162,7 +161,7 @@ start(void)
 void
 print_number(int num, int x, int y)
 {
-     int i, sy = y;
+     int sy = y;
 
      for(i = 0; i < LGNUM; ++i, ++sy)
      {
@@ -185,8 +184,6 @@ arrange_clock(int h1, int h2,
               int m1, int m2,
               int s1, int s2)
 {
-     int i;
-
      temp_dp = (option.second) ? 21 : 12;
 
      print_number(h1, geo.x, geo.y);
@@ -252,7 +249,7 @@ check_key(Bool keylock)
      case KEY_UP:
      case 'k':
      case 'K':
-          if(!fixcenter)
+          if(!option.center)
           {
                if(geo.x > 1)
                     --geo.x;
@@ -262,7 +259,7 @@ check_key(Bool keylock)
      case KEY_DOWN:
      case 'j':
      case 'J':
-          if(!fixcenter)
+          if(!option.center)
           {
                if(geo.x + geo.height + 2 < MAXH)
                     ++geo.x;
@@ -272,7 +269,7 @@ check_key(Bool keylock)
      case KEY_LEFT:
      case 'h':
      case 'H':
-          if(!fixcenter)
+          if(!option.center)
           {
                if(geo.y > 1)
                     --geo.y;
@@ -282,7 +279,7 @@ check_key(Bool keylock)
      case KEY_RIGHT:
      case 'l':
      case 'L':
-          if(!fixcenter)
+          if(!option.center)
           {
                if(geo.y + geo.width + 1 < MAXW)
                     ++geo.y;
@@ -297,9 +294,9 @@ check_key(Bool keylock)
                geo.width -= DIFFSEC;
           clear();
           option.second = !option.second;
-          if(fixcenter)
+          if(option.center)
           {
-               fixcenter = False;
+               option.center = False;
                set_center();
           }
           break;
@@ -359,25 +356,25 @@ get_time(void)
 void
 set_center(void)
 {
-     if(!fixcenter)
+     if(!option.center)
      {
           geo.y = MAXW / 2 - (geo.width / 2);
           geo.x = MAXH / 2 - (geo.height / 2);
-          fixcenter = True;
+          option.center = True;
      }
      else
-          fixcenter = !fixcenter;
+          option.center = !option.center;
 }
 
 /* SIGNAL HANDLE FUNCTION */
 void
 handle_sig(int num)
 {
-     if(num == SIGWINCH && fixcenter)
+     if(num == SIGWINCH && option.center)
      {
           endwin();
           start();
-          fixcenter = !fixcenter;
+          option.center = !option.center;
           set_center();
      }
      else if(num == SIGINT || num == SIGTERM)
