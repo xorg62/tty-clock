@@ -126,8 +126,8 @@ date_t sdate;
 char *meridiem;
 int bg, i;
 struct tm *tm;
-time_t lt;
-
+time_t lt = time(NULL);
+struct tm *tm = localtime(&lt);
 
 /* STARTING FUNCTION */
 void
