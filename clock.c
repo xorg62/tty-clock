@@ -183,6 +183,7 @@ arrange_clock(int h1, int h2,
               int m1, int m2,
               int s1, int s2)
 {
+
      print_number(h1, geo.x, geo.y);
      print_number(h2, geo.x, geo.y + 7);
 
@@ -233,6 +234,7 @@ arrange_clock(int h1, int h2,
             sdate.year,
             meridiem);
      attroff(COLOR_PAIR(2));
+
 }
 
 /* KEY CHECKING FUNCTION */
@@ -356,6 +358,8 @@ set_center(void)
 {
      if(!option.center)
      {
+          if(option.second && geo.width != 52)
+               geo.width += DIFFSEC;
           geo.y = MAXW / 2 - (geo.width / 2);
           geo.x = MAXH / 2 - (geo.height / 2);
           option.center = True;
@@ -425,7 +429,14 @@ main(int argc, char **argv)
                if(atoi(optarg) > 0)
                     geo.y = atoi(optarg) + 1;
                break;
-          case 's': option.second = True; break;
+          case 's':
+               option.second = True;
+               if(option.center)
+               {
+                    option.center = !option.center;
+                    set_center();
+               }
+               break;
           case 't': option.twelve = True; break;
           case 'b': option.keylock = False; break;
           case 'c': start(); set_center(); break;
