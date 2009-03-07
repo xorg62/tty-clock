@@ -127,7 +127,6 @@ char *meridiem;
 int bg, i;
 struct tm *tm;
 time_t lt;
-struct tm *tm;
 
 /* STARTING FUNCTION */
 void
