@@ -2,36 +2,35 @@
 #Under BSD License
 #See clock.c for the license detail.
 
-SRC = clock.c
+SRC = ttyclock.c
 CC = cc
-NCURSESFLAG = -lncurses
 BIN = tty-clock
 INSTALLPATH = /usr/local/bin/
-CFLAGS = -Wall ${NCURSESFLAG}
+CFLAGS = -Wall -g
+LDFLAGS = -lncurses
 
 
 tty-clock : ${SRC}
 
 	@echo "build ${SRC}"
-	@echo "CC ${CFLAGS} ${SRC}"
-	@${CC} ${CFLAGS} ${SRC} -o ${BIN}
+	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC}"
+	@${CC} ${CFLAGS} ${LDFLAGS} ${SRC} -o ${BIN}
 
 install : ${BIN}
 
 	@echo "installing binary file to ${INSTALLPATH}${BIN}"
 	@cp ${BIN} ${INSTALLPATH}
 	@chmod 755 ${INSTALLPATH}${BIN}
-	@echo "installed."
+	@echo "installed"
 
 uninstall :
 
 	@echo "uninstalling binary file (${INSTALLPATH}${BIN})"
 	@rm -f ${INSTALLPATH}${BIN}
-	@echo "uninstalled :'(."
-
+	@echo "${BIN} uninstalled"
 clean :
 
-	@echo "cleaning"
+	@echo "cleaning ${BIN}"
 	@rm ${BIN}
-	@echo "cleaned."
+	@echo "${BIN} cleaned"
 
