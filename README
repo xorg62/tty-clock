@@ -1,4 +1,4 @@
-tty-clock usage : tty-clock -[option] <arg>
+tty-clock usage : tty-clock [-option] <arg>
   -s, --second        Show seconds
   -b, --lock          Lock the keyboard
   -t, --twelve        Set the hour in 12h format
