@@ -424,6 +424,7 @@ main(int argc, char **argv)
           update_hour();
           draw_clock();
           key_event();
+          usleep(UPDATETIME);
      }
 
      free(ttyclock);
