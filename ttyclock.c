@@ -273,12 +273,7 @@ set_second(void)
      if((ttyclock->option.second = !ttyclock->option.second))
           clock_move(ttyclock->geo.x, ttyclock->geo.y, (ttyclock->geo.w = SECFRAMEW), ttyclock->geo.h);
      else
-     {
-          /* Clean old second number on the terminal */
-          wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
-          wclear(ttyclock->framewin);
           clock_move(ttyclock->geo.x, ttyclock->geo.y, (ttyclock->geo.w = NORMFRAMEW), ttyclock->geo.h);
-     }
 
      set_center(ttyclock->option.center);
 
