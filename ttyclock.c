@@ -66,8 +66,14 @@ init(void)
 
      /* Init global struct */
      ttyclock->running = True;
-     ttyclock->geo.x = 0;
-     ttyclock->geo.y = 0;
+     if(!ttyclock->geo.x)
+          ttyclock->geo.x = 0;
+     if(!ttyclock->geo.y)
+          ttyclock->geo.y = 0;
+     if(!ttyclock->geo.a)
+          ttyclock->geo.a = 1;
+     if(!ttyclock->geo.b)
+          ttyclock->geo.b = 1;
      ttyclock->geo.w = (ttyclock->option.second) ? SECFRAMEW : NORMFRAMEW;
      ttyclock->geo.h = 7;
      ttyclock->tm = localtime(&(ttyclock->lt));
@@ -103,12 +109,8 @@ signal_handler(int signal)
      switch(signal)
      {
      case SIGWINCH:
-          /* If the terminal is resizing */
-          if(ttyclock->option.center)
-          {
-               endwin();
-               init();
-          }
+          endwin();
+          init();
           break;
           /* Interruption signal */
      case SIGINT:
@@ -137,7 +139,7 @@ update_hour(void)
      ihour = ttyclock->tm->tm_hour;
 
      if(ttyclock->option.twelve)
-          ttyclock->meridiem = (ihour > 12) ? " [PM]" : " [AM]";
+          ttyclock->meridiem = ((ihour > 12) ? PMSIGN : AMSIGN);
      else
           ttyclock->meridiem = "";
 
@@ -266,6 +268,29 @@ clock_move(int x, int y, int w, int h)
      return;
 }
 
+/* Useless but fun :) */
+void
+clock_rebound(void)
+{
+     if(!ttyclock->option.rebound)
+          return;
+
+     if(ttyclock->geo.x < 1)
+          ttyclock->geo.a = 1;
+     if(ttyclock->geo.x > (LINES - ttyclock->geo.h - DATEWINH))
+          ttyclock->geo.a = -1;
+     if(ttyclock->geo.y < 1)
+          ttyclock->geo.b = 1;
+     if(ttyclock->geo.y > (COLS - ttyclock->geo.w - 1))
+          ttyclock->geo.b = -1;
+
+     clock_move(ttyclock->geo.x + ttyclock->geo.a,
+                ttyclock->geo.y + ttyclock->geo.b,
+                ttyclock->geo.w,
+                ttyclock->geo.h);
+     return;
+}
+
 void
 set_second(void)
 {
@@ -356,6 +381,11 @@ key_event(void)
      case 'C':
           set_center(!ttyclock->option.center);
           break;
+
+     case 'r':
+     case 'R':
+          ttyclock->option.rebound = !ttyclock->option.rebound;
+          break;
      }
 
      return;
@@ -419,10 +449,13 @@ main(int argc, char **argv)
 
      init();
 
+
      while(ttyclock->running)
      {
+          clock_rebound();
           update_hour();
           draw_clock();
+
           key_event();
           usleep(UPDATETIME);
      }

@@ -46,6 +46,8 @@
 #define SECFRAMEW  54
 #define UPDATETIME 10000
 #define DATEWINH   3
+#define AMSIGN     " [AM]"
+#define PMSIGN     " [PM]"
 
 /* Help string */
 #define HELPSTR "tty-clock usage : tty-clock [-option] <arg>    \n\
@@ -72,12 +74,15 @@ typedef struct
           Bool twelve;
           Bool keylock;
           Bool center;
+          Bool rebound;
      } option;
 
      /* Clock geometry */
      struct
      {
           int x, y, w, h;
+          /* For rebound use (see clock_rebound())*/
+          int a, b;
      } geo;
 
      /* Date content ([2] = number by number) */
@@ -86,7 +91,7 @@ typedef struct
           unsigned int hour[2];
           unsigned int minute[2];
           unsigned int second[2];
-          char datestr[56];
+          char datestr[16];
      } date;
 
      /* time.h utils */
@@ -95,8 +100,8 @@ typedef struct
 
      /* Clock member */
      char *meridiem;
-     WINDOW* framewin;
-     WINDOW* datewin;
+     WINDOW *framewin;
+     WINDOW *datewin;
 
 } ttyclock_t;
 
