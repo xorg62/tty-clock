@@ -1,4 +1,4 @@
-tty-clock usage : tty-clock [-option] <arg>
+tty-clock usage : tty-clock [-option]
   -s, --second        Show seconds
   -t, --twelve        Set the hour in 12h format
   -r, --rebound       Do rebound the clock

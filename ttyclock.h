@@ -50,7 +50,7 @@
 #define PMSIGN     " [PM]"
 
 /* Help string */
-#define HELPSTR "tty-clock usage : tty-clock [-option] <arg>    \n\
+#define HELPSTR "tty-clock usage : tty-clock [-option]          \n\
    -s, --second     Show seconds                                \n\
    -c, --center     Set the clock at the center of the terminal \n\
    -t, --twelve     Set the hour in 12h format                  \n\
@@ -72,7 +72,6 @@ typedef struct
      {
           Bool second;
           Bool twelve;
-          Bool keylock;
           Bool center;
           Bool rebound;
      } option;
