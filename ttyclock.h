@@ -52,7 +52,6 @@
 /* Help string */
 #define HELPSTR "tty-clock usage : tty-clock [-option] <arg>    \n\
    -s, --second     Show seconds                                \n\
-   -l, --lock       Lock the keyboard                           \n\
    -c, --center     Set the clock at the center of the terminal \n\
    -t, --twelve     Set the hour in 12h format                  \n\
    -r, --rebound    Do rebound the clock                        \n\

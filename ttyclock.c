@@ -309,10 +309,14 @@ void
 set_center(Bool b)
 {
      if((ttyclock->option.center = b))
+     {
+          ttyclock->option.rebound = False;
+
           clock_move((ttyclock->geo.x = (LINES / 2 - (ttyclock->geo.h / 2))),
                      (ttyclock->geo.y = (COLS  / 2 - (ttyclock->geo.w / 2))),
                      ttyclock->geo.w,
                      ttyclock->geo.h);
+     }
 
      return;
 }
@@ -320,8 +324,6 @@ set_center(Bool b)
 void
 key_event(void)
 {
-     if(ttyclock->option.keylock)
-          return;
 
      halfdelay(1);
 
@@ -406,7 +408,6 @@ main(int argc, char **argv)
                {"second",  0, NULL, 's'},
                {"twelve",  0, NULL, 't'},
                {"rebound", 0, NULL, 'r'},
-               {"lock",    0, NULL, 'l'},
                {"center",  0, NULL, 'c'},
                {NULL,      0, NULL, 0}
           };
@@ -414,7 +415,7 @@ main(int argc, char **argv)
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
 
-     while ((c = getopt_long(argc,argv,"tvslrcih",
+     while ((c = getopt_long(argc,argv,"tvsrcih",
                              long_options, NULL)) != -1)
      {
           switch(c)
@@ -446,9 +447,6 @@ main(int argc, char **argv)
                break;
           case 'r':
                ttyclock->option.rebound = True;
-               break;
-          case 'l':
-               ttyclock->option.keylock = True;
                break;
           }
      }
