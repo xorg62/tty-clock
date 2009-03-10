@@ -385,6 +385,8 @@ key_event(void)
      case 'r':
      case 'R':
           ttyclock->option.rebound = !ttyclock->option.rebound;
+          if(ttyclock->option.rebound && ttyclock->option.center)
+               ttyclock->option.center = False;
           break;
      }
 
@@ -403,6 +405,7 @@ main(int argc, char **argv)
                {"info",    0, NULL, 'i'},
                {"second",  0, NULL, 's'},
                {"twelve",  0, NULL, 't'},
+               {"rebound", 0, NULL, 'r'},
                {"lock",    0, NULL, 'l'},
                {"center",  0, NULL, 'c'},
                {NULL,      0, NULL, 0}
@@ -411,7 +414,7 @@ main(int argc, char **argv)
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
 
-     while ((c = getopt_long(argc,argv,"tvslcih",
+     while ((c = getopt_long(argc,argv,"tvslrcih",
                              long_options, NULL)) != -1)
      {
           switch(c)
@@ -441,6 +444,9 @@ main(int argc, char **argv)
           case 't':
                ttyclock->option.twelve = True;
                break;
+          case 'r':
+               ttyclock->option.rebound = True;
+               break;
           case 'l':
                ttyclock->option.keylock = True;
                break;
@@ -449,13 +455,11 @@ main(int argc, char **argv)
 
      init();
 
-
      while(ttyclock->running)
      {
           clock_rebound();
           update_hour();
           draw_clock();
-
           key_event();
           usleep(UPDATETIME);
      }

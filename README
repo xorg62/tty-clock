@@ -2,6 +2,7 @@ tty-clock usage : tty-clock [-option] <arg>
   -s, --second        Show seconds
   -b, --lock          Lock the keyboard
   -t, --twelve        Set the hour in 12h format
+  -r, --rebound       Do rebound the clock
   -v, --version       Show tty-clock version
   -i, --info          Show some info about tty-clock
   -h, --help          Show this page
