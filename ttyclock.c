@@ -211,7 +211,7 @@ draw_clock(void)
 
      /* Draw the date */
      wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
-     mvwprintw(ttyclock->datewin, (DATEWINH - (DATEWINH / 2) - 1), 1, ttyclock->date.datestr);
+     mvwprintw(ttyclock->datewin, ((DATEWINH / 2) - 1), 1, ttyclock->date.datestr);
      wrefresh(ttyclock->datewin);
 
      /* Draw second if the option is enable */
@@ -399,6 +399,9 @@ int
 main(int argc, char **argv)
 {
      int c;
+     struct timespec sleeptime;
+     sleeptime.tv_sec = 0;
+     sleeptime.tv_nsec = UPDATETIME; 
 
      struct option long_options[] =
           {
@@ -459,7 +462,7 @@ main(int argc, char **argv)
           update_hour();
           draw_clock();
           key_event();
-          usleep(UPDATETIME);
+          nanosleep(&sleeptime,NULL);
      }
 
      free(ttyclock);
