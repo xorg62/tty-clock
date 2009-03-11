@@ -208,7 +208,6 @@ draw_clock(void)
      draw_number(ttyclock->date.minute[0], 1, 20);
      draw_number(ttyclock->date.minute[1], 1, 27);
 
-
      /* Draw the date */
      wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
      mvwprintw(ttyclock->datewin, (DATEWINH / 2), 1, ttyclock->date.datestr);
@@ -290,12 +289,12 @@ clock_rebound(void)
 void
 set_second(void)
 {
-     /* Reverse option value */
-     clock_move(ttyclock->geo.x,
-                ttyclock->geo.y,
-                (ttyclock->geo.w = ((ttyclock->option.second = !ttyclock->option.second)) ? SECFRAMEW : NORMFRAMEW),
-                ttyclock->geo.h);
+     int new_w = (((ttyclock->option.second = !ttyclock->option.second)) ? SECFRAMEW : NORMFRAMEW);
+     int y_adj;
 
+     for(y_adj = 0; (ttyclock->geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
+
+     clock_move(ttyclock->geo.x, (ttyclock->geo.y - y_adj), new_w, ttyclock->geo.h);
 
      set_center(ttyclock->option.center);
 
@@ -309,8 +308,8 @@ set_center(Bool b)
      {
           ttyclock->option.rebound = False;
 
-          clock_move((ttyclock->geo.x = (LINES / 2 - (ttyclock->geo.h / 2))),
-                     (ttyclock->geo.y = (COLS  / 2 - (ttyclock->geo.w / 2))),
+          clock_move((LINES / 2 - (ttyclock->geo.h / 2)),
+                     (COLS  / 2 - (ttyclock->geo.w / 2)),
                      ttyclock->geo.w,
                      ttyclock->geo.h);
      }
