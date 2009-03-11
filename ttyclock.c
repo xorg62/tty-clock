@@ -239,31 +239,26 @@ clock_move(int x, int y, int w, int h)
      wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
      wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
      wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-
-     /* Clean windows */
      werase(ttyclock->framewin);
      werase(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
      wrefresh(ttyclock->datewin);
 
+     /* Frame win move */
+     mvwin(ttyclock->framewin, (ttyclock->geo.x = x), (ttyclock->geo.y = y));
+     wresize(ttyclock->framewin, (ttyclock->geo.h = h), (ttyclock->geo.w = w));
 
-     /* Make new property */
-     ttyclock->framewin = newwin((ttyclock->geo.h = h),
-                                 (ttyclock->geo.w = w),
-                                 (ttyclock->geo.x = x),
-                                 (ttyclock->geo.y = y));
-
-     ttyclock->datewin =  newwin(DATEWINH,
-                                 strlen(ttyclock->date.datestr) + 2,
-                                 ttyclock->geo.x + ttyclock->geo.h - 1,
-                                 ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
+     /* Date win move */
+     mvwin(ttyclock->datewin,
+           ttyclock->geo.x + ttyclock->geo.h - 1,
+           ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
+     wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
 
      box(ttyclock->framewin, 0, 0);
      box(ttyclock->datewin,  0, 0);
 
      wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
-
 
      return;
 }
@@ -300,6 +295,7 @@ set_second(void)
                 ttyclock->geo.y,
                 (ttyclock->geo.w = ((ttyclock->option.second = !ttyclock->option.second)) ? SECFRAMEW : NORMFRAMEW),
                 ttyclock->geo.h);
+
 
      set_center(ttyclock->option.center);
 
@@ -400,7 +396,6 @@ int
 main(int argc, char **argv)
 {
      int c;
-     struct timespec sleeptime = {0, UPDATETIME};
 
      struct option long_options[] =
           {
@@ -461,7 +456,6 @@ main(int argc, char **argv)
           update_hour();
           draw_clock();
           key_event();
-          nanosleep(&sleeptime, NULL);
      }
 
      free(ttyclock);

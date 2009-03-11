@@ -44,7 +44,7 @@
 /* Macro */
 #define NORMFRAMEW 35
 #define SECFRAMEW  54
-#define UPDATETIME 10000000
+#define UPDATETIME 25000000
 #define DATEWINH   3
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
