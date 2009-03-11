@@ -288,6 +288,7 @@ clock_rebound(void)
                 ttyclock->geo.y + ttyclock->geo.b,
                 ttyclock->geo.w,
                 ttyclock->geo.h);
+
      return;
 }
 
@@ -295,10 +296,10 @@ void
 set_second(void)
 {
      /* Reverse option value */
-     if((ttyclock->option.second = !ttyclock->option.second))
-          clock_move(ttyclock->geo.x, ttyclock->geo.y, (ttyclock->geo.w = SECFRAMEW), ttyclock->geo.h);
-     else
-          clock_move(ttyclock->geo.x, ttyclock->geo.y, (ttyclock->geo.w = NORMFRAMEW), ttyclock->geo.h);
+     clock_move(ttyclock->geo.x,
+                ttyclock->geo.y,
+                (ttyclock->geo.w = ((ttyclock->option.second = !ttyclock->option.second)) ? SECFRAMEW : NORMFRAMEW),
+                ttyclock->geo.h);
 
      set_center(ttyclock->option.center);
 
@@ -399,9 +400,7 @@ int
 main(int argc, char **argv)
 {
      int c;
-     struct timespec sleeptime;
-     sleeptime.tv_sec = 0;
-     sleeptime.tv_nsec = UPDATETIME; 
+     struct timespec sleeptime = {0, UPDATETIME};
 
      struct option long_options[] =
           {
@@ -462,7 +461,7 @@ main(int argc, char **argv)
           update_hour();
           draw_clock();
           key_event();
-          nanosleep(&sleeptime,NULL);
+          nanosleep(&sleeptime, NULL);
      }
 
      free(ttyclock);
