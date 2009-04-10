@@ -156,12 +156,10 @@ update_hour(void)
      ttyclock->date.minute[1] = ttyclock->tm->tm_min % 10;
 
      /* Set date string */
-     sprintf(ttyclock->date.datestr,
-             "%.2d/%.2d/%d%s",
-             ttyclock->tm->tm_mday,
-             ttyclock->tm->tm_mon + 1,
-             ttyclock->tm->tm_year + 1900,
-             ttyclock->meridiem);
+     strftime(ttyclock->date.datestr,
+         sizeof(ttyclock->date.datestr),
+         "%d/%m/%Y",
+         ttyclock->tm);
 
      /* Set seconds */
      ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
