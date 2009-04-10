@@ -157,9 +157,9 @@ update_hour(void)
 
      /* Set date string */
      strftime(ttyclock->date.datestr,
-         sizeof(ttyclock->date.datestr),
-         ttyclock->option.format,
-         ttyclock->tm);
+              sizeof(ttyclock->date.datestr),
+              ttyclock->option.format,
+              ttyclock->tm);
 
      /* Set seconds */
      ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
