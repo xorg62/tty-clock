@@ -158,7 +158,7 @@ update_hour(void)
      /* Set date string */
      strftime(ttyclock->date.datestr,
          sizeof(ttyclock->date.datestr),
-         "%d/%m/%Y",
+         ttyclock->option.format,
          ttyclock->tm);
 
      /* Set seconds */
@@ -403,13 +403,18 @@ main(int argc, char **argv)
                {"twelve",  0, NULL, 't'},
                {"rebound", 0, NULL, 'r'},
                {"center",  0, NULL, 'c'},
+               {"format",  1, NULL, 'f'},
                {NULL,      0, NULL, 0}
           };
 
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
 
-     while ((c = getopt_long(argc,argv,"tvsrcih",
+     /* Date format */
+     ttyclock->option.format = malloc(sizeof(char)*100);
+     strncpy(ttyclock->option.format, "%d/%m/%Y", 100);
+
+     while ((c = getopt_long(argc,argv,"tvsrcihf:",
                              long_options, NULL)) != -1)
      {
           switch(c)
@@ -441,6 +446,9 @@ main(int argc, char **argv)
                break;
           case 'r':
                ttyclock->option.rebound = True;
+               break;
+          case 'f':
+               strncpy(ttyclock->option.format, optarg, 100);
                break;
           }
      }

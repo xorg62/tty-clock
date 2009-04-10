@@ -55,6 +55,7 @@
    -c, --center     Set the clock at the center of the terminal \n\
    -t, --twelve     Set the hour in 12h format                  \n\
    -r, --rebound    Do rebound the clock                        \n\
+   -f, --format     Set the date format                         \n\
    -v, --version    Show tty-clock version                      \n\
    -i, --info       Show some info about tty-clock              \n\
    -h, --help       Show this page                              "
@@ -74,6 +75,7 @@ typedef struct
           Bool twelve;
           Bool center;
           Bool rebound;
+          char *format;
      } option;
 
      /* Clock geometry */
