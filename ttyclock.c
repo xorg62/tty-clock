@@ -36,7 +36,7 @@ void
 init(void)
 {
      struct sigaction sig;
-     int bg = COLOR_BLACK;
+     ttyclock->bg = COLOR_BLACK;
 
      /* Init ncurses */
      initscr();
@@ -48,12 +48,12 @@ init(void)
 
      /* Init default terminal color */
      if(use_default_colors() == OK)
-          bg = -1;
+          ttyclock->bg = -1;
 
      /* Init color pair */
-     init_pair(0, bg, bg);
-     init_pair(1, bg, ttyclock->option.color);
-     init_pair(2, ttyclock->option.color, bg);
+     init_pair(0, ttyclock->bg, ttyclock->bg);
+     init_pair(1, ttyclock->bg, ttyclock->option.color);
+     init_pair(2, ttyclock->option.color, ttyclock->bg);
      refresh();
 
      /* Init signal handler */
@@ -388,7 +388,8 @@ key_event(void)
                if(c == (i + '0'))
                {
                     ttyclock->option.color = i;
-                    init();
+                    init_pair(1, ttyclock->bg, i);
+                    init_pair(2, i, ttyclock->bg);
                }
           break;
      }

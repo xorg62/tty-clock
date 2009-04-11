@@ -55,6 +55,7 @@ typedef struct
 {
      /* while() boolean */
      Bool running;
+     int bg;
 
      /* Running option */
      struct
