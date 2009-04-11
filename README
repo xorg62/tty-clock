@@ -1,8 +1,10 @@
 tty-clock usage : tty-clock [-option]
-  -s             Show seconds
-  -t             Set the hour in 12h format
-  -r             Do rebound the clock
-  -f <format>    Set the date format
-  -v             Show tty-clock version
-  -i             Show some info about tty-clock
-  -h             Show this page
+    -s            Show seconds
+    -c            Set the clock at the center of the terminal
+    -C <num>      Set the clock color.
+    -t            Set the hour in 12h format
+    -r            Do rebound the clock
+    -f <format>   Set the date format
+    -v            Show tty-clock version
+    -i            Show some info about tty-clock
+    -h            Show this page

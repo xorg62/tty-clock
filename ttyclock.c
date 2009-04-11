@@ -52,8 +52,8 @@ init(void)
 
      /* Init color pair */
      init_pair(0, bg, bg);
-     init_pair(1, bg, COLOR_GREEN);
-     init_pair(2, COLOR_GREEN, bg);
+     init_pair(1, bg, ttyclock->option.color);
+     init_pair(2, ttyclock->option.color, bg);
      refresh();
 
      /* Init signal handler */
@@ -399,8 +399,10 @@ main(int argc, char **argv)
      ttyclock->option.format = malloc(sizeof(char) * 100);
      /* Default date format */
      strncpy(ttyclock->option.format, "%d/%m/%Y", 100);
+     /* Default color */
+     ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
 
-     while ((c = getopt(argc, argv, "tvsrcihf:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihf:C:")) != -1)
      {
           switch(c)
           {
@@ -409,6 +411,7 @@ main(int argc, char **argv)
                printf("tty-clock usage : tty-clock [-option]                         \n"
                       "    -s            Show seconds                                \n"
                       "    -c            Set the clock at the center of the terminal \n"
+                      "    -C <num>      Set the clock color.                        \n"
                       "    -t            Set the hour in 12h format                  \n"
                       "    -r            Do rebound the clock                        \n"
                       "    -f <format>   Set the date format                         \n"
@@ -435,6 +438,10 @@ main(int argc, char **argv)
                break;
           case 'c':
                ttyclock->option.center = True;
+               break;
+          case 'C':
+               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
+                    ttyclock->option.color = atoi(optarg);
                break;
           case 't':
                ttyclock->option.twelve = True;

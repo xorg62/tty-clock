@@ -64,6 +64,7 @@ typedef struct
           Bool center;
           Bool rebound;
           char *format;
+          int color;
      } option;
 
      /* Clock geometry */
