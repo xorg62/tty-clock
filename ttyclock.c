@@ -132,6 +132,7 @@ void
 update_hour(void)
 {
      int ihour;
+     char tmpstr[128];
 
      ttyclock->tm = localtime(&(ttyclock->lt));
      ttyclock->lt = time(NULL);
@@ -141,7 +142,7 @@ update_hour(void)
      if(ttyclock->option.twelve)
           ttyclock->meridiem = ((ihour > 12) ? PMSIGN : AMSIGN);
      else
-          ttyclock->meridiem = "";
+          ttyclock->meridiem = "\0";
 
      /* Manage hour for twelve mode */
      ihour = ((ttyclock->option.twelve && ihour > 12)  ? (ihour - 12) : ihour);
@@ -156,10 +157,11 @@ update_hour(void)
      ttyclock->date.minute[1] = ttyclock->tm->tm_min % 10;
 
      /* Set date string */
-     strftime(ttyclock->date.datestr,
-              sizeof(ttyclock->date.datestr),
+     strftime(tmpstr,
+              sizeof(tmpstr),
               ttyclock->option.format,
               ttyclock->tm);
+     sprintf(ttyclock->date.datestr, "%s%s", tmpstr, ttyclock->meridiem);
 
      /* Set seconds */
      ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
@@ -418,13 +420,13 @@ main(int argc, char **argv)
           {
           case 'h':
           default:
-               printf("tty-clock usage : tty-clock [-option]                         \n"
+               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]           \n"
                       "    -s            Show seconds                                \n"
                       "    -c            Set the clock at the center of the terminal \n"
-                      "    -C <num>      Set the clock color                         \n"
+                      "    -C [0-7]      Set the clock color                         \n"
                       "    -t            Set the hour in 12h format                  \n"
                       "    -r            Do rebound the clock                        \n"
-                      "    -f <format>   Set the date format                         \n"
+                      "    -f format     Set the date format                         \n"
                       "    -v            Show tty-clock version                      \n"
                       "    -i            Show some info about tty-clock              \n"
                       "    -h            Show this page                              \n");
