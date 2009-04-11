@@ -316,10 +316,11 @@ set_center(Bool b)
 void
 key_event(void)
 {
+     int i, c;
 
      halfdelay(1);
 
-     switch(getch())
+     switch((c = getch()))
      {
      case KEY_UP:
      case 'k':
@@ -382,6 +383,14 @@ key_event(void)
           if(ttyclock->option.rebound && ttyclock->option.center)
                ttyclock->option.center = False;
           break;
+     default:
+          for(i = 0; i < 8; ++i)
+               if(c == (i + '0'))
+               {
+                    ttyclock->option.color = i;
+                    init();
+               }
+          break;
      }
 
      return;
@@ -411,7 +420,7 @@ main(int argc, char **argv)
                printf("tty-clock usage : tty-clock [-option]                         \n"
                       "    -s            Show seconds                                \n"
                       "    -c            Set the clock at the center of the terminal \n"
-                      "    -C <num>      Set the clock color.                        \n"
+                      "    -C <num>      Set the clock color                         \n"
                       "    -t            Set the hour in 12h format                  \n"
                       "    -r            Do rebound the clock                        \n"
                       "    -f <format>   Set the date format                         \n"
