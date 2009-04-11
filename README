@@ -1,8 +1,8 @@
 tty-clock usage : tty-clock [-option]
-  -s, --second        Show seconds
-  -t, --twelve        Set the hour in 12h format
-  -r, --rebound       Do rebound the clock
-  -f, --format        Set the date format
-  -v, --version       Show tty-clock version
-  -i, --info          Show some info about tty-clock
-  -h, --help          Show this page
+  -s             Show seconds
+  -t             Set the hour in 12h format
+  -r             Do rebound the clock
+  -f <format>    Set the date format
+  -v             Show tty-clock version
+  -i             Show some info about tty-clock
+  -h             Show this page
