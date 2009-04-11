@@ -165,8 +165,6 @@ update_hour(void)
      ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
      ttyclock->date.second[1] = ttyclock->tm->tm_sec % 10;
 
-
-
      return;
 }
 
@@ -368,7 +366,7 @@ key_event(void)
      case 't':
      case 'T':
           ttyclock->option.twelve = !ttyclock->option.twelve;
-          /* Set the new ttyclock->date.datestr for resize date window */
+          /* Set the new ttyclock->date.datestr to resize date window */
           update_hour();
           clock_move(ttyclock->geo.x, ttyclock->geo.y, ttyclock->geo.w, ttyclock->geo.h);
           break;
@@ -394,45 +392,42 @@ main(int argc, char **argv)
 {
      int c;
 
-     struct option long_options[] =
-          {
-               {"help",    0, NULL, 'h'},
-               {"version", 0, NULL, 'v'},
-               {"info",    0, NULL, 'i'},
-               {"second",  0, NULL, 's'},
-               {"twelve",  0, NULL, 't'},
-               {"rebound", 0, NULL, 'r'},
-               {"center",  0, NULL, 'c'},
-               {"format",  1, NULL, 'f'},
-               {NULL,      0, NULL, 0}
-          };
-
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
 
      /* Date format */
-     ttyclock->option.format = malloc(sizeof(char)*100);
+     ttyclock->option.format = malloc(sizeof(char) * 100);
+     /* Default date format */
      strncpy(ttyclock->option.format, "%d/%m/%Y", 100);
 
-     while ((c = getopt_long(argc,argv,"tvsrcihf:",
-                             long_options, NULL)) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihf:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               puts(HELPSTR);
+               printf("tty-clock usage : tty-clock [-option]                         \n"
+                      "    -s            Show seconds                                \n"
+                      "    -c            Set the clock at the center of the terminal \n"
+                      "    -t            Set the hour in 12h format                  \n"
+                      "    -r            Do rebound the clock                        \n"
+                      "    -f <format>   Set the date format                         \n"
+                      "    -v            Show tty-clock version                      \n"
+                      "    -i            Show some info about tty-clock              \n"
+                      "    -h            Show this page                              \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
           case 'i':
                puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com)");
                free(ttyclock);
+               free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
                free(ttyclock);
+               free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
                break;
           case 's':
@@ -464,6 +459,7 @@ main(int argc, char **argv)
      }
 
      free(ttyclock);
+     free(ttyclock->option.format);
      endwin();
 
      return 0;

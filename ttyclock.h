@@ -44,21 +44,9 @@
 /* Macro */
 #define NORMFRAMEW 35
 #define SECFRAMEW  54
-#define UPDATETIME 25000000
 #define DATEWINH   3
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
-
-/* Help string */
-#define HELPSTR "tty-clock usage : tty-clock [-option]          \n\
-   -s, --second     Show seconds                                \n\
-   -c, --center     Set the clock at the center of the terminal \n\
-   -t, --twelve     Set the hour in 12h format                  \n\
-   -r, --rebound    Do rebound the clock                        \n\
-   -f, --format     Set the date format                         \n\
-   -v, --version    Show tty-clock version                      \n\
-   -i, --info       Show some info about tty-clock              \n\
-   -h, --help       Show this page                              "
 
 typedef enum { False, True } Bool;
 
