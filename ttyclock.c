@@ -323,7 +323,7 @@ key_event(void)
 {
      int i, c;
 
-     struct timespec length = { 0, UPDATETIME };
+     struct timespec length = { 0, ttyclock->option.delay };
 
      switch(c = wgetch(stdscr))
      {
@@ -417,23 +417,26 @@ main(int argc, char **argv)
      strncpy(ttyclock->option.format, "%d/%m/%Y", 100);
      /* Default color */
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
+     /* Default delay */
+     ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihf:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihfd:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]           \n"
-                      "    -s            Show seconds                                \n"
-                      "    -c            Set the clock at the center of the terminal \n"
-                      "    -C [0-7]      Set the clock color                         \n"
-                      "    -t            Set the hour in 12h format                  \n"
-                      "    -r            Do rebound the clock                        \n"
-                      "    -f format     Set the date format                         \n"
-                      "    -v            Show tty-clock version                      \n"
-                      "    -i            Show some info about tty-clock              \n"
-                      "    -h            Show this page                              \n");
+               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]              \n"
+                      "    -s            Show seconds                                   \n"
+                      "    -c            Set the clock at the center of the terminal    \n"
+                      "    -C [0-7]      Set the clock color                            \n"
+                      "    -t            Set the hour in 12h format                     \n"
+                      "    -r            Do rebound the clock                           \n"
+                      "    -f format     Set the date format                            \n"
+                      "    -v            Show tty-clock version                         \n"
+                      "    -i            Show some info about tty-clock                 \n"
+                      "    -h            Show this page                                 \n"
+                      "    -d delay      Set the delay between two redraws of the clock \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
@@ -467,6 +470,10 @@ main(int argc, char **argv)
                break;
           case 'f':
                strncpy(ttyclock->option.format, optarg, 100);
+               break;
+          case 'd':
+               if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
+                    ttyclock->option.delay = atol(optarg);
                break;
           }
      }

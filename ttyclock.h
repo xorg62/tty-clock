@@ -45,7 +45,6 @@
 #define NORMFRAMEW 35
 #define SECFRAMEW  54
 #define DATEWINH   3
-#define UPDATETIME 40000000
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
 
@@ -67,6 +66,7 @@ typedef struct
           Bool rebound;
           char *format;
           int color;
+          long delay;
      } option;
 
      /* Clock geometry */
