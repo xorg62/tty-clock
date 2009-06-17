@@ -98,7 +98,7 @@ init(void)
 
      set_center(ttyclock->option.center);
 
-     nodelay(ttyclock->framewin, TRUE);
+     nodelay(stdscr, True);
 
      wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
@@ -325,7 +325,7 @@ key_event(void)
 
      struct timespec length = { 0, UPDATETIME };
 
-     switch(c = wgetch(ttyclock->framewin))
+     switch(c = wgetch(stdscr))
      {
      case KEY_UP:
      case 'k':
