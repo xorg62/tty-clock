@@ -36,7 +36,7 @@ void
 init(void)
 {
      struct sigaction sig;
-     int bg = COLOR_BLACK;
+     ttyclock->bg = COLOR_BLACK;
 
      /* Init ncurses */
      initscr();
@@ -49,12 +49,12 @@ init(void)
 
      /* Init default terminal color */
      if(use_default_colors() == OK)
-          bg = -1;
+          ttyclock->bg = -1;
 
      /* Init color pair */
-     init_pair(0, bg, bg);
-     init_pair(1, bg, COLOR_GREEN);
-     init_pair(2, COLOR_GREEN, bg);
+     init_pair(0, ttyclock->bg, ttyclock->bg);
+     init_pair(1, ttyclock->bg, ttyclock->option.color);
+     init_pair(2, ttyclock->option.color, ttyclock->bg);
      refresh();
 
      /* Init signal handler */
@@ -135,6 +135,7 @@ void
 update_hour(void)
 {
      int ihour;
+     char tmpstr[128];
 
      ttyclock->tm = localtime(&(ttyclock->lt));
      ttyclock->lt = time(NULL);
@@ -144,7 +145,7 @@ update_hour(void)
      if(ttyclock->option.twelve)
           ttyclock->meridiem = ((ihour > 12) ? PMSIGN : AMSIGN);
      else
-          ttyclock->meridiem = "";
+          ttyclock->meridiem = "\0";
 
      /* Manage hour for twelve mode */
      ihour = ((ttyclock->option.twelve && ihour > 12)  ? (ihour - 12) : ihour);
@@ -159,18 +160,15 @@ update_hour(void)
      ttyclock->date.minute[1] = ttyclock->tm->tm_min % 10;
 
      /* Set date string */
-     sprintf(ttyclock->date.datestr,
-             "%.2d/%.2d/%d%s",
-             ttyclock->tm->tm_mday,
-             ttyclock->tm->tm_mon + 1,
-             ttyclock->tm->tm_year + 1900,
-             ttyclock->meridiem);
+     strftime(tmpstr,
+              sizeof(tmpstr),
+              ttyclock->option.format,
+              ttyclock->tm);
+     sprintf(ttyclock->date.datestr, "%s%s", tmpstr, ttyclock->meridiem);
 
      /* Set seconds */
      ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
      ttyclock->date.second[1] = ttyclock->tm->tm_sec % 10;
-
-
 
      return;
 }
@@ -323,10 +321,11 @@ set_center(Bool b)
 void
 key_event(void)
 {
+     int i, c;
 
      struct timespec length = { 0, UPDATETIME };
 
-     switch(wgetch(ttyclock->framewin))
+     switch(c = wgetch(ttyclock->framewin))
      {
      case KEY_UP:
      case 'k':
@@ -373,7 +372,7 @@ key_event(void)
      case 't':
      case 'T':
           ttyclock->option.twelve = !ttyclock->option.twelve;
-          /* Set the new ttyclock->date.datestr for resize date window */
+          /* Set the new ttyclock->date.datestr to resize date window */
           update_hour();
           clock_move(ttyclock->geo.x, ttyclock->geo.y, ttyclock->geo.w, ttyclock->geo.h);
           break;
@@ -389,9 +388,15 @@ key_event(void)
           if(ttyclock->option.rebound && ttyclock->option.center)
                ttyclock->option.center = False;
           break;
-
      default:
           nanosleep(&length, NULL);
+          for(i = 0; i < 8; ++i)
+               if(c == (i + '0'))
+               {
+                    ttyclock->option.color = i;
+                    init_pair(1, ttyclock->bg, i);
+                    init_pair(2, i, ttyclock->bg);
+               }
           break;
      }
 
@@ -403,40 +408,45 @@ main(int argc, char **argv)
 {
      int c;
 
-     struct option long_options[] =
-          {
-               {"help",    0, NULL, 'h'},
-               {"version", 0, NULL, 'v'},
-               {"info",    0, NULL, 'i'},
-               {"second",  0, NULL, 's'},
-               {"twelve",  0, NULL, 't'},
-               {"rebound", 0, NULL, 'r'},
-               {"center",  0, NULL, 'c'},
-               {NULL,      0, NULL, 0}
-          };
-
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
 
-     while ((c = getopt_long(argc,argv,"tvsrcih",
-                             long_options, NULL)) != -1)
+     /* Date format */
+     ttyclock->option.format = malloc(sizeof(char) * 100);
+     /* Default date format */
+     strncpy(ttyclock->option.format, "%d/%m/%Y", 100);
+     /* Default color */
+     ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
+
+     while ((c = getopt(argc, argv, "tvsrcihf:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               puts(HELPSTR);
+               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]           \n"
+                      "    -s            Show seconds                                \n"
+                      "    -c            Set the clock at the center of the terminal \n"
+                      "    -C [0-7]      Set the clock color                         \n"
+                      "    -t            Set the hour in 12h format                  \n"
+                      "    -r            Do rebound the clock                        \n"
+                      "    -f format     Set the date format                         \n"
+                      "    -v            Show tty-clock version                      \n"
+                      "    -i            Show some info about tty-clock              \n"
+                      "    -h            Show this page                              \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
           case 'i':
                puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com)");
                free(ttyclock);
+               free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
                free(ttyclock);
+               free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
                break;
           case 's':
@@ -445,11 +455,18 @@ main(int argc, char **argv)
           case 'c':
                ttyclock->option.center = True;
                break;
+          case 'C':
+               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
+                    ttyclock->option.color = atoi(optarg);
+               break;
           case 't':
                ttyclock->option.twelve = True;
                break;
           case 'r':
                ttyclock->option.rebound = True;
+               break;
+          case 'f':
+               strncpy(ttyclock->option.format, optarg, 100);
                break;
           }
      }
@@ -465,6 +482,7 @@ main(int argc, char **argv)
      }
 
      free(ttyclock);
+     free(ttyclock->option.format);
      endwin();
 
      return 0;

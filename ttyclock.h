@@ -44,20 +44,10 @@
 /* Macro */
 #define NORMFRAMEW 35
 #define SECFRAMEW  54
-#define UPDATETIME 25000000
 #define DATEWINH   3
+#define UPDATETIME 40000000
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
-
-/* Help string */
-#define HELPSTR "tty-clock usage : tty-clock [-option]          \n\
-   -s, --second     Show seconds                                \n\
-   -c, --center     Set the clock at the center of the terminal \n\
-   -t, --twelve     Set the hour in 12h format                  \n\
-   -r, --rebound    Do rebound the clock                        \n\
-   -v, --version    Show tty-clock version                      \n\
-   -i, --info       Show some info about tty-clock              \n\
-   -h, --help       Show this page                              "
 
 typedef enum { False, True } Bool;
 
@@ -66,6 +56,7 @@ typedef struct
 {
      /* while() boolean */
      Bool running;
+     int bg;
 
      /* Running option */
      struct
@@ -74,6 +65,8 @@ typedef struct
           Bool twelve;
           Bool center;
           Bool rebound;
+          char *format;
+          int color;
      } option;
 
      /* Clock geometry */
@@ -90,7 +83,7 @@ typedef struct
           unsigned int hour[2];
           unsigned int minute[2];
           unsigned int second[2];
-          char datestr[16];
+          char datestr[256];
      } date;
 
      /* time.h utils */
