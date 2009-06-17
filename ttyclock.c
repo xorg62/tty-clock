@@ -40,6 +40,7 @@ init(void)
 
      /* Init ncurses */
      initscr();
+     cbreak();
      noecho();
      keypad(stdscr, True);
      start_color();
@@ -96,6 +97,8 @@ init(void)
      clearok(ttyclock->datewin, True);
 
      set_center(ttyclock->option.center);
+
+     nodelay(ttyclock->framewin, TRUE);
 
      wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
@@ -321,9 +324,9 @@ void
 key_event(void)
 {
 
-     halfdelay(1);
+     struct timespec length = { 0, UPDATETIME };
 
-     switch(getch())
+     switch(wgetch(ttyclock->framewin))
      {
      case KEY_UP:
      case 'k':
@@ -385,6 +388,10 @@ key_event(void)
           ttyclock->option.rebound = !ttyclock->option.rebound;
           if(ttyclock->option.rebound && ttyclock->option.center)
                ttyclock->option.center = False;
+          break;
+
+     default:
+          nanosleep(&length, NULL);
           break;
      }
 
