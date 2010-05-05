@@ -455,7 +455,7 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihfbd:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihbf:d:C:")) != -1)
      {
           switch(c)
           {
