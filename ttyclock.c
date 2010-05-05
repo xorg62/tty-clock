@@ -86,14 +86,18 @@ init(void)
                                  ttyclock->geo.w,
                                  ttyclock->geo.x,
                                  ttyclock->geo.y);
-     box(ttyclock->framewin, 0, 0);
+     if(ttyclock->option.box) {
+           box(ttyclock->framewin, 0, 0);
+     }
 
      /* Create the date win */
      ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.datestr) + 2,
                                 ttyclock->geo.x + ttyclock->geo.h - 1,
                                 ttyclock->geo.y + (ttyclock->geo.w / 2) -
                                 (strlen(ttyclock->date.datestr) / 2) - 1);
-     box(ttyclock->datewin, 0, 0);
+     if(ttyclock->option.box) {
+          box(ttyclock->datewin, 0, 0);
+     }
      clearok(ttyclock->datewin, True);
 
      set_center(ttyclock->option.center);
@@ -420,14 +424,15 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihfd:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihfbd:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-sbctrvih] [-C [0-7]] [-f format] [-d delay]  \n"
                       "    -s            Show seconds                                   \n"
+                      "    -b            Show box                                       \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -t            Set the hour in 12h format                     \n"
@@ -474,6 +479,9 @@ main(int argc, char **argv)
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock->option.delay = atol(optarg);
+               break;
+          case 'b':
+               ttyclock->option.box = True;
                break;
           }
      }
