@@ -258,8 +258,10 @@ clock_move(int x, int y, int w, int h)
            ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
      wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
 
-     box(ttyclock->framewin, 0, 0);
-     box(ttyclock->datewin,  0, 0);
+     if(ttyclock->option.box) {
+           box(ttyclock->framewin, 0, 0);
+           box(ttyclock->datewin,  0, 0);
+     }
 
      wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
@@ -320,6 +322,29 @@ set_center(Bool b)
      }
 
      return;
+}
+
+void
+set_box(Bool b)
+{
+     ttyclock->option.box = b;
+
+     wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
+     wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
+
+     if(ttyclock->option.box) {
+         wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
+         wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
+         box(ttyclock->framewin, 0, 0);
+         box(ttyclock->datewin,  0, 0);
+     }
+     else {
+         wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+         wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+     }
+
+     wrefresh(ttyclock->datewin);
+     wrefresh(ttyclock->framewin);
 }
 
 void
@@ -392,6 +417,12 @@ key_event(void)
           if(ttyclock->option.rebound && ttyclock->option.center)
                ttyclock->option.center = False;
           break;
+
+     case 'b':
+     case 'B':
+          set_box(!ttyclock->option.box);
+          break;
+
      default:
           nanosleep(&length, NULL);
           for(i = 0; i < 8; ++i)
