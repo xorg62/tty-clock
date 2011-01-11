@@ -86,14 +86,18 @@ init(void)
                                  ttyclock->geo.w,
                                  ttyclock->geo.x,
                                  ttyclock->geo.y);
-     box(ttyclock->framewin, 0, 0);
+     if(ttyclock->option.box) {
+           box(ttyclock->framewin, 0, 0);
+     }
 
      /* Create the date win */
      ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.datestr) + 2,
                                 ttyclock->geo.x + ttyclock->geo.h - 1,
                                 ttyclock->geo.y + (ttyclock->geo.w / 2) -
                                 (strlen(ttyclock->date.datestr) / 2) - 1);
-     box(ttyclock->datewin, 0, 0);
+     if(ttyclock->option.box) {
+          box(ttyclock->datewin, 0, 0);
+     }
      clearok(ttyclock->datewin, True);
 
      set_center(ttyclock->option.center);
@@ -254,8 +258,10 @@ clock_move(int x, int y, int w, int h)
            ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
      wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
 
-     box(ttyclock->framewin, 0, 0);
-     box(ttyclock->datewin,  0, 0);
+     if(ttyclock->option.box) {
+           box(ttyclock->framewin, 0, 0);
+           box(ttyclock->datewin,  0, 0);
+     }
 
      wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
@@ -316,6 +322,29 @@ set_center(Bool b)
      }
 
      return;
+}
+
+void
+set_box(Bool b)
+{
+     ttyclock->option.box = b;
+
+     wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
+     wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
+
+     if(ttyclock->option.box) {
+         wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
+         wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
+         box(ttyclock->framewin, 0, 0);
+         box(ttyclock->datewin,  0, 0);
+     }
+     else {
+         wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+         wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+     }
+
+     wrefresh(ttyclock->datewin);
+     wrefresh(ttyclock->framewin);
 }
 
 void
@@ -388,6 +417,12 @@ key_event(void)
           if(ttyclock->option.rebound && ttyclock->option.center)
                ttyclock->option.center = False;
           break;
+
+     case 'b':
+     case 'B':
+          set_box(!ttyclock->option.box);
+          break;
+
      default:
           nanosleep(&length, NULL);
           for(i = 0; i < 8; ++i)
@@ -420,14 +455,15 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihf:d:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihbf:d:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format] [-d delay]   \n"
+               printf("usage : tty-clock [-sbctrvih] [-C [0-7]] [-f format] [-d delay]  \n"
                       "    -s            Show seconds                                   \n"
+                      "    -b            Show box                                       \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -t            Set the hour in 12h format                     \n"
@@ -474,6 +510,9 @@ main(int argc, char **argv)
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock->option.delay = atol(optarg);
+               break;
+          case 'b':
+               ttyclock->option.box = True;
                break;
           }
      }

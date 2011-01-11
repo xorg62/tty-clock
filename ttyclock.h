@@ -64,6 +64,7 @@ typedef struct
           Bool twelve;
           Bool center;
           Bool rebound;
+          Bool box;
           char *format;
           int color;
           long delay;
@@ -106,6 +107,7 @@ void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
 void set_second(void);
 void set_center(Bool b);
+void set_box(Bool b);
 void key_event(void);
 
 /* Global variable */
