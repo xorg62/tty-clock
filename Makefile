@@ -31,6 +31,6 @@ uninstall :
 clean :
 
 	@echo "cleaning ${BIN}"
-	@rm ${BIN}
+	@rm -f ${BIN}
 	@echo "${BIN} cleaned"
 
