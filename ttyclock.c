@@ -132,6 +132,15 @@ signal_handler(int signal)
 }
 
 void
+cleanup(void)
+{
+	if (ttyclock && ttyclock->option.format)
+		free(ttyclock->option.format);
+	if (ttyclock)
+		free(ttyclock);
+}
+
+void
 update_hour(void)
 {
      int ihour;
@@ -420,7 +429,9 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihfd:C:")) != -1)
+     atexit(cleanup);
+
+     while ((c = getopt(argc, argv, "tvsrcihf:d:C:")) != -1)
      {
           switch(c)
           {
@@ -437,19 +448,14 @@ main(int argc, char **argv)
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
                       "    -d delay      Set the delay between two redraws of the clock \n");
-               free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
           case 'i':
                puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com)");
-               free(ttyclock);
-               free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
-               free(ttyclock);
-               free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
                break;
           case 's':
@@ -488,8 +494,6 @@ main(int argc, char **argv)
           key_event();
      }
 
-     free(ttyclock);
-     free(ttyclock->option.format);
      endwin();
 
      return 0;
