@@ -7,7 +7,7 @@
 tty-clock - a terminal digital clock
 .SH SYNOPSIS
 .LP
-\fBtty\-clock [\-sbctrvih] [\-C [\fP\fI0\-7\fP\fB]] [\-f\fP \fIformat\fP\fB] [\-d \fIdelay\fP\fB]\fP
+\fBtty\-clock [\-sSbctrvih] [\-C [\fP\fI0\-7\fP\fB]] [\-f\fP \fIformat\fP\fB] [\-d \fIdelay\fP\fB]\fP
 .SH DESCRIPTION
 .LP
 \fItty-clock\fP displays a simple digital clock on the terminal
@@ -20,11 +20,8 @@ K,J,H,L
 vi-style movement commands to set the position of the displayed clock.
 These commands have no effect when the \fBcentered\fP option is set.
 .TP
-S
-Display seconds.
-.TP
-T
-Switch time output to the 12-hour format.
+B
+Toggles displaying a box around the clock. options is disabled by default.
 .TP
 C
 Toggle the clock's position to \fBcentered\fP.
@@ -33,6 +30,12 @@ When set the movement commands are disabled.
 R
 Set the clock to \fBrebound\fP along the edges of the terminal.
 .TP
+S
+Display seconds.
+.TP
+T
+Switch time output to the 12-hour format.
+.TP
 Q
 Quit.
 .SH OPTIONS
@@ -40,6 +43,9 @@ Quit.
 .TP
 \fB\-s\fR
 Show seconds.
+.TP
+\fB-S\fR
+Screensaver mode. tty\-clock terminates when any key is pressed.
 .TP
 \fB\-b\fR
 Show box.
