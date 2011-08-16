@@ -1,5 +1,6 @@
 usage : tty-clock [-sSctrvih] [-C [0-7]] [-f format]
     -s            Show seconds
+    -b            Show box                                       
     -S            Screensaver mode
     -c            Set the clock at the center of the terminal
     -C [0-7]      Set the clock color
@@ -9,3 +10,5 @@ usage : tty-clock [-sSctrvih] [-C [0-7]] [-f format]
     -v            Show tty-clock version
     -i            Show some info about tty-clock
     -h            Show this page
+    -d delay      Set the delay between two redraws of the clock 
+
