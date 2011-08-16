@@ -1,5 +1,6 @@
-usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]
+usage : tty-clock [-sSctrvih] [-C [0-7]] [-f format]
     -s            Show seconds
+    -S            Screensaver mode
     -c            Set the clock at the center of the terminal
     -C [0-7]      Set the clock color
     -t            Set the hour in 12h format

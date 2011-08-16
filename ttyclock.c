@@ -333,6 +333,28 @@ key_event(void)
      int i, c;
 
      struct timespec length = { 0, ttyclock->option.delay };
+     
+     if (ttyclock->option.screensaver)
+     {
+          c = wgetch(stdscr);
+          if(c != ERR)
+          {
+               ttyclock->running = False;
+          }
+          else
+          {
+               nanosleep(&length, NULL);
+               for(i = 0; i < 8; ++i)
+                    if(c == (i + '0'))
+                    {
+                         ttyclock->option.color = i;
+                         init_pair(1, ttyclock->bg, i);
+                         init_pair(2, i, ttyclock->bg);
+                    }
+          }
+          return;
+     }
+     
 
      switch(c = wgetch(stdscr))
      {
@@ -431,14 +453,15 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "tvsrcihf:d:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsSrcihf:d:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-sSctrvih] [-C [0-7]] [-f format]             \n"
                       "    -s            Show seconds                                   \n"
+                      "    -S            Screensaver mode                               \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -t            Set the hour in 12h format                     \n"
@@ -460,6 +483,9 @@ main(int argc, char **argv)
                break;
           case 's':
                ttyclock->option.second = True;
+               break;
+          case 'S':
+               ttyclock->option.screensaver = True;
                break;
           case 'c':
                ttyclock->option.center = True;
