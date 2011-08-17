@@ -33,8 +33,12 @@
 #ifndef TTYCLOCK_H_INCLUDED
 #define TTYCLOCK_H_INCLUDED
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <time.h>
 #include <signal.h>
 #include <ncurses.h>
@@ -55,6 +59,10 @@ typedef struct
 {
      /* while() boolean */
      Bool running;
+    
+     /* terminal variables */ 
+     SCREEN *ttyscr;
+     char *tty;
      int bg;
 
      /* Running option */
@@ -66,6 +74,7 @@ typedef struct
           Bool center;
           Bool rebound;
           Bool box;
+	  Bool noquit;
           char *format;
           int color;
           long delay;

@@ -39,7 +39,19 @@ init(void)
      ttyclock->bg = COLOR_BLACK;
 
      /* Init ncurses */
-     initscr();
+     if (ttyclock->tty) {
+	     FILE *ftty = fopen(ttyclock->tty, "r+");
+	     if (!ftty) {
+		     fprintf(stderr, "tty-clock: error: '%s' couldn't be opened: %s.\n",
+				     ttyclock->tty, strerror(errno));
+		     exit(EXIT_FAILURE);
+	     }
+	     ttyclock->ttyscr = newterm(NULL, ftty, ftty);
+	     assert(ttyclock->ttyscr != NULL);
+	     set_term(ttyclock->ttyscr);
+     } else
+	     initscr();
+
      cbreak();
      noecho();
      keypad(stdscr, True);
@@ -138,6 +150,11 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
+	if (ttyclock->ttyscr)
+		delscreen(ttyclock->ttyscr);
+
+	if (ttyclock && ttyclock->tty)
+		free(ttyclock->tty);
 	if (ttyclock && ttyclock->option.format)
 		free(ttyclock->option.format);
 	if (ttyclock)
@@ -366,7 +383,7 @@ key_event(void)
      if (ttyclock->option.screensaver)
      {
           c = wgetch(stdscr);
-          if(c != ERR)
+          if(c != ERR && ttyclock->option.noquit == False)
           {
                ttyclock->running = False;
           }
@@ -421,7 +438,8 @@ key_event(void)
 
      case 'q':
      case 'Q':
-          ttyclock->running = False;
+          if (ttyclock->option.noquit == False)
+		  ttyclock->running = False;
           break;
 
      case 's':
@@ -476,11 +494,13 @@ main(int argc, char **argv)
 
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
+     assert(ttyclock != NULL);
+     memset(ttyclock, 0, sizeof(ttyclock_t));
 
      /* Date format */
      ttyclock->option.format = malloc(sizeof(char) * 100);
      /* Default date format */
-     strncpy(ttyclock->option.format, "%d/%m/%Y", 100);
+     strncpy(ttyclock->option.format, "%F", 100);
      /* Default color */
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
      /* Default delay */
@@ -488,21 +508,23 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "tvsSrcihbf:d:C:")) != -1)
+     while ((c = getopt(argc, argv, "tT:nvsSrcihbf:d:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sSbctrvih] [-C [0-7]] [-f format] [-d delay]  \n"
+               printf("usage : tty-clock [-sSbctrnvih] [-C [0-7]] [-f format] [-d delay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -b            Show box                                       \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -t            Set the hour in 12h format                     \n"
+		      "    -T tty        Display the clock on the specified terminal    \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
+		      "    -n            Don't quit on keypress                         \n"
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
@@ -546,6 +568,25 @@ main(int argc, char **argv)
           case 'b':
                ttyclock->option.box = True;
                break;
+	  case 'T': {
+	       struct stat sbuf;
+	       if (stat(optarg, &sbuf) == -1) {
+		       fprintf(stderr, "tty-clock: error: couldn't stat '%s': %s.\n",
+				       optarg, strerror(errno));
+		       exit(EXIT_FAILURE);
+	       } else if (!S_ISCHR(sbuf.st_mode)) {
+		       fprintf(stderr, "tty-clock: error: '%s' doesn't appear to be a character device.\n",
+				       optarg);
+		       exit(EXIT_FAILURE);
+	       } else {
+	       		if (ttyclock->tty)
+				free(ttyclock->tty);
+			ttyclock->tty = strdup(optarg);
+	       }}
+	       break;
+	  case 'n':
+	       ttyclock->option.noquit = True;
+	       break;
           }
      }
 
