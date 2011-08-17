@@ -1,4 +1,4 @@
-usage : tty-clock [-sSctrvih] [-C [0-7]] [-f format]
+usage : tty-clock [-sSbctrnvih] [-C [0-7]] [-f format] [-T tty]
     -s            Show seconds
     -b            Show box                                       
     -S            Screensaver mode
