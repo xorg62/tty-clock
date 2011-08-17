@@ -90,11 +90,19 @@ Show some info about tty\-clock.
 Show usage information.
 .TP
 \fB\-d\fR \fIdelay\fR
-Set the delay between two redraws of the clock.
+Set the delay (in nanoseconds) between two redraws of the clock.
 .SH "EXAMPLES"
 .LP
-The following example displays a fullscreen clock at boot on one of
-the Virtual Terminals on a Linux system using an
+To invoke
+.I tty\-clock
+in screensaver mode with the clock display set to rebound and the update
+delay set to 1/10th of a second (10 FPS):
+.IP
+$ tty\-clock -Srd 100000000
+.LP
+The following example arranges for \fItty-clock\fR to be displayed
+indefinitely on one of the Virtual Terminals on a Linux system
+at boot time using an
 .B inittab(5)
 entry:
 .IP
