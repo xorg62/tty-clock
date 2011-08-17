@@ -6,7 +6,9 @@ usage : tty-clock [-sSctrvih] [-C [0-7]] [-f format]
     -C [0-7]      Set the clock color
     -t            Set the hour in 12h format
     -r            Do rebound the clock
+    -T tty        Display the clock on the specified terminal
     -f format     Set the date format
+    -n            Don't quit on keypress
     -v            Show tty-clock version
     -i            Show some info about tty-clock
     -h            Show this page
