@@ -8,14 +8,14 @@ BIN = tty-clock
 PREFIX ?= /usr/local
 INSTALLPATH = ${DESTDIR}${PREFIX}/bin
 CFLAGS = -Wall -g
-LDFLAGS = -lncurses
+LIBS = -lncurses
 
 
 tty-clock : ${SRC}
 
 	@echo "build ${SRC}"
-	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC}"
-	@${CC} ${CFLAGS} ${LDFLAGS} ${SRC} -o ${BIN}
+	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC} ${LIBS}"
+	@${CC} ${CFLAGS} ${LDFLAGS} ${SRC} ${LIBS} -o ${BIN}
 
 install : ${BIN}
 
