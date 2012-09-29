@@ -86,14 +86,21 @@ init(void)
                                  ttyclock->geo.w,
                                  ttyclock->geo.x,
                                  ttyclock->geo.y);
-     box(ttyclock->framewin, 0, 0);
+
+     if(ttyclock->option.border) {
+        box(ttyclock->framewin, 0, 0);
+     }
 
      /* Create the date win */
      ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.datestr) + 2,
                                 ttyclock->geo.x + ttyclock->geo.h - 1,
                                 ttyclock->geo.y + (ttyclock->geo.w / 2) -
                                 (strlen(ttyclock->date.datestr) / 2) - 1);
-     box(ttyclock->datewin, 0, 0);
+
+     if(ttyclock->option.border) {
+          box(ttyclock->datewin, 0, 0);
+     }
+
      clearok(ttyclock->datewin, True);
 
      set_center(ttyclock->option.center);
@@ -254,8 +261,10 @@ clock_move(int x, int y, int w, int h)
            ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
      wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
 
-     box(ttyclock->framewin, 0, 0);
-     box(ttyclock->datewin,  0, 0);
+     if(ttyclock->option.border) {
+          box(ttyclock->framewin, 0, 0);
+          box(ttyclock->datewin,  0, 0);
+     }
 
      wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
@@ -419,14 +428,16 @@ main(int argc, char **argv)
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
+     /* Default border */
+     ttyclock->option.border = True;
 
-     while ((c = getopt(argc, argv, "tvsrcihfd:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihbfd:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-sctrvihb] [-C [0-7]] [-f format]              \n"
                       "    -s            Show seconds                                   \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
@@ -436,7 +447,8 @@ main(int argc, char **argv)
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
-                      "    -d delay      Set the delay between two redraws of the clock \n");
+                      "    -d delay      Set the delay between two redraws of the clock \n"
+                      "    -b            Disable border line                            \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
@@ -474,6 +486,9 @@ main(int argc, char **argv)
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock->option.delay = atol(optarg);
+               break;
+          case 'b':
+               ttyclock->option.border = False;
                break;
           }
      }
