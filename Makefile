@@ -13,8 +13,7 @@ LDFLAGS = -lncurses
 tty-clock : ${SRC}
 
 	@echo "build ${SRC}"
-	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC}"
-	@${CC} ${CFLAGS} ${LDFLAGS} ${SRC} -o ${BIN}
+	${CC} ${CFLAGS} ${SRC} ${LDFLAGS} -o ${BIN}
 
 install : ${BIN}
 
