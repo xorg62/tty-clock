@@ -64,6 +64,7 @@ typedef struct
           Bool twelve;
           Bool center;
           Bool rebound;
+          Bool date;
           char *format;
           int color;
           long delay;
