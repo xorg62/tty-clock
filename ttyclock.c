@@ -89,18 +89,25 @@ init(void)
      box(ttyclock->framewin, 0, 0);
 
      /* Create the date win */
-     ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.datestr) + 2,
-                                ttyclock->geo.x + ttyclock->geo.h - 1,
-                                ttyclock->geo.y + (ttyclock->geo.w / 2) -
-                                (strlen(ttyclock->date.datestr) / 2) - 1);
-     box(ttyclock->datewin, 0, 0);
-     clearok(ttyclock->datewin, True);
+     if (ttyclock->option.date)
+     {
+          ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.datestr) + 2,
+                                     ttyclock->geo.x + ttyclock->geo.h - 1,
+                                     ttyclock->geo.y + (ttyclock->geo.w / 2) -
+                                     (strlen(ttyclock->date.datestr) / 2) - 1);
+          box(ttyclock->datewin, 0, 0);
+          clearok(ttyclock->datewin, True);
+     }
 
      set_center(ttyclock->option.center);
 
      nodelay(stdscr, True);
 
-     wrefresh(ttyclock->datewin);
+     if (ttyclock->option.date)
+     {
+          wrefresh(ttyclock->datewin);
+     }
+
      wrefresh(ttyclock->framewin);
 
      return;
@@ -210,9 +217,12 @@ draw_clock(void)
      draw_number(ttyclock->date.minute[1], 1, 27);
 
      /* Draw the date */
-     wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
-     mvwprintw(ttyclock->datewin, (DATEWINH / 2), 1, ttyclock->date.datestr);
-     wrefresh(ttyclock->datewin);
+     if (ttyclock->option.date)
+     {
+          wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
+          mvwprintw(ttyclock->datewin, (DATEWINH / 2), 1, ttyclock->date.datestr);
+          wrefresh(ttyclock->datewin);
+     }
 
      /* Draw second if the option is enable */
      if(ttyclock->option.second)
@@ -237,27 +247,33 @@ clock_move(int x, int y, int w, int h)
      /* Erase border for a clean move */
      wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
      wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-     wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
-     wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
      werase(ttyclock->framewin);
-     werase(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
-     wrefresh(ttyclock->datewin);
+
+     if (ttyclock->option.date)
+     {
+          wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
+          wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+          werase(ttyclock->datewin);
+          wrefresh(ttyclock->datewin);
+     }
 
      /* Frame win move */
      mvwin(ttyclock->framewin, (ttyclock->geo.x = x), (ttyclock->geo.y = y));
      wresize(ttyclock->framewin, (ttyclock->geo.h = h), (ttyclock->geo.w = w));
 
      /* Date win move */
-     mvwin(ttyclock->datewin,
-           ttyclock->geo.x + ttyclock->geo.h - 1,
-           ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
-     wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
+     if (ttyclock->option.date)
+     {
+          mvwin(ttyclock->datewin,
+                ttyclock->geo.x + ttyclock->geo.h - 1,
+                ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
+          wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
+          box(ttyclock->datewin,  0, 0);
+          wrefresh(ttyclock->datewin);
+     }
 
      box(ttyclock->framewin, 0, 0);
-     box(ttyclock->datewin,  0, 0);
-
-     wrefresh(ttyclock->datewin);
      wrefresh(ttyclock->framewin);
 
      return;
@@ -411,6 +427,8 @@ main(int argc, char **argv)
      /* Alloc ttyclock */
      ttyclock = malloc(sizeof(ttyclock_t));
 
+     ttyclock->option.date = True;
+
      /* Date format */
      ttyclock->option.format = malloc(sizeof(char) * 100);
      /* Default date format */
@@ -420,13 +438,13 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihfd:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihfDd:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-sctrvihD] [-C [0-7]] [-f format]              \n"
                       "    -s            Show seconds                                   \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
@@ -436,7 +454,8 @@ main(int argc, char **argv)
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
-                      "    -d delay      Set the delay between two redraws of the clock \n");
+                      "    -d delay      Set the delay between two redraws of the clock \n"
+                      "    -D            Hide date                                      \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
@@ -474,6 +493,9 @@ main(int argc, char **argv)
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock->option.delay = atol(optarg);
+               break;
+          case 'D':
+               ttyclock->option.date = False;
                break;
           }
      }
