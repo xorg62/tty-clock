@@ -3,31 +3,34 @@
 #See clock.c for the license detail.
 
 SRC = ttyclock.c
-CC = cc
+CC ?= gcc
 BIN = tty-clock
 INSTALLPATH = /usr/local/bin/
-CFLAGS = -Wall -g
-LDFLAGS = -lncurses
+CFLAGS ?= -O2 -g
+CFLAGS += -Wall $(shell pkg-config --cflags ncurses 2>/dev/null)
+LIBS = $(shell pkg-config --libs ncurses 2>/dev/null | echo -lncurses)
 
 
 tty-clock : ${SRC}
 
 	@echo "build ${SRC}"
-	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC}"
-	@${CC} ${CFLAGS} ${LDFLAGS} ${SRC} -o ${BIN}
+	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} ${SRC} -o ${BIN} ${LIBS}
 
 install : ${BIN}
 
-	@echo "installing binary file to ${INSTALLPATH}${BIN}"
-	@cp ${BIN} ${INSTALLPATH}
-	@chmod 755 ${INSTALLPATH}${BIN}
+	@echo "creating target folder in ${DESTDIR}${INSTALLPATH}"
+	@mkdir -p "${DESTDIR}${INSTALLPATH}"
+	@echo "installing binary file to ${DESTDIR}${INSTALLPATH}${BIN}"
+	@cp ${BIN} "${DESTDIR}${INSTALLPATH}"
+	@chmod 755 "${DESTDIR}${INSTALLPATH}${BIN}"
 	@echo "installed"
 
 uninstall :
 
-	@echo "uninstalling binary file (${INSTALLPATH}${BIN})"
-	@rm -f ${INSTALLPATH}${BIN}
+	@echo "uninstalling binary file (${DESTDIR}${INSTALLPATH}${BIN})"
+	@rm -f "${DESTDIR}${INSTALLPATH}${BIN}"
 	@echo "${BIN} uninstalled"
+
 clean :
 
 	@echo "cleaning ${BIN}"
