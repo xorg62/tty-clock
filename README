@@ -1,4 +1,4 @@
-usage : tty-clock [-sctrvihD] [-C [0-7]] [-f format]              
+usage : tty-clock [-scbtrvihD] [-C [0-7]] [-f format]              
     -s            Show seconds                                   
     -c            Set the clock at the center of the terminal    
     -C [0-7]      Set the clock color                            
