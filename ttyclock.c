@@ -55,6 +55,9 @@ init(void)
      init_pair(0, ttyclock->bg, ttyclock->bg);
      init_pair(1, ttyclock->bg, ttyclock->option.color);
      init_pair(2, ttyclock->option.color, ttyclock->bg);
+//     init_pair(0, ttyclock->bg, ttyclock->bg);
+//     init_pair(1, ttyclock->bg, ttyclock->option.color);
+//     init_pair(2, ttyclock->option.color, ttyclock->bg);
      refresh();
 
      /* Init signal handler */
@@ -86,7 +89,13 @@ init(void)
                                  ttyclock->geo.w,
                                  ttyclock->geo.x,
                                  ttyclock->geo.y);
-     box(ttyclock->framewin, 0, 0);
+     //box(ttyclock->framewin, 0, 0);
+     wborder(ttyclock->framewin,' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+     
+     if (ttyclock->option.bold)
+     {
+          wattron(ttyclock->framewin, A_BLINK);
+     }
 
      /* Create the date win */
      if (ttyclock->option.date)
@@ -95,7 +104,8 @@ init(void)
                                      ttyclock->geo.x + ttyclock->geo.h - 1,
                                      ttyclock->geo.y + (ttyclock->geo.w / 2) -
                                      (strlen(ttyclock->date.datestr) / 2) - 1);
-          box(ttyclock->datewin, 0, 0);
+          //box(ttyclock->datewin, 0, 0);
+          wborder(ttyclock->datewin,' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
           clearok(ttyclock->datewin, True);
      }
 
@@ -192,6 +202,12 @@ draw_number(int n, int x, int y)
                sy = y;
                ++x;
           }
+
+          if (ttyclock->option.bold)
+               wattron(ttyclock->framewin, A_BLINK);
+          else
+               wattroff(ttyclock->framewin, A_BLINK);
+
           wbkgdset(ttyclock->framewin, COLOR_PAIR(number[n][i/2]));
           mvwaddch(ttyclock->framewin, x, sy, ' ');
      }
@@ -217,6 +233,11 @@ draw_clock(void)
      draw_number(ttyclock->date.minute[1], 1, 27);
 
      /* Draw the date */
+     if (ttyclock->option.bold)
+          wattron(ttyclock->datewin, A_BOLD);
+     else
+          wattroff(ttyclock->datewin, A_BOLD);
+
      if (ttyclock->option.date)
      {
           wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
@@ -269,11 +290,13 @@ clock_move(int x, int y, int w, int h)
                 ttyclock->geo.x + ttyclock->geo.h - 1,
                 ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
           wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
-          box(ttyclock->datewin,  0, 0);
+          //box(ttyclock->datewin,  0, 0);
+          wborder(ttyclock->datewin,' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
           wrefresh(ttyclock->datewin);
      }
 
-     box(ttyclock->framewin, 0, 0);
+     //box(ttyclock->framewin, 0, 0);
+     wborder(ttyclock->framewin,' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
      wrefresh(ttyclock->framewin);
 
      return;
@@ -398,6 +421,11 @@ key_event(void)
           set_center(!ttyclock->option.center);
           break;
 
+     case 'b':
+     case 'B':
+          ttyclock->option.bold = !ttyclock->option.bold;
+          break;
+
      case 'r':
      case 'R':
           ttyclock->option.rebound = !ttyclock->option.rebound;
@@ -438,7 +466,7 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
 
-     while ((c = getopt(argc, argv, "tvsrcihfDd:C:")) != -1)
+     while ((c = getopt(argc, argv, "btvsrcihfDd:C:")) != -1)
      {
           switch(c)
           {
@@ -448,6 +476,7 @@ main(int argc, char **argv)
                       "    -s            Show seconds                                   \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
+                      "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
@@ -477,6 +506,9 @@ main(int argc, char **argv)
           case 'c':
                ttyclock->option.center = True;
                break;
+          case 'b':
+               ttyclock->option.bold = True;
+               break;
           case 'C':
                if(atoi(optarg) >= 0 && atoi(optarg) < 8)
                     ttyclock->option.color = atoi(optarg);
@@ -501,7 +533,7 @@ main(int argc, char **argv)
      }
 
      init();
-
+     attron(A_BLINK);
      while(ttyclock->running)
      {
           clock_rebound();
