@@ -67,6 +67,7 @@ typedef struct
           Bool date;
           char *format;
           int color;
+          Bool bold;
           long delay;
      } option;
 
