@@ -472,7 +472,7 @@ main(int argc, char **argv)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvihD] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-scbtrvihD] [-C [0-7]] [-f format]              \n"
                       "    -s            Show seconds                                   \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
