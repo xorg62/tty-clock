@@ -203,14 +203,33 @@ draw_number(int n, int x, int y)
 void
 draw_clock(void)
 {
+     bool flag = false;
      /* Draw hour numbers */
      draw_number(ttyclock->date.hour[0], 1, 1);
      draw_number(ttyclock->date.hour[1], 1, 8);
 
-     /* 2 dot for number separation */
-     wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
-     mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     time_t seconds;
+     seconds = time(NULL);
+
+     if (seconds % 2 == 0){
+        flag = true;
+     }
+     else{
+         flag = false;
+     }
+
+     if (flag == false){
+         /* 2 dot for number separation */
+         wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+         mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+         mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     }
+     else if (flag == true){
+         /*2 dot black for blinking */
+         wbkgdset(ttyclock->framewin, COLOR_PAIR(2));
+         mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+         mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     }
 
      /* Draw minute numbers */
      draw_number(ttyclock->date.minute[0], 1, 20);
