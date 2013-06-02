@@ -207,20 +207,28 @@ draw_clock(void)
      draw_number(ttyclock->date.hour[0], 1, 1);
      draw_number(ttyclock->date.hour[1], 1, 8);
 
-     time_t seconds;
-     seconds = time(NULL);
+     if (ttyclock->option.blink){
+       time_t seconds;
+       seconds = time(NULL);
 
-     if (seconds % 2 != 0){
-         /* 2 dot for number separation */
-         wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
-         mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-         mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+       if (seconds % 2 != 0){
+           /* 2 dot for number separation */
+           wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+           mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+           mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+       }
+       else if (seconds % 2 == 0){
+           /*2 dot black for blinking */
+           wbkgdset(ttyclock->framewin, COLOR_PAIR(2));
+           mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+           mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+       }
      }
-     else if (seconds % 2 == 0){
-         /*2 dot black for blinking */
-         wbkgdset(ttyclock->framewin, COLOR_PAIR(2));
-         mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-         mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     else{
+       /* 2 dot for number separation */
+       wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+       mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+       mvwaddstr(ttyclock->framewin, 4, 16, "  ");
      }
 
      /* Draw minute numbers */
@@ -448,14 +456,16 @@ main(int argc, char **argv)
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
+     /* Default blink */
+     ttyclock->option.blink = False;
 
-     while ((c = getopt(argc, argv, "tvsrcihfDd:C:")) != -1)
+     while ((c = getopt(argc, argv, "tvsrcihfDBd:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sctrvihD] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-sctrvihDB] [-C [0-7]] [-f format]            \n"
                       "    -s            Show seconds                                   \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
@@ -466,7 +476,8 @@ main(int argc, char **argv)
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
                       "    -d delay      Set the delay between two redraws of the clock \n"
-                      "    -D            Hide date                                      \n");
+                      "    -D            Hide date                                      \n"
+                      "    -B            Enable blinking colon                          \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
@@ -507,6 +518,9 @@ main(int argc, char **argv)
                break;
           case 'D':
                ttyclock->option.date = False;
+               break;
+          case 'B':
+               ttyclock->option.blink = True;
                break;
           }
      }

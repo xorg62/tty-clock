@@ -8,3 +8,4 @@ usage : tty-clock [-sctrvih] [-C [0-7]] [-f format]
     -v            Show tty-clock version
     -i            Show some info about tty-clock
     -h            Show this page
+    -B            Enable blinking colon

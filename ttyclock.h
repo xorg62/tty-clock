@@ -68,6 +68,7 @@ typedef struct
           char *format;
           int color;
           long delay;
+          Bool blink;
      } option;
 
      /* Clock geometry */
