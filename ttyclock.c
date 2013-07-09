@@ -246,11 +246,33 @@ draw_clock(void)
      /* Draw second if the option is enable */
      if(ttyclock->option.second)
      {
-          /* Again 2 dot for number separation */
-          wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
-          mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
-          mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+          /* If blink option is true */
+          if(ttyclock->option.blink)
+          {
+                time_t seconds;
+                seconds = time(NULL);
 
+                if (seconds % 2 != 0){
+                      /* Again 2 dot for number separation */
+                      wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+                      mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
+                      mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+                }
+                else if (seconds % 2 == 0) {
+                      /* Again 2 dot for number separation */
+                      wbkgdset(ttyclock->framewin, COLOR_PAIR(2));
+                      mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
+                      mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+                }
+
+          }
+          else
+          {
+                /* Again 2 dot for number separation */
+                wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+                mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
+                mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+          }
           /* Draw second numbers */
           draw_number(ttyclock->date.second[0], 1, 39);
           draw_number(ttyclock->date.second[1], 1, 46);
