@@ -3,6 +3,7 @@ usage : tty-clock [-sctrvihDB] [-C [0-7]] [-f format]
     -c            Set the clock at the center of the terminal    
     -C [0-7]      Set the clock color                            
     -t            Set the hour in 12h format                     
+    -u            Use UTC time
     -r            Do rebound the clock                           
     -f format     Set the date format                            
     -v            Show tty-clock version                         
