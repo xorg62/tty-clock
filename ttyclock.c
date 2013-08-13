@@ -78,6 +78,9 @@ init(void)
      ttyclock->geo.w = (ttyclock->option.second) ? SECFRAMEW : NORMFRAMEW;
      ttyclock->geo.h = 7;
      ttyclock->tm = localtime(&(ttyclock->lt));
+     if(ttyclock->option.utc) {
+         ttyclock->tm = gmtime(&(ttyclock->lt));
+     }
      ttyclock->lt = time(NULL);
      update_hour();
 
@@ -145,6 +148,9 @@ update_hour(void)
      char tmpstr[128];
 
      ttyclock->tm = localtime(&(ttyclock->lt));
+     if(ttyclock->option.utc) {
+         ttyclock->tm = gmtime(&(ttyclock->lt));
+     }
      ttyclock->lt = time(NULL);
 
      ihour = ttyclock->tm->tm_hour;
@@ -459,7 +465,7 @@ main(int argc, char **argv)
      /* Default blink */
      ttyclock->option.blink = False;
 
-     while ((c = getopt(argc, argv, "tvsrcihfDBd:C:")) != -1)
+     while ((c = getopt(argc, argv, "utvsrcihfDBd:C:")) != -1)
      {
           switch(c)
           {
@@ -470,6 +476,7 @@ main(int argc, char **argv)
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -t            Set the hour in 12h format                     \n"
+                      "    -u            Use UTC time                                   \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
                       "    -v            Show tty-clock version                         \n"
@@ -486,6 +493,9 @@ main(int argc, char **argv)
                free(ttyclock);
                free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
+               break;
+          case 'u':
+               ttyclock->option.utc = True;
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
