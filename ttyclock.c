@@ -465,7 +465,7 @@ main(int argc, char **argv)
      /* Default blink */
      ttyclock->option.blink = False;
 
-     while ((c = getopt(argc, argv, "utvsrcihfDBd:C:")) != -1)
+     while ((c = getopt(argc, argv, "utvsrcihf:DBd:C:")) != -1)
      {
           switch(c)
           {
