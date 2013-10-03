@@ -378,7 +378,7 @@ key_event(void)
 {
      int i, c;
 
-     struct timespec length = { 0, ttyclock->option.delay };
+     struct timespec length = { ttyclock->option.delay, ttyclock->option.nsdelay };
      
      if (ttyclock->option.screensaver)
      {
@@ -504,17 +504,18 @@ main(int argc, char **argv)
      /* Default color */
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
      /* Default delay */
-     ttyclock->option.delay = 40000000; /* 25FPS */
+     ttyclock->option.delay = 1; /* 1FPS */
+     ttyclock->option.nsdelay = 0; /* -0FPS */
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "tT:nvsSrcihbf:d:C:")) != -1)
+     while ((c = getopt(argc, argv, "tT:nvsSrcihbf:d:D:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-sSbctrnvih] [-C [0-7]] [-f format] [-d delay] [-T tty] \n"
+               printf("usage : tty-clock [-sSbctrnvih] [-C [0-7]] [-f format] [-d delay] [-D nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -b            Show box                                       \n"
@@ -528,11 +529,12 @@ main(int argc, char **argv)
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
-                      "    -d delay      Set the delay between two redraws of the clock \n");
+                      "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
+                      "    -D nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
-               puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com)");
+               puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com), Grey (grey@greytheory.net)");
                exit(EXIT_SUCCESS);
                break;
           case 'v':
@@ -562,9 +564,13 @@ main(int argc, char **argv)
                strncpy(ttyclock->option.format, optarg, 100);
                break;
           case 'd':
-               if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
+               if(atol(optarg) >= 0 && atol(optarg) < 100)
                     ttyclock->option.delay = atol(optarg);
                break;
+          case 'D':
+               if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
+                    ttyclock->option.nsdelay = atol(optarg);
+                break;
           case 'b':
                ttyclock->option.box = True;
                break;

@@ -78,6 +78,7 @@ typedef struct
           char *format;
           int color;
           long delay;
+          long nsdelay;
      } option;
 
      /* Clock geometry */

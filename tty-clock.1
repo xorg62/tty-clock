@@ -90,7 +90,10 @@ Show some info about tty\-clock.
 Show usage information.
 .TP
 \fB\-d\fR \fIdelay\fR
-Set the delay (in nanoseconds) between two redraws of the clock.
+Set the delay (in seconds) between two redraws of the clock. Default 1s.
+.TP
+\fB\-D\fR \fInsdelay\fR
+Additional delay (in nanoseconds) between two redraws of the clock. Default 0ns.
 .SH "EXAMPLES"
 .LP
 To invoke
@@ -98,7 +101,7 @@ To invoke
 in screensaver mode with the clock display set to rebound and the update
 delay set to 1/10th of a second (10 FPS):
 .IP
-$ tty\-clock -Srd 100000000
+$ tty\-clock -SrD 100000000 -d 0
 .LP
 The following example arranges for \fItty-clock\fR to be displayed
 indefinitely on one of the Virtual Terminals on a Linux system
@@ -114,6 +117,8 @@ entry:
 Written by Martin Duquesnoy <xorg62@gmail.com>.
 .LP
 manpage written by Carla Valenti <valenti.karla@gmail.com>.
+.LP
+Modified for lower CPU usage by Grey <grey@greytheory.net>.
 .LP
 Please report
 .I tty-clock
