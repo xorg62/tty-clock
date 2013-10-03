@@ -12,5 +12,5 @@ usage : tty-clock [-sSbctrnvih] [-C [0-7]] [-f format] [-T tty]
     -v            Show tty-clock version
     -i            Show some info about tty-clock
     -h            Show this page
-    -d delay      Set the delay between two redraws of the clock 
-
+    -d delay      Set the delay between two redraws of the clock. Default 1s.
+    -D nsdelay    Additional delay between two redraws of the clock in nanoseconds. Default 0ns.
