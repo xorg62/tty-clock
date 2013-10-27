@@ -81,6 +81,9 @@ init(void)
      ttyclock->geo.w = (ttyclock->option.second) ? SECFRAMEW : NORMFRAMEW;
      ttyclock->geo.h = 7;
      ttyclock->tm = localtime(&(ttyclock->lt));
+     if(ttyclock->option.utc) {
+         ttyclock->tm = gmtime(&(ttyclock->lt));
+     }
      ttyclock->lt = time(NULL);
      update_hour();
 
@@ -155,6 +158,9 @@ update_hour(void)
      char tmpstr[128];
 
      ttyclock->tm = localtime(&(ttyclock->lt));
+     if(ttyclock->option.utc) {
+         ttyclock->tm = gmtime(&(ttyclock->lt));
+     }
      ttyclock->lt = time(NULL);
 
      ihour = ttyclock->tm->tm_hour;
@@ -223,10 +229,29 @@ draw_clock(void)
      draw_number(ttyclock->date.hour[0], 1, 1);
      draw_number(ttyclock->date.hour[1], 1, 8);
 
-     /* 2 dot for number separation */
-     wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
-     mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     if (ttyclock->option.blink){
+       time_t seconds;
+       seconds = time(NULL);
+
+       if (seconds % 2 != 0){
+           /* 2 dot for number separation */
+           wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+           mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+           mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+       }
+       else if (seconds % 2 == 0){
+           /*2 dot black for blinking */
+           wbkgdset(ttyclock->framewin, COLOR_PAIR(2));
+           mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+           mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+       }
+     }
+     else{
+       /* 2 dot for number separation */
+       wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+       mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+       mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     }
 
      /* Draw minute numbers */
      draw_number(ttyclock->date.minute[0], 1, 20);
@@ -465,26 +490,30 @@ main(int argc, char **argv)
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
      /* Default delay */
      ttyclock->option.delay = 40000000; /* 25FPS */
+     /* Default blink */
+     ttyclock->option.blink = False;
 
-     while ((c = getopt(argc, argv, "btvsrcihfDd:C:")) != -1)
+     while ((c = getopt(argc, argv, "utvsrcihf:DBd:C:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-scbtrvihD] [-C [0-7]] [-f format]              \n"
+               printf("usage : tty-clock [-scbtrvihDB] [-C [0-7]] [-f format]           \n"
                       "    -s            Show seconds                                   \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
+                      "    -u            Use UTC time                                   \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
                       "    -d delay      Set the delay between two redraws of the clock \n"
-                      "    -D            Hide date                                      \n");
+                      "    -D            Hide date                                      \n"
+                      "    -B            Enable blinking colon                          \n");
                free(ttyclock);
                exit(EXIT_SUCCESS);
                break;
@@ -493,6 +522,9 @@ main(int argc, char **argv)
                free(ttyclock);
                free(ttyclock->option.format);
                exit(EXIT_SUCCESS);
+               break;
+          case 'u':
+               ttyclock->option.utc = True;
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
@@ -528,6 +560,9 @@ main(int argc, char **argv)
                break;
           case 'D':
                ttyclock->option.date = False;
+               break;
+          case 'B':
+               ttyclock->option.blink = True;
                break;
           }
      }

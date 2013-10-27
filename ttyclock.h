@@ -65,10 +65,12 @@ typedef struct
           Bool center;
           Bool rebound;
           Bool date;
+          Bool utc;
           char *format;
           int color;
           Bool bold;
           long delay;
+          Bool blink;
      } option;
 
      /* Clock geometry */

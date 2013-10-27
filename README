@@ -4,6 +4,7 @@ usage : tty-clock [-scbtrvihD] [-C [0-7]] [-f format]
     -C [0-7]      Set the clock color                            
     -b            Use bold colors                                
     -t            Set the hour in 12h format                     
+    -u            Use UTC time
     -r            Do rebound the clock                           
     -f format     Set the date format                            
     -v            Show tty-clock version                         
@@ -11,3 +12,4 @@ usage : tty-clock [-scbtrvihD] [-C [0-7]] [-f format]
     -h            Show this page                                 
     -d delay      Set the delay between two redraws of the clock 
     -D            Hide date                                      
+    -B            Enable blinking colon                          
