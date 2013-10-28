@@ -8,8 +8,16 @@ BIN = tty-clock
 PREFIX ?= /usr/local
 INSTALLPATH = ${DESTDIR}${PREFIX}/bin
 MANPATH = ${DESTDIR}${PREFIX}/share/man/man1
-CFLAGS = -Wall -g -I $$(ncursesw5-config --includedir)
-LDFLAGS = -L $$(ncursesw5-config --libdir) $$(ncursesw5-config --libs)
+
+ifeq ($(shell sh -c 'which ncurses5-config>/dev/null 2>/dev/null && echo y'), y)
+	CFLAGS = -Wall -g -I $$(ncurses5-config --includedir)
+	LDFLAGS = -L $$(ncurses5-config --libdir) $$(ncursesw5-config --libs)
+else ifeq ($(shell sh -c 'which ncursesw5-config>/dev/null 2>/dev/null && echo y'), y)
+		CFLAGS = -Wall -g -I $$(ncursesw5-config --includedir)
+		LDFLAGS = -L $$(ncursesw5-config --libdir) $$(ncursesw5-config --libs)
+endif
+
+
 
 
 tty-clock : ${SRC}
