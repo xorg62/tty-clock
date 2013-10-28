@@ -14,7 +14,6 @@ usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdel
     -v            Show tty-clock version                         
     -i            Show some info about tty-clock                 
     -h            Show this page                                 
-    -d delay      Set the delay between two redraws of the clock 
     -D            Hide date                                      
     -B            Enable blinking colon                          
     -d delay      Set the delay between two redraws of the clock. Default 1s. 
