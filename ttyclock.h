@@ -33,8 +33,12 @@
 #ifndef TTYCLOCK_H_INCLUDED
 #define TTYCLOCK_H_INCLUDED
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <time.h>
 #include <signal.h>
 #include <ncurses.h>
@@ -55,21 +59,30 @@ typedef struct
 {
      /* while() boolean */
      Bool running;
+    
+     /* terminal variables */ 
+     SCREEN *ttyscr;
+     char *tty;
      int bg;
 
      /* Running option */
      struct
      {
           Bool second;
+          Bool screensaver;
           Bool twelve;
           Bool center;
           Bool rebound;
           Bool date;
           Bool utc;
+          Bool box;
+      	  Bool noquit;
           char *format;
           int color;
+          Bool bold;
           long delay;
           Bool blink;
+          long nsdelay;
      } option;
 
      /* Clock geometry */
@@ -109,6 +122,7 @@ void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
 void set_second(void);
 void set_center(Bool b);
+void set_box(Bool b);
 void key_event(void);
 
 /* Global variable */

@@ -5,35 +5,50 @@
 SRC = ttyclock.c
 CC ?= gcc
 BIN = tty-clock
-INSTALLPATH = /usr/local/bin/
-CFLAGS ?= -O2 -g
-CFLAGS += -Wall $(shell pkg-config --cflags ncurses 2>/dev/null)
-LIBS = $(shell pkg-config --libs ncurses 2>/dev/null | echo -lncurses)
+PREFIX ?= /usr/local
+INSTALLPATH = ${DESTDIR}${PREFIX}/bin
+MANPATH = ${DESTDIR}${PREFIX}/share/man/man1
+
+ifeq ($(shell sh -c 'which ncurses5-config>/dev/null 2>/dev/null && echo y'), y)
+	CFLAGS = -Wall -g -I $$(ncurses5-config --includedir)
+	LDFLAGS = -L $$(ncurses5-config --libdir) $$(ncursesw5-config --libs)
+else ifeq ($(shell sh -c 'which ncursesw5-config>/dev/null 2>/dev/null && echo y'), y)
+		CFLAGS = -Wall -g -I $$(ncursesw5-config --includedir)
+		LDFLAGS = -L $$(ncursesw5-config --libdir) $$(ncursesw5-config --libs)
+endif
+
+
 
 
 tty-clock : ${SRC}
 
 	@echo "build ${SRC}"
-	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} ${SRC} -o ${BIN} ${LIBS}
+	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC}"
+	@${CC} ${CFLAGS} ${SRC} -o ${BIN} ${LDFLAGS}
 
 install : ${BIN}
 
-	@echo "creating target folder in ${DESTDIR}${INSTALLPATH}"
-	@mkdir -p "${DESTDIR}${INSTALLPATH}"
-	@echo "installing binary file to ${DESTDIR}${INSTALLPATH}${BIN}"
-	@cp ${BIN} "${DESTDIR}${INSTALLPATH}"
-	@chmod 755 "${DESTDIR}${INSTALLPATH}${BIN}"
+	@echo "installing binary file to ${INSTALLPATH}/${BIN}"
+	@mkdir -p ${INSTALLPATH}
+	@cp ${BIN} ${INSTALLPATH}
+	@chmod 0755 ${INSTALLPATH}/${BIN}
+	@echo "installing manpage to ${MANPATH}/${BIN}.1"
+	@mkdir -p ${MANPATH}
+	@cp ${BIN}.1 ${MANPATH}
+	@chmod 0644 ${MANPATH}/${BIN}.1
 	@echo "installed"
 
 uninstall :
 
-	@echo "uninstalling binary file (${DESTDIR}${INSTALLPATH}${BIN})"
-	@rm -f "${DESTDIR}${INSTALLPATH}${BIN}"
+	@echo "uninstalling binary file (${INSTALLPATH})"
+	@rm -f ${INSTALLPATH}/${BIN}
+	@echo "uninstalling manpage (${MANPATH})"
+	@rm -f ${MANPATH}/${BIN}.1
 	@echo "${BIN} uninstalled"
 
 clean :
 
 	@echo "cleaning ${BIN}"
-	@rm ${BIN}
+	@rm -f ${BIN}
 	@echo "${BIN} cleaned"
 
