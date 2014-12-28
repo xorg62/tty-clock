@@ -250,14 +250,14 @@ draw_number(int n, int x, int y)
 void
 draw_clock(void)
 {
+     time_t seconds;
+     seconds = time(NULL);
+
      /* Draw hour numbers */
      draw_number(ttyclock->date.hour[0], 1, 1);
      draw_number(ttyclock->date.hour[1], 1, 8);
 
      if (ttyclock->option.blink){
-       time_t seconds;
-       seconds = time(NULL);
-
        if (seconds % 2 != 0){
            /* 2 dot for number separation */
            wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
@@ -298,10 +298,26 @@ draw_clock(void)
      /* Draw second if the option is enable */
      if(ttyclock->option.second)
      {
-          /* Again 2 dot for number separation */
-          wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
-          mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
-          mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+          if (ttyclock->option.blink){
+            if (seconds % 2 != 0){
+                /* 2 dot for number separation */
+                wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+                mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
+                mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+            }
+            else if (seconds % 2 == 0){
+                /*2 dot black for blinking */
+                wbkgdset(ttyclock->framewin, COLOR_PAIR(2));
+                mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
+                mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+            }
+          }
+          else{
+            /* 2 dot for number separation */
+            wbkgdset(ttyclock->framewin, COLOR_PAIR(1));
+            mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
+            mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+          }
 
           /* Draw second numbers */
           draw_number(ttyclock->date.second[0], 1, 39);
