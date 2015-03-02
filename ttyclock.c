@@ -255,12 +255,12 @@ draw_clock(void)
      draw_number(ttyclock->date.hour[1], 1, 8);
      chtype dotcolor = COLOR_PAIR(1);
      if (ttyclock->option.blink && time(NULL) % 2 == 0)
-	dotcolor = COLOR_PAIR(2);
+          dotcolor = COLOR_PAIR(2);
 
-       /* 2 dot for number separation */
-       wbkgdset(ttyclock->framewin, dotcolor);
-       mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-       mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     /* 2 dot for number separation */
+     wbkgdset(ttyclock->framewin, dotcolor);
+     mvwaddstr(ttyclock->framewin, 2, 16, "  ");
+     mvwaddstr(ttyclock->framewin, 4, 16, "  ");
 
      /* Draw minute numbers */
      draw_number(ttyclock->date.minute[0], 1, 20);
