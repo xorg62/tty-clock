@@ -83,6 +83,7 @@ typedef struct
           long delay;
           Bool blink;
           long nsdelay;
+		  Bool allcolors;
      } option;
 
      /* Clock geometry */
