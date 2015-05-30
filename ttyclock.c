@@ -686,6 +686,7 @@ main(int argc, char **argv)
 	       break;
 	  case 'l':
 	       ttyclock->option.colorblink = atoi(optarg);
+	       break;
           }
      }
 
