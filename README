@@ -4,6 +4,7 @@ usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdel
     -x            Show box                                       
     -c            Set the clock at the center of the terminal    
     -C [0-7]      Set the clock color                            
+    -A            Cange color successively every second         
     -b            Use bold colors                                
     -t            Set the hour in 12h format                     
     -u            Use UTC time                                   
