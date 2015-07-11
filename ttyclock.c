@@ -218,6 +218,26 @@ update_hour(void)
      ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
      ttyclock->date.second[1] = ttyclock->tm->tm_sec % 10;
 
+     /* Change color every second if the option is enable */
+     static unsigned s_prevSec = 0;
+     if (ttyclock->option.allcolors && s_prevSec != ttyclock->date.second[1])
+     {
+         if (9 == s_prevSec)
+             s_prevSec = 0;
+         else
+             s_prevSec = ttyclock->date.second[1];
+
+         static unsigned s_color = 1;
+         if (8 == s_color)
+             s_color = 1;
+
+         ttyclock->option.color = s_color++;
+
+         init_pair(0, ttyclock->bg, ttyclock->bg);
+         init_pair(1, ttyclock->bg, ttyclock->option.color);
+         init_pair(2, ttyclock->option.color, ttyclock->bg);
+     }
+
      return;
 }
 
@@ -522,6 +542,11 @@ key_event(void)
           set_box(!ttyclock->option.box);
           break;
 
+     case 'a':
+     case 'A':
+          ttyclock->option.allcolors = True;
+          break;
+
      default:
           nanosleep(&length, NULL);
           for(i = 0; i < 8; ++i)
@@ -530,6 +555,7 @@ key_event(void)
                     ttyclock->option.color = i;
                     init_pair(1, ttyclock->bg, i);
                     init_pair(2, i, ttyclock->bg);
+                    ttyclock->option.allcolors = False;
                }
           break;
      }
@@ -555,6 +581,7 @@ main(int argc, char **argv)
      strncpy(ttyclock->option.format, "%F", 100);
      /* Default color */
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
+     ttyclock->option.allcolors= False;
      /* Default delay */
      ttyclock->option.delay = 1; /* 1FPS */
      ttyclock->option.nsdelay = 0; /* -0FPS */
@@ -562,18 +589,19 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnADC:f:d:T:a:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDBxnA] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
+                      "    -A            Change color successively every second         \n"
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
                       "    -u            Use UTC time                                   \n"
@@ -661,7 +689,10 @@ main(int argc, char **argv)
 	       break;
 	  case 'n':
 	       ttyclock->option.noquit = True;
-	       break;
+           break;
+      case 'A':
+           ttyclock->option.allcolors = True;
+           break;
           }
      }
 
