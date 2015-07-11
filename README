@@ -1,4 +1,4 @@
-usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] 
+usage : tty-clock [-iuvsScbtrahADBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] 
     -s            Show seconds                                   
     -S            Screensaver mode                               
     -x            Show box                                       
