@@ -1,4 +1,15 @@
-usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] 
+## Instalation
+```
+cd /tmp
+wget https://github.com/xorg62/tty-clock/archive/master.zip
+unzip master.zip
+cd tty-clock-master/
+make
+sudo mv tty-clock /usr/bin/tty-clock
+```
+
+##Usage : 
+tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] 
     -s            Show seconds                                   
     -S            Screensaver mode                               
     -x            Show box                                       
