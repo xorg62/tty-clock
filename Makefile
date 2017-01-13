@@ -15,6 +15,9 @@ ifeq ($(shell sh -c 'which ncurses5-config>/dev/null 2>/dev/null && echo y'), y)
 else ifeq ($(shell sh -c 'which ncursesw5-config>/dev/null 2>/dev/null && echo y'), y)
 		CFLAGS ?= -Wall -g -I $$(ncursesw5-config --includedir)
 		LDFLAGS ?= -L $$(ncursesw5-config --libdir) $$(ncursesw5-config --libs)
+else
+	CFLAGS ?= -Wall -g $((pkg-config --cflags ncurses))
+	LDFLAGS ?= $$(pkg-config --libs ncurses))
 endif
 
 tty-clock : ${SRC}
