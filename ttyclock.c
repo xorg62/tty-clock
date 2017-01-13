@@ -182,11 +182,11 @@ update_hour(void)
      int ihour;
      char tmpstr[128];
 
+     ttyclock->lt = time(NULL);
      ttyclock->tm = localtime(&(ttyclock->lt));
      if(ttyclock->option.utc) {
          ttyclock->tm = gmtime(&(ttyclock->lt));
      }
-     ttyclock->lt = time(NULL);
 
      ihour = ttyclock->tm->tm_hour;
 
