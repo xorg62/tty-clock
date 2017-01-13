@@ -19,9 +19,8 @@ endif
 
 tty-clock : ${SRC}
 
-	@echo "build ${SRC}"
-	@echo "CC ${CFLAGS} ${LDFLAGS} ${SRC}"
-	@${CC} ${CFLAGS} ${SRC} -o ${BIN} ${LDFLAGS}
+	@echo "building ${SRC}"
+	${CC} ${CFLAGS} ${SRC} -o ${BIN} ${LDFLAGS}
 
 install : ${BIN}
 
