@@ -292,6 +292,26 @@ draw_clock(void)
           draw_number(ttyclock->date.second[1], 1, 46);
      }
 
+     /* Blink with chaniging color every hour */
+     if(ttyclock->option.colorblink){
+          static int old_color = -1;
+	  int blink_times = ttyclock->option.colorblink;
+
+	  if(ttyclock->tm->tm_min == 0 && ttyclock->tm->tm_sec%2 == 0 && ttyclock->tm->tm_sec < blink_times * 2){
+	       int new_color = (ttyclock->option.color + 1) % 8;
+
+	       old_color = ttyclock->option.color;
+	       ttyclock->option.color = new_color;
+	       init_pair(1, ttyclock->bg, new_color);
+	       init_pair(2, new_color, ttyclock->bg);
+	  }
+	  else if(ttyclock->tm->tm_min == 0 && ttyclock->tm->tm_sec%2 == 1 && ttyclock->tm->tm_sec < blink_times * 2 && old_color != -1){
+	       ttyclock->option.color = old_color;
+	       init_pair(1, ttyclock->bg, old_color);
+	       init_pair(2, old_color, ttyclock->bg);
+	  }
+     }
+
      return;
 }
 
@@ -559,10 +579,11 @@ main(int argc, char **argv)
      ttyclock->option.delay = 1; /* 1FPS */
      ttyclock->option.nsdelay = 0; /* -0FPS */
      ttyclock->option.blink = False;
+     ttyclock->option.colorblink = 0;
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:l:")) != -1)
      {
           switch(c)
           {
@@ -587,7 +608,8 @@ main(int argc, char **argv)
                       "    -D            Hide date                                      \n"
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
+		      "    -l n          Blink with changing color n times every hour.\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
@@ -661,6 +683,9 @@ main(int argc, char **argv)
 	       break;
 	  case 'n':
 	       ttyclock->option.noquit = True;
+	       break;
+	  case 'l':
+	       ttyclock->option.colorblink = atoi(optarg);
 	       break;
           }
      }
