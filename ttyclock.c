@@ -118,7 +118,7 @@ init(void)
                                 ttyclock->geo.x + ttyclock->geo.h - 1,
                                 ttyclock->geo.y + (ttyclock->geo.w / 2) -
                                 (strlen(ttyclock->date.datestr) / 2) - 1);
-     if(ttyclock->option.box) {
+     if(ttyclock->option.box && ttyclock->option.date) {
           box(ttyclock->datewin, 0, 0);
      }
      clearok(ttyclock->datewin, True);
