@@ -67,6 +67,7 @@ init(void)
      init_pair(0, ttyclock->bg, ttyclock->bg);
      init_pair(1, ttyclock->bg, ttyclock->option.color);
      init_pair(2, ttyclock->option.color, ttyclock->bg);
+     init_pair(3, ttyclock->option.boxcolor, ttyclock->bg);
 //     init_pair(0, ttyclock->bg, ttyclock->bg);
 //     init_pair(1, ttyclock->bg, ttyclock->option.color);
 //     init_pair(2, ttyclock->option.color, ttyclock->bg);
@@ -105,7 +106,9 @@ init(void)
                                  ttyclock->geo.x,
                                  ttyclock->geo.y);
      if(ttyclock->option.box) {
+           wattron(ttyclock->framewin,COLOR_PAIR(3));
            box(ttyclock->framewin, 0, 0);
+           wattroff(ttyclock->framewin,COLOR_PAIR(3));
      }
 
      if (ttyclock->option.bold)
@@ -119,7 +122,9 @@ init(void)
                                 ttyclock->geo.y + (ttyclock->geo.w / 2) -
                                 (strlen(ttyclock->date.datestr) / 2) - 1);
      if(ttyclock->option.box && ttyclock->option.date) {
+          wattron(ttyclock->datewin,COLOR_PAIR(3));
           box(ttyclock->datewin, 0, 0);
+          wattroff(ttyclock->datewin,COLOR_PAIR(3));
      }
      clearok(ttyclock->datewin, True);
 
@@ -326,13 +331,17 @@ clock_move(int x, int y, int w, int h)
           wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
 
           if (ttyclock->option.box) {
+            wattron(ttyclock->datewin,COLOR_PAIR(3));
             box(ttyclock->datewin,  0, 0);
+            wattroff(ttyclock->datewin,COLOR_PAIR(3));
           }
      }
 
      if (ttyclock->option.box)
      {
+        wattron(ttyclock->framewin,COLOR_PAIR(3));
         box(ttyclock->framewin, 0, 0);
+        wattroff(ttyclock->framewin,COLOR_PAIR(3));
      }
 
      wrefresh(ttyclock->framewin);
@@ -555,6 +564,8 @@ main(int argc, char **argv)
      strncpy(ttyclock->option.format, "%F", 100);
      /* Default color */
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
+     /* Default box color */
+     ttyclock->option.boxcolor = -1;
      /* Default delay */
      ttyclock->option.delay = 1; /* 1FPS */
      ttyclock->option.nsdelay = 0; /* -0FPS */
@@ -562,7 +573,7 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:X:f:d:T:a:")) != -1)
      {
           switch(c)
           {
@@ -642,6 +653,10 @@ main(int argc, char **argv)
                 break;
           case 'x':
                ttyclock->option.box = True;
+               break;
+          case 'X':
+               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
+                    ttyclock->option.boxcolor = atoi(optarg);
                break;
 	  case 'T': {
 	       struct stat sbuf;
