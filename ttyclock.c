@@ -37,19 +37,19 @@ void
 init(void)
 {
      struct sigaction sig;
-     ttyclock->bg = COLOR_BLACK;
+     ttyclock.bg = COLOR_BLACK;
 
      /* Init ncurses */
-     if (ttyclock->tty) {
-         FILE *ftty = fopen(ttyclock->tty, "r+");
+     if (ttyclock.tty) {
+         FILE *ftty = fopen(ttyclock.tty, "r+");
          if (!ftty) {
              fprintf(stderr, "tty-clock: error: '%s' couldn't be opened: %s.\n",
-                     ttyclock->tty, strerror(errno));
+                     ttyclock.tty, strerror(errno));
              exit(EXIT_FAILURE);
          }
-         ttyclock->ttyscr = newterm(NULL, ftty, ftty);
-         assert(ttyclock->ttyscr != NULL);
-         set_term(ttyclock->ttyscr);
+         ttyclock.ttyscr = newterm(NULL, ftty, ftty);
+         assert(ttyclock.ttyscr != NULL);
+         set_term(ttyclock.ttyscr);
      } else
          initscr();
 
@@ -62,15 +62,15 @@ init(void)
 
      /* Init default terminal color */
      if(use_default_colors() == OK)
-          ttyclock->bg = -1;
+          ttyclock.bg = -1;
 
      /* Init color pair */
-     init_pair(0, ttyclock->bg, ttyclock->bg);
-     init_pair(1, ttyclock->bg, ttyclock->option.color);
-     init_pair(2, ttyclock->option.color, ttyclock->bg);
-//     init_pair(0, ttyclock->bg, ttyclock->bg);
-//     init_pair(1, ttyclock->bg, ttyclock->option.color);
-//     init_pair(2, ttyclock->option.color, ttyclock->bg);
+     init_pair(0, ttyclock.bg, ttyclock.bg);
+     init_pair(1, ttyclock.bg, ttyclock.option.color);
+     init_pair(2, ttyclock.option.color, ttyclock.bg);
+//     init_pair(0, ttyclock.bg, ttyclock.bg);
+//     init_pair(1, ttyclock.bg, ttyclock.option.color);
+//     init_pair(2, ttyclock.option.color, ttyclock.bg);
      refresh();
 
      /* Init signal handler */
@@ -82,58 +82,58 @@ init(void)
      sigaction(SIGSEGV,  &sig, NULL);
 
      /* Init global struct */
-     ttyclock->running = True;
-     if(!ttyclock->geo.x)
-          ttyclock->geo.x = 0;
-     if(!ttyclock->geo.y)
-          ttyclock->geo.y = 0;
-     if(!ttyclock->geo.a)
-          ttyclock->geo.a = 1;
-     if(!ttyclock->geo.b)
-          ttyclock->geo.b = 1;
-     ttyclock->geo.w = (ttyclock->option.second) ? SECFRAMEW : NORMFRAMEW;
-     ttyclock->geo.h = 7;
-     ttyclock->tm = localtime(&(ttyclock->lt));
-     if(ttyclock->option.utc) {
-         ttyclock->tm = gmtime(&(ttyclock->lt));
+     ttyclock.running = True;
+     if(!ttyclock.geo.x)
+          ttyclock.geo.x = 0;
+     if(!ttyclock.geo.y)
+          ttyclock.geo.y = 0;
+     if(!ttyclock.geo.a)
+          ttyclock.geo.a = 1;
+     if(!ttyclock.geo.b)
+          ttyclock.geo.b = 1;
+     ttyclock.geo.w = (ttyclock.option.second) ? SECFRAMEW : NORMFRAMEW;
+     ttyclock.geo.h = 7;
+     ttyclock.tm = localtime(&(ttyclock.lt));
+     if(ttyclock.option.utc) {
+         ttyclock.tm = gmtime(&(ttyclock.lt));
      }
-     ttyclock->lt = time(NULL);
+     ttyclock.lt = time(NULL);
      update_hour();
 
      /* Create clock win */
-     ttyclock->framewin = newwin(ttyclock->geo.h,
-                                 ttyclock->geo.w,
-                                 ttyclock->geo.x,
-                                 ttyclock->geo.y);
-     if(ttyclock->option.box) {
-           box(ttyclock->framewin, 0, 0);
+     ttyclock.framewin = newwin(ttyclock.geo.h,
+                                 ttyclock.geo.w,
+                                 ttyclock.geo.x,
+                                 ttyclock.geo.y);
+     if(ttyclock.option.box) {
+           box(ttyclock.framewin, 0, 0);
      }
 
-     if (ttyclock->option.bold)
+     if (ttyclock.option.bold)
      {
-          wattron(ttyclock->framewin, A_BLINK);
+          wattron(ttyclock.framewin, A_BLINK);
      }
 
      /* Create the date win */
-     ttyclock->datewin = newwin(DATEWINH, strlen(ttyclock->date.datestr) + 2,
-                                ttyclock->geo.x + ttyclock->geo.h - 1,
-                                ttyclock->geo.y + (ttyclock->geo.w / 2) -
-                                (strlen(ttyclock->date.datestr) / 2) - 1);
-     if(ttyclock->option.box && ttyclock->option.date) {
-          box(ttyclock->datewin, 0, 0);
+     ttyclock.datewin = newwin(DATEWINH, strlen(ttyclock.date.datestr) + 2,
+                                ttyclock.geo.x + ttyclock.geo.h - 1,
+                                ttyclock.geo.y + (ttyclock.geo.w / 2) -
+                                (strlen(ttyclock.date.datestr) / 2) - 1);
+     if(ttyclock.option.box && ttyclock.option.date) {
+          box(ttyclock.datewin, 0, 0);
      }
-     clearok(ttyclock->datewin, True);
+     clearok(ttyclock.datewin, True);
 
-     set_center(ttyclock->option.center);
+     set_center(ttyclock.option.center);
 
      nodelay(stdscr, True);
 
-     if (ttyclock->option.date)
+     if (ttyclock.option.date)
      {
-          wrefresh(ttyclock->datewin);
+          wrefresh(ttyclock.datewin);
      }
 
-     wrefresh(ttyclock->framewin);
+     wrefresh(ttyclock.framewin);
 
      return;
 }
@@ -150,7 +150,7 @@ signal_handler(int signal)
           /* Interruption signal */
      case SIGINT:
      case SIGTERM:
-          ttyclock->running = False;
+          ttyclock.running = False;
           /* Segmentation fault signal */
           break;
      case SIGSEGV:
@@ -166,15 +166,10 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
-    if (ttyclock->ttyscr)
-        delscreen(ttyclock->ttyscr);
+    if (ttyclock.ttyscr)
+        delscreen(ttyclock.ttyscr);
 
-    if (ttyclock && ttyclock->tty)
-        free(ttyclock->tty);
-    if (ttyclock && ttyclock->option.format)
-        free(ttyclock->option.format);
-    if (ttyclock)
-        free(ttyclock);
+    free(ttyclock.tty);
 }
 
 void
@@ -183,41 +178,41 @@ update_hour(void)
      int ihour;
      char tmpstr[128];
 
-     ttyclock->lt = time(NULL);
-     ttyclock->tm = localtime(&(ttyclock->lt));
-     if(ttyclock->option.utc) {
-         ttyclock->tm = gmtime(&(ttyclock->lt));
+     ttyclock.lt = time(NULL);
+     ttyclock.tm = localtime(&(ttyclock.lt));
+     if(ttyclock.option.utc) {
+         ttyclock.tm = gmtime(&(ttyclock.lt));
      }
 
-     ihour = ttyclock->tm->tm_hour;
+     ihour = ttyclock.tm->tm_hour;
 
-     if(ttyclock->option.twelve)
-          ttyclock->meridiem = ((ihour >= 12) ? PMSIGN : AMSIGN);
+     if(ttyclock.option.twelve)
+          ttyclock.meridiem = ((ihour > 12) ? PMSIGN : AMSIGN);
      else
-          ttyclock->meridiem = "\0";
+          ttyclock.meridiem = "\0";
 
      /* Manage hour for twelve mode */
-     ihour = ((ttyclock->option.twelve && ihour > 12)  ? (ihour - 12) : ihour);
-     ihour = ((ttyclock->option.twelve && !ihour) ? 12 : ihour);
+     ihour = ((ttyclock.option.twelve && ihour > 12)  ? (ihour - 12) : ihour);
+     ihour = ((ttyclock.option.twelve && !ihour) ? 12 : ihour);
 
      /* Set hour */
-     ttyclock->date.hour[0] = ihour / 10;
-     ttyclock->date.hour[1] = ihour % 10;
+     ttyclock.date.hour[0] = ihour / 10;
+     ttyclock.date.hour[1] = ihour % 10;
 
      /* Set minutes */
-     ttyclock->date.minute[0] = ttyclock->tm->tm_min / 10;
-     ttyclock->date.minute[1] = ttyclock->tm->tm_min % 10;
+     ttyclock.date.minute[0] = ttyclock.tm->tm_min / 10;
+     ttyclock.date.minute[1] = ttyclock.tm->tm_min % 10;
 
      /* Set date string */
      strftime(tmpstr,
               sizeof(tmpstr),
-              ttyclock->option.format,
-              ttyclock->tm);
-     sprintf(ttyclock->date.datestr, "%s%s", tmpstr, ttyclock->meridiem);
+              ttyclock.option.format,
+              ttyclock.tm);
+     sprintf(ttyclock.date.datestr, "%s%s", tmpstr, ttyclock.meridiem);
 
      /* Set seconds */
-     ttyclock->date.second[0] = ttyclock->tm->tm_sec / 10;
-     ttyclock->date.second[1] = ttyclock->tm->tm_sec % 10;
+     ttyclock.date.second[0] = ttyclock.tm->tm_sec / 10;
+     ttyclock.date.second[1] = ttyclock.tm->tm_sec % 10;
 
      return;
 }
@@ -235,15 +230,15 @@ draw_number(int n, int x, int y)
                ++x;
           }
 
-          if (ttyclock->option.bold)
-               wattron(ttyclock->framewin, A_BLINK);
+          if (ttyclock.option.bold)
+               wattron(ttyclock.framewin, A_BLINK);
           else
-               wattroff(ttyclock->framewin, A_BLINK);
+               wattroff(ttyclock.framewin, A_BLINK);
 
-          wbkgdset(ttyclock->framewin, COLOR_PAIR(number[n][i/2]));
-          mvwaddch(ttyclock->framewin, x, sy, ' ');
+          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i/2]));
+          mvwaddch(ttyclock.framewin, x, sy, ' ');
      }
-     wrefresh(ttyclock->framewin);
+     wrefresh(ttyclock.framewin);
 
      return;
 }
@@ -252,45 +247,45 @@ void
 draw_clock(void)
 {
      /* Draw hour numbers */
-     draw_number(ttyclock->date.hour[0], 1, 1);
-     draw_number(ttyclock->date.hour[1], 1, 8);
+     draw_number(ttyclock.date.hour[0], 1, 1);
+     draw_number(ttyclock.date.hour[1], 1, 8);
      chtype dotcolor = COLOR_PAIR(1);
-     if (ttyclock->option.blink && time(NULL) % 2 == 0)
+     if (ttyclock.option.blink && time(NULL) % 2 == 0)
           dotcolor = COLOR_PAIR(2);
 
      /* 2 dot for number separation */
-     wbkgdset(ttyclock->framewin, dotcolor);
-     mvwaddstr(ttyclock->framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock->framewin, 4, 16, "  ");
+     wbkgdset(ttyclock.framewin, dotcolor);
+     mvwaddstr(ttyclock.framewin, 2, 16, "  ");
+     mvwaddstr(ttyclock.framewin, 4, 16, "  ");
 
      /* Draw minute numbers */
-     draw_number(ttyclock->date.minute[0], 1, 20);
-     draw_number(ttyclock->date.minute[1], 1, 27);
+     draw_number(ttyclock.date.minute[0], 1, 20);
+     draw_number(ttyclock.date.minute[1], 1, 27);
 
      /* Draw the date */
-     if (ttyclock->option.bold)
-          wattron(ttyclock->datewin, A_BOLD);
+     if (ttyclock.option.bold)
+          wattron(ttyclock.datewin, A_BOLD);
      else
-          wattroff(ttyclock->datewin, A_BOLD);
+          wattroff(ttyclock.datewin, A_BOLD);
 
-     if (ttyclock->option.date)
+     if (ttyclock.option.date)
      {
-          wbkgdset(ttyclock->datewin, (COLOR_PAIR(2)));
-          mvwprintw(ttyclock->datewin, (DATEWINH / 2), 1, ttyclock->date.datestr);
-          wrefresh(ttyclock->datewin);
+          wbkgdset(ttyclock.datewin, (COLOR_PAIR(2)));
+          mvwprintw(ttyclock.datewin, (DATEWINH / 2), 1, ttyclock.date.datestr);
+          wrefresh(ttyclock.datewin);
      }
 
      /* Draw second if the option is enable */
-     if(ttyclock->option.second)
+     if(ttyclock.option.second)
      {
           /* Again 2 dot for number separation */
-          wbkgdset(ttyclock->framewin, dotcolor);
-          mvwaddstr(ttyclock->framewin, 2, NORMFRAMEW, "  ");
-          mvwaddstr(ttyclock->framewin, 4, NORMFRAMEW, "  ");
+          wbkgdset(ttyclock.framewin, dotcolor);
+          mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
+          mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
 
           /* Draw second numbers */
-          draw_number(ttyclock->date.second[0], 1, 39);
-          draw_number(ttyclock->date.second[1], 1, 46);
+          draw_number(ttyclock.date.second[0], 1, 39);
+          draw_number(ttyclock.date.second[1], 1, 46);
      }
 
      return;
@@ -301,43 +296,43 @@ clock_move(int x, int y, int w, int h)
 {
 
      /* Erase border for a clean move */
-     wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
-     wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-     werase(ttyclock->framewin);
-     wrefresh(ttyclock->framewin);
+     wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
+     wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+     werase(ttyclock.framewin);
+     wrefresh(ttyclock.framewin);
 
-     if (ttyclock->option.date)
+     if (ttyclock.option.date)
      {
-          wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
-          wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-          werase(ttyclock->datewin);
-          wrefresh(ttyclock->datewin);
+          wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
+          wborder(ttyclock.datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+          werase(ttyclock.datewin);
+          wrefresh(ttyclock.datewin);
      }
 
      /* Frame win move */
-     mvwin(ttyclock->framewin, (ttyclock->geo.x = x), (ttyclock->geo.y = y));
-     wresize(ttyclock->framewin, (ttyclock->geo.h = h), (ttyclock->geo.w = w));
+     mvwin(ttyclock.framewin, (ttyclock.geo.x = x), (ttyclock.geo.y = y));
+     wresize(ttyclock.framewin, (ttyclock.geo.h = h), (ttyclock.geo.w = w));
 
      /* Date win move */
-     if (ttyclock->option.date)
+     if (ttyclock.option.date)
      {
-          mvwin(ttyclock->datewin,
-                ttyclock->geo.x + ttyclock->geo.h - 1,
-                ttyclock->geo.y + (ttyclock->geo.w / 2) - (strlen(ttyclock->date.datestr) / 2) - 1);
-          wresize(ttyclock->datewin, DATEWINH, strlen(ttyclock->date.datestr) + 2);
+          mvwin(ttyclock.datewin,
+                ttyclock.geo.x + ttyclock.geo.h - 1,
+                ttyclock.geo.y + (ttyclock.geo.w / 2) - (strlen(ttyclock.date.datestr) / 2) - 1);
+          wresize(ttyclock.datewin, DATEWINH, strlen(ttyclock.date.datestr) + 2);
 
-          if (ttyclock->option.box) {
-            box(ttyclock->datewin,  0, 0);
+          if (ttyclock.option.box) {
+            box(ttyclock.datewin,  0, 0);
           }
      }
 
-     if (ttyclock->option.box)
+     if (ttyclock.option.box)
      {
-        box(ttyclock->framewin, 0, 0);
+        box(ttyclock.framewin, 0, 0);
      }
 
-     wrefresh(ttyclock->framewin);
-     wrefresh(ttyclock->datewin);
+     wrefresh(ttyclock.framewin);
+     wrefresh(ttyclock.datewin); 
      return;
 }
 
@@ -345,22 +340,22 @@ clock_move(int x, int y, int w, int h)
 void
 clock_rebound(void)
 {
-     if(!ttyclock->option.rebound)
+     if(!ttyclock.option.rebound)
           return;
 
-     if(ttyclock->geo.x < 1)
-          ttyclock->geo.a = 1;
-     if(ttyclock->geo.x > (LINES - ttyclock->geo.h - DATEWINH))
-          ttyclock->geo.a = -1;
-     if(ttyclock->geo.y < 1)
-          ttyclock->geo.b = 1;
-     if(ttyclock->geo.y > (COLS - ttyclock->geo.w - 1))
-          ttyclock->geo.b = -1;
+     if(ttyclock.geo.x < 1)
+          ttyclock.geo.a = 1;
+     if(ttyclock.geo.x > (LINES - ttyclock.geo.h - DATEWINH))
+          ttyclock.geo.a = -1;
+     if(ttyclock.geo.y < 1)
+          ttyclock.geo.b = 1;
+     if(ttyclock.geo.y > (COLS - ttyclock.geo.w - 1))
+          ttyclock.geo.b = -1;
 
-     clock_move(ttyclock->geo.x + ttyclock->geo.a,
-                ttyclock->geo.y + ttyclock->geo.b,
-                ttyclock->geo.w,
-                ttyclock->geo.h);
+     clock_move(ttyclock.geo.x + ttyclock.geo.a,
+                ttyclock.geo.y + ttyclock.geo.b,
+                ttyclock.geo.w,
+                ttyclock.geo.h);
 
      return;
 }
@@ -368,14 +363,14 @@ clock_rebound(void)
 void
 set_second(void)
 {
-     int new_w = (((ttyclock->option.second = !ttyclock->option.second)) ? SECFRAMEW : NORMFRAMEW);
+     int new_w = (((ttyclock.option.second = !ttyclock.option.second)) ? SECFRAMEW : NORMFRAMEW);
      int y_adj;
 
-     for(y_adj = 0; (ttyclock->geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
+     for(y_adj = 0; (ttyclock.geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
 
-     clock_move(ttyclock->geo.x, (ttyclock->geo.y - y_adj), new_w, ttyclock->geo.h);
+     clock_move(ttyclock.geo.x, (ttyclock.geo.y - y_adj), new_w, ttyclock.geo.h);
 
-     set_center(ttyclock->option.center);
+     set_center(ttyclock.option.center);
 
      return;
 }
@@ -383,14 +378,14 @@ set_second(void)
 void
 set_center(Bool b)
 {
-     if((ttyclock->option.center = b))
+     if((ttyclock.option.center = b))
      {
-          ttyclock->option.rebound = False;
+          ttyclock.option.rebound = False;
 
-          clock_move((LINES / 2 - (ttyclock->geo.h / 2)),
-                     (COLS  / 2 - (ttyclock->geo.w / 2)),
-                     ttyclock->geo.w,
-                     ttyclock->geo.h);
+          clock_move((LINES / 2 - (ttyclock.geo.h / 2)),
+                     (COLS  / 2 - (ttyclock.geo.w / 2)),
+                     ttyclock.geo.w,
+                     ttyclock.geo.h);
      }
 
      return;
@@ -399,24 +394,24 @@ set_center(Bool b)
 void
 set_box(Bool b)
 {
-     ttyclock->option.box = b;
+     ttyclock.option.box = b;
 
-     wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
-     wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
+     wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
+     wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
 
-     if(ttyclock->option.box) {
-         wbkgdset(ttyclock->framewin, COLOR_PAIR(0));
-         wbkgdset(ttyclock->datewin, COLOR_PAIR(0));
-         box(ttyclock->framewin, 0, 0);
-         box(ttyclock->datewin,  0, 0);
+     if(ttyclock.option.box) {
+         wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
+         wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
+         box(ttyclock.framewin, 0, 0);
+         box(ttyclock.datewin,  0, 0);
      }
      else {
-         wborder(ttyclock->framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-         wborder(ttyclock->datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+         wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+         wborder(ttyclock.datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
      }
 
-     wrefresh(ttyclock->datewin);
-     wrefresh(ttyclock->framewin);
+     wrefresh(ttyclock.datewin);
+     wrefresh(ttyclock.framewin);
 }
 
 void
@@ -424,14 +419,14 @@ key_event(void)
 {
      int i, c;
 
-     struct timespec length = { ttyclock->option.delay, ttyclock->option.nsdelay };
-
-     if (ttyclock->option.screensaver)
+     struct timespec length = { ttyclock.option.delay, ttyclock.option.nsdelay };
+     
+     if (ttyclock.option.screensaver)
      {
           c = wgetch(stdscr);
-          if(c != ERR && ttyclock->option.noquit == False)
+          if(c != ERR && ttyclock.option.noquit == False)
           {
-               ttyclock->running = False;
+               ttyclock.running = False;
           }
           else
           {
@@ -439,9 +434,9 @@ key_event(void)
                for(i = 0; i < 8; ++i)
                     if(c == (i + '0'))
                     {
-                         ttyclock->option.color = i;
-                         init_pair(1, ttyclock->bg, i);
-                         init_pair(2, i, ttyclock->bg);
+                         ttyclock.option.color = i;
+                         init_pair(1, ttyclock.bg, i);
+                         init_pair(2, i, ttyclock.bg);
                     }
           }
           return;
@@ -453,39 +448,39 @@ key_event(void)
      case KEY_UP:
      case 'k':
      case 'K':
-          if(ttyclock->geo.x >= 1
-             && !ttyclock->option.center)
-               clock_move(ttyclock->geo.x - 1, ttyclock->geo.y, ttyclock->geo.w, ttyclock->geo.h);
+          if(ttyclock.geo.x >= 1
+             && !ttyclock.option.center)
+               clock_move(ttyclock.geo.x - 1, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
           break;
 
      case KEY_DOWN:
      case 'j':
      case 'J':
-          if(ttyclock->geo.x <= (LINES - ttyclock->geo.h - DATEWINH)
-             && !ttyclock->option.center)
-               clock_move(ttyclock->geo.x + 1, ttyclock->geo.y, ttyclock->geo.w, ttyclock->geo.h);
+          if(ttyclock.geo.x <= (LINES - ttyclock.geo.h - DATEWINH)
+             && !ttyclock.option.center)
+               clock_move(ttyclock.geo.x + 1, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
           break;
 
      case KEY_LEFT:
      case 'h':
      case 'H':
-          if(ttyclock->geo.y >= 1
-             && !ttyclock->option.center)
-               clock_move(ttyclock->geo.x, ttyclock->geo.y - 1, ttyclock->geo.w, ttyclock->geo.h);
+          if(ttyclock.geo.y >= 1
+             && !ttyclock.option.center)
+               clock_move(ttyclock.geo.x, ttyclock.geo.y - 1, ttyclock.geo.w, ttyclock.geo.h);
           break;
 
      case KEY_RIGHT:
      case 'l':
      case 'L':
-          if(ttyclock->geo.y <= (COLS - ttyclock->geo.w - 1)
-             && !ttyclock->option.center)
-               clock_move(ttyclock->geo.x, ttyclock->geo.y + 1, ttyclock->geo.w, ttyclock->geo.h);
+          if(ttyclock.geo.y <= (COLS - ttyclock.geo.w - 1)
+             && !ttyclock.option.center)
+               clock_move(ttyclock.geo.x, ttyclock.geo.y + 1, ttyclock.geo.w, ttyclock.geo.h);
           break;
 
      case 'q':
      case 'Q':
-          if (ttyclock->option.noquit == False)
-          ttyclock->running = False;
+          if (ttyclock.option.noquit == False)
+               ttyclock.running = False;
           break;
 
      case 's':
@@ -495,32 +490,32 @@ key_event(void)
 
      case 't':
      case 'T':
-          ttyclock->option.twelve = !ttyclock->option.twelve;
-          /* Set the new ttyclock->date.datestr to resize date window */
+          ttyclock.option.twelve = !ttyclock.option.twelve;
+          /* Set the new ttyclock.date.datestr to resize date window */
           update_hour();
-          clock_move(ttyclock->geo.x, ttyclock->geo.y, ttyclock->geo.w, ttyclock->geo.h);
+          clock_move(ttyclock.geo.x, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
           break;
 
      case 'c':
      case 'C':
-          set_center(!ttyclock->option.center);
+          set_center(!ttyclock.option.center);
           break;
 
      case 'b':
      case 'B':
-          ttyclock->option.bold = !ttyclock->option.bold;
+          ttyclock.option.bold = !ttyclock.option.bold;
           break;
 
      case 'r':
      case 'R':
-          ttyclock->option.rebound = !ttyclock->option.rebound;
-          if(ttyclock->option.rebound && ttyclock->option.center)
-               ttyclock->option.center = False;
+          ttyclock.option.rebound = !ttyclock.option.rebound;
+          if(ttyclock.option.rebound && ttyclock.option.center)
+               ttyclock.option.center = False;
           break;
 
      case 'x':
      case 'X':
-          set_box(!ttyclock->option.box);
+          set_box(!ttyclock.option.box);
           break;
 
      default:
@@ -528,9 +523,9 @@ key_event(void)
           for(i = 0; i < 8; ++i)
                if(c == (i + '0'))
                {
-                    ttyclock->option.color = i;
-                    init_pair(1, ttyclock->bg, i);
-                    init_pair(2, i, ttyclock->bg);
+                    ttyclock.option.color = i;
+                    init_pair(1, ttyclock.bg, i);
+                    init_pair(2, i, ttyclock.bg);
                }
           break;
      }
@@ -544,22 +539,18 @@ main(int argc, char **argv)
      int c;
 
      /* Alloc ttyclock */
-     ttyclock = malloc(sizeof(ttyclock_t));
-     assert(ttyclock != NULL);
-     memset(ttyclock, 0, sizeof(ttyclock_t));
+     memset(&ttyclock, 0, sizeof(ttyclock_t));
 
-     ttyclock->option.date = True;
+     ttyclock.option.date = True;
 
-     /* Date format */
-     ttyclock->option.format = malloc(sizeof(char) * 100);
      /* Default date format */
-     strncpy(ttyclock->option.format, "%F", 100);
+     strncpy(ttyclock.option.format, "%F", sizeof (ttyclock.option.format));
      /* Default color */
-     ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
+     ttyclock.option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
      /* Default delay */
-     ttyclock->option.delay = 1; /* 1FPS */
-     ttyclock->option.nsdelay = 0; /* -0FPS */
-     ttyclock->option.blink = False;
+     ttyclock.option.delay = 1; /* 1FPS */
+     ttyclock.option.nsdelay = 0; /* -0FPS */
+     ttyclock.option.blink = False;
 
      atexit(cleanup);
 
@@ -596,79 +587,78 @@ main(int argc, char **argv)
                exit(EXIT_SUCCESS);
                break;
           case 'u':
-               ttyclock->option.utc = True;
+               ttyclock.option.utc = True;
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
                exit(EXIT_SUCCESS);
                break;
           case 's':
-               ttyclock->option.second = True;
+               ttyclock.option.second = True;
                break;
           case 'S':
-               ttyclock->option.screensaver = True;
+               ttyclock.option.screensaver = True;
                break;
           case 'c':
-               ttyclock->option.center = True;
+               ttyclock.option.center = True;
                break;
           case 'b':
-               ttyclock->option.bold = True;
+               ttyclock.option.bold = True;
                break;
           case 'C':
                if(atoi(optarg) >= 0 && atoi(optarg) < 8)
-                    ttyclock->option.color = atoi(optarg);
+                    ttyclock.option.color = atoi(optarg);
                break;
           case 't':
-               ttyclock->option.twelve = True;
+               ttyclock.option.twelve = True;
                break;
           case 'r':
-               ttyclock->option.rebound = True;
+               ttyclock.option.rebound = True;
                break;
           case 'f':
-               strncpy(ttyclock->option.format, optarg, 100);
+               strncpy(ttyclock.option.format, optarg, 100);
                break;
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 100)
-                    ttyclock->option.delay = atol(optarg);
+                    ttyclock.option.delay = atol(optarg);
                break;
           case 'D':
-               ttyclock->option.date = False;
+               ttyclock.option.date = False;
                break;
           case 'B':
-               ttyclock->option.blink = True;
+               ttyclock.option.blink = True;
                break;
           case 'a':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
-                    ttyclock->option.nsdelay = atol(optarg);
+                    ttyclock.option.nsdelay = atol(optarg);
                 break;
           case 'x':
-               ttyclock->option.box = True;
+               ttyclock.option.box = True;
                break;
-      case 'T': {
-           struct stat sbuf;
-           if (stat(optarg, &sbuf) == -1) {
-               fprintf(stderr, "tty-clock: error: couldn't stat '%s': %s.\n",
-                       optarg, strerror(errno));
-               exit(EXIT_FAILURE);
-           } else if (!S_ISCHR(sbuf.st_mode)) {
-               fprintf(stderr, "tty-clock: error: '%s' doesn't appear to be a character device.\n",
-                       optarg);
-               exit(EXIT_FAILURE);
-           } else {
-                   if (ttyclock->tty)
-                free(ttyclock->tty);
-            ttyclock->tty = strdup(optarg);
-           }}
-           break;
-      case 'n':
-           ttyclock->option.noquit = True;
-           break;
+          case 'T': {
+               struct stat sbuf;
+               if (stat(optarg, &sbuf) == -1) {
+                    fprintf(stderr, "tty-clock: error: couldn't stat '%s': %s.\n",
+                              optarg, strerror(errno));
+                    exit(EXIT_FAILURE);
+               } else if (!S_ISCHR(sbuf.st_mode)) {
+                    fprintf(stderr, "tty-clock: error: '%s' doesn't appear to be a character device.\n",
+                              optarg);
+                    exit(EXIT_FAILURE);
+               } else {
+               free(ttyclock.tty);
+                  ttyclock.tty = strdup(optarg);
+               }}
+               break;
+          case 'n':
+               ttyclock.option.noquit = True;
+               break;
           }
      }
 
      init();
      attron(A_BLINK);
-     while(ttyclock->running)
+     while(ttyclock.running)
      {
           clock_rebound();
           update_hour();

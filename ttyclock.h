@@ -78,7 +78,7 @@ typedef struct
           Bool utc;
           Bool box;
           Bool noquit;
-          char *format;
+          char format[100];
           int color;
           Bool bold;
           long delay;
@@ -127,7 +127,7 @@ void set_box(Bool b);
 void key_event(void);
 
 /* Global variable */
-ttyclock_t *ttyclock;
+ttyclock_t ttyclock;
 
 /* Number matrix */
 const Bool number[][15] =
