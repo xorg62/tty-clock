@@ -1,6 +1,7 @@
 /*
  *      TTY-CLOCK headers file.
- *      Copyright © 2008 Martin Duquesnoy <xorg62@gmail.com>
+ *      Copyright © 2009-2013 tty-clock contributors
+ *      Copyright © 2008-2009 Martin Duquesnoy <xorg62@gmail.com>
  *      All rights reserved.
  *
  *      Redistribution and use in source and binary forms, with or without

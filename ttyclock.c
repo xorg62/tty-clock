@@ -1,5 +1,6 @@
 /*
  *      TTY-CLOCK Main file.
+ *      Copyright © 2009-2018 tty-clock contributors
  *      Copyright © 2008 Martin Duquesnoy <xorg62@gmail.com>
  *      All rights reserved.
  *
