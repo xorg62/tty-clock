@@ -77,7 +77,8 @@ typedef struct
           Bool date;
           Bool utc;
           Bool box;
-      	  Bool noquit;
+          int boxcolor;
+          Bool noquit;
           char *format;
           int color;
           Bool bold;
