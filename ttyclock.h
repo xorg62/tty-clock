@@ -73,6 +73,7 @@ typedef struct
           Bool screensaver;
           Bool twelve;
           Bool center;
+          Bool bottom;
           Bool rebound;
           Bool date;
           Bool utc;
@@ -123,6 +124,7 @@ void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
 void set_second(void);
 void set_center(Bool b);
+void set_bottom(Bool z);
 void set_box(Bool b);
 void key_event(void);
 

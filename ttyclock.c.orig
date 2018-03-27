@@ -125,7 +125,6 @@ init(void)
      clearok(ttyclock->datewin, True);
 
      set_center(ttyclock->option.center);
-     set_bottom(ttyclock->option.bottom);
 
      nodelay(stdscr, True);
 
@@ -193,7 +192,7 @@ update_hour(void)
      ihour = ttyclock->tm->tm_hour;
 
      if(ttyclock->option.twelve)
-          ttyclock->meridiem = ((ihour >= 12) ? PMSIGN : AMSIGN);
+          ttyclock->meridiem = ((ihour > 12) ? PMSIGN : AMSIGN);
      else
           ttyclock->meridiem = "\0";
 
@@ -398,24 +397,6 @@ set_center(Bool b)
 }
 
 void
-set_bottom(Bool b)
-{
-    if (b == True)
-        printf("%s", "True");
-     if((ttyclock->option.bottom = b))
-     {
-          ttyclock->option.rebound = False;
-
-          clock_move((LINES - ttyclock->geo.h - 2),
-                     (COLS - ttyclock->geo.w),
-                     ttyclock->geo.w,
-                     ttyclock->geo.h);
-     }
-
-     return;
-}
-
-void
 set_box(Bool b)
 {
      ttyclock->option.box = b;
@@ -542,11 +523,6 @@ key_event(void)
           set_box(!ttyclock->option.box);
           break;
 
-     case 'z':
-     case 'Z':
-          set_bottom(!ttyclock->option.bottom);
-          break;
-
      default:
           nanosleep(&length, NULL);
           for(i = 0; i < 8; ++i)
@@ -580,8 +556,6 @@ main(int argc, char **argv)
      strncpy(ttyclock->option.format, "%F", 100);
      /* Default color */
      ttyclock->option.color = COLOR_GREEN; /* COLOR_GREEN = 2 */
-     /* Default bottom pos */
-     ttyclock->option.bottom = False;
      /* Default delay */
      ttyclock->option.delay = 1; /* 1FPS */
      ttyclock->option.nsdelay = 0; /* -0FPS */
@@ -589,18 +563,17 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDzC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDzBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
                       "    -c            Set the clock at the center of the terminal    \n"
-                      "    -z            Set the clock at the bottom of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
@@ -637,9 +610,6 @@ main(int argc, char **argv)
                break;
           case 'c':
                ttyclock->option.center = True;
-               break;
-          case 'z':
-               ttyclock->option.bottom = True;
                break;
           case 'b':
                ttyclock->option.bold = True;
