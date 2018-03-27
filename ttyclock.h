@@ -146,5 +146,4 @@ const Bool number[][15] =
 
 #endif /* TTYCLOCK_H_INCLUDED */
 
-/* vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4
- */
+// vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4
