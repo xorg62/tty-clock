@@ -60,8 +60,8 @@ typedef struct
 {
      /* while() boolean */
      Bool running;
-    
-     /* terminal variables */ 
+
+     /* terminal variables */
      SCREEN *ttyscr;
      char *tty;
      int bg;
@@ -77,7 +77,7 @@ typedef struct
           Bool date;
           Bool utc;
           Bool box;
-      	  Bool noquit;
+          Bool noquit;
           char *format;
           int color;
           Bool bold;
@@ -145,3 +145,5 @@ const Bool number[][15] =
 };
 
 #endif /* TTYCLOCK_H_INCLUDED */
+
+// vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4

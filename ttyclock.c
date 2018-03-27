@@ -41,17 +41,17 @@ init(void)
 
      /* Init ncurses */
      if (ttyclock->tty) {
-	     FILE *ftty = fopen(ttyclock->tty, "r+");
-	     if (!ftty) {
-		     fprintf(stderr, "tty-clock: error: '%s' couldn't be opened: %s.\n",
-				     ttyclock->tty, strerror(errno));
-		     exit(EXIT_FAILURE);
-	     }
-	     ttyclock->ttyscr = newterm(NULL, ftty, ftty);
-	     assert(ttyclock->ttyscr != NULL);
-	     set_term(ttyclock->ttyscr);
+         FILE *ftty = fopen(ttyclock->tty, "r+");
+         if (!ftty) {
+             fprintf(stderr, "tty-clock: error: '%s' couldn't be opened: %s.\n",
+                     ttyclock->tty, strerror(errno));
+             exit(EXIT_FAILURE);
+         }
+         ttyclock->ttyscr = newterm(NULL, ftty, ftty);
+         assert(ttyclock->ttyscr != NULL);
+         set_term(ttyclock->ttyscr);
      } else
-	     initscr();
+         initscr();
 
      cbreak();
      noecho();
@@ -166,15 +166,15 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
-	if (ttyclock->ttyscr)
-		delscreen(ttyclock->ttyscr);
+    if (ttyclock->ttyscr)
+        delscreen(ttyclock->ttyscr);
 
-	if (ttyclock && ttyclock->tty)
-		free(ttyclock->tty);
-	if (ttyclock && ttyclock->option.format)
-		free(ttyclock->option.format);
-	if (ttyclock)
-		free(ttyclock);
+    if (ttyclock && ttyclock->tty)
+        free(ttyclock->tty);
+    if (ttyclock && ttyclock->option.format)
+        free(ttyclock->option.format);
+    if (ttyclock)
+        free(ttyclock);
 }
 
 void
@@ -337,7 +337,7 @@ clock_move(int x, int y, int w, int h)
      }
 
      wrefresh(ttyclock->framewin);
-     wrefresh(ttyclock->datewin); 
+     wrefresh(ttyclock->datewin);
      return;
 }
 
@@ -425,7 +425,7 @@ key_event(void)
      int i, c;
 
      struct timespec length = { ttyclock->option.delay, ttyclock->option.nsdelay };
-     
+
      if (ttyclock->option.screensaver)
      {
           c = wgetch(stdscr);
@@ -446,7 +446,7 @@ key_event(void)
           }
           return;
      }
-     
+
 
      switch(c = wgetch(stdscr))
      {
@@ -485,7 +485,7 @@ key_event(void)
      case 'q':
      case 'Q':
           if (ttyclock->option.noquit == False)
-		  ttyclock->running = False;
+          ttyclock->running = False;
           break;
 
      case 's':
@@ -578,10 +578,10 @@ main(int argc, char **argv)
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
                       "    -u            Use UTC time                                   \n"
-		      "    -T tty        Display the clock on the specified terminal    \n"
+              "    -T tty        Display the clock on the specified terminal    \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
-		      "    -n            Don't quit on keypress                         \n"
+              "    -n            Don't quit on keypress                         \n"
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
@@ -644,25 +644,25 @@ main(int argc, char **argv)
           case 'x':
                ttyclock->option.box = True;
                break;
-	  case 'T': {
-	       struct stat sbuf;
-	       if (stat(optarg, &sbuf) == -1) {
-		       fprintf(stderr, "tty-clock: error: couldn't stat '%s': %s.\n",
-				       optarg, strerror(errno));
-		       exit(EXIT_FAILURE);
-	       } else if (!S_ISCHR(sbuf.st_mode)) {
-		       fprintf(stderr, "tty-clock: error: '%s' doesn't appear to be a character device.\n",
-				       optarg);
-		       exit(EXIT_FAILURE);
-	       } else {
-	       		if (ttyclock->tty)
-				free(ttyclock->tty);
-			ttyclock->tty = strdup(optarg);
-	       }}
-	       break;
-	  case 'n':
-	       ttyclock->option.noquit = True;
-	       break;
+      case 'T': {
+           struct stat sbuf;
+           if (stat(optarg, &sbuf) == -1) {
+               fprintf(stderr, "tty-clock: error: couldn't stat '%s': %s.\n",
+                       optarg, strerror(errno));
+               exit(EXIT_FAILURE);
+           } else if (!S_ISCHR(sbuf.st_mode)) {
+               fprintf(stderr, "tty-clock: error: '%s' doesn't appear to be a character device.\n",
+                       optarg);
+               exit(EXIT_FAILURE);
+           } else {
+                   if (ttyclock->tty)
+                free(ttyclock->tty);
+            ttyclock->tty = strdup(optarg);
+           }}
+           break;
+      case 'n':
+           ttyclock->option.noquit = True;
+           break;
           }
      }
 
@@ -680,3 +680,5 @@ main(int argc, char **argv)
 
      return 0;
 }
+
+// vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4
