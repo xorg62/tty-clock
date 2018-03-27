@@ -682,3 +682,4 @@ main(int argc, char **argv)
 }
 
 /* vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4
+ */
