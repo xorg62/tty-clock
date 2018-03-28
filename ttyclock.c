@@ -459,7 +459,7 @@ key_event(void)
 {
      int i, c;
      int p = 0;
-     char nums[11] = {'.','!','"','#','$','%','^','&','*','(','\0'};
+     char nums[11] = {'"','!','@','#','$','%','^','&','*','(','\0'};
      wchar_t gbp = L'£';
 
      struct timespec length = { ttyclock->option.delay, ttyclock->option.nsdelay };
@@ -564,8 +564,9 @@ key_event(void)
           set_box(!ttyclock->option.box);
           break;
 
-     case '!':
      case '"':
+     case '!':
+     case '@':
      case '#':
      case '$':
      case '%':
@@ -574,6 +575,8 @@ key_event(void)
      case '*':
      case '(':
           while ( p < 9 && nums[p] != c ) p++;
+          if (c == '"')
+              p = 2;
           set_position(p);
           break;
      default:
