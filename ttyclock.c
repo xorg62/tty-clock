@@ -483,10 +483,7 @@ key_event(void)
      }
 
 
-     c = wgetch(stdscr);
-     if (c == gbp)
-         c = '#';
-     switch(c)
+     switch(c = wgetch(stdscr))
      {
      case KEY_UP:
      case 'k':
