@@ -124,7 +124,11 @@ init(void)
      }
      clearok(ttyclock->datewin, True);
 
-     set_center(ttyclock->option.center);
+     if (ttyclock->option.center)
+          set_center(ttyclock->option.center);
+     else
+        if (ttyclock->option.position)
+            set_position(ttyclock->option.position);
 
      nodelay(stdscr, True);
 
@@ -375,7 +379,10 @@ set_second(void)
 
      clock_move(ttyclock->geo.x, (ttyclock->geo.y - y_adj), new_w, ttyclock->geo.h);
 
-     set_center(ttyclock->option.center);
+     if (ttyclock->option.center)
+          set_center(ttyclock->option.center);
+     else
+        if (ttyclock->option.position)
 
      return;
 }
@@ -394,6 +401,34 @@ set_center(Bool b)
      }
 
      return;
+}
+
+void
+set_position(int p)
+{
+    int LINE, COL;
+
+    ttyclock->option.rebound = False;
+
+    if (p >= 1 && p <= 3)
+        LINE = 0;
+    if (p >= 4 && p <= 6)
+        LINE = (LINES / 2) - (ttyclock->geo.h / 2);
+    if (p >= 7 && p <= 9)
+        LINE = LINES - ttyclock->geo.h - 2;
+
+    if (p == 1 || p == 4 || p == 7)
+        COL = 0;
+    if (p == 2 || p == 5 || p == 8)
+        COL = (COLS  / 2) - (ttyclock->geo.w / 2);
+    if (p == 3 || p == 6 || p == 9)
+        COL = COLS - ttyclock->geo.w;
+
+    clock_move(LINE,
+               COL,
+               ttyclock->geo.w,
+               ttyclock->geo.h);
+
 }
 
 void
@@ -423,6 +458,9 @@ void
 key_event(void)
 {
      int i, c;
+     int p = 0;
+     char nums[11] = {'.','!','"','#','$','%','^','&','*','(','\0'};
+     wchar_t gbp = L'£';
 
      struct timespec length = { ttyclock->option.delay, ttyclock->option.nsdelay };
 
@@ -448,7 +486,10 @@ key_event(void)
      }
 
 
-     switch(c = wgetch(stdscr))
+     c = wgetch(stdscr);
+     if (c == gbp)
+         c = '#';
+     switch(c)
      {
      case KEY_UP:
      case 'k':
@@ -523,6 +564,18 @@ key_event(void)
           set_box(!ttyclock->option.box);
           break;
 
+     case '!':
+     case '"':
+     case '#':
+     case '$':
+     case '%':
+     case '^':
+     case '&':
+     case '*':
+     case '(':
+          while ( p < 9 && nums[p] != c ) p++;
+          set_position(p);
+          break;
      default:
           nanosleep(&length, NULL);
           for(i = 0; i < 8; ++i)
@@ -563,13 +616,13 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:p:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] [-p [1-9]] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -588,7 +641,8 @@ main(int argc, char **argv)
                       "    -D            Hide date                                      \n"
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
+                      "    -p [1-9]      Position of clock in terminal: 1-9 starting top-left and ending bottom-right.\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
@@ -643,6 +697,10 @@ main(int argc, char **argv)
                 break;
           case 'x':
                ttyclock->option.box = True;
+               break;
+          case 'p':
+               if(atol(optarg) > 0 && atol(optarg) < 10)
+                    ttyclock->option.position = atol(optarg);
                break;
       case 'T': {
            struct stat sbuf;
