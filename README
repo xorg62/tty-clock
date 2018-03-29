@@ -18,4 +18,8 @@ usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdel
     -B            Enable blinking colon
     -d delay      Set the delay between two redraws of the clock. Default 1s.
     -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.
-    -p [1-9]      Position of clock in terminal: 1-9 starting top-left and ending bottom-right.
+    -p [1-9]      Position of clock in terminal: 1-9 starting top-left and ending bottom-right:
+
+                  123
+                  456
+                  789

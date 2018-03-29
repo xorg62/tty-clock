@@ -624,7 +624,10 @@ main(int argc, char **argv)
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
                       "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
-                      "    -p [1-9]      Position of clock in terminal: 1-9 starting top-left and ending bottom-right.\n");
+                      "    -p [1-9]      Position of clock in terminal: 1-9 starting top-left and ending bottom-right:\n\n"
+                      "                  123\n"
+                      "                  456\n"
+                      "                  789\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
