@@ -84,6 +84,7 @@ typedef struct
           long delay;
           Bool blink;
           long nsdelay;
+          int position;
      } option;
 
      /* Clock geometry */
@@ -125,6 +126,7 @@ void set_second(void);
 void set_center(Bool b);
 void set_box(Bool b);
 void key_event(void);
+void set_position(int p);
 
 /* Global variable */
 ttyclock_t *ttyclock;
