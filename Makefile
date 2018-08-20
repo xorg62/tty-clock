@@ -4,10 +4,10 @@
 
 SRC = ttyclock.c
 CC ?= gcc
-BIN = tty-clock
+BIN ?= tty-clock
 PREFIX ?= /usr/local
-INSTALLPATH = ${DESTDIR}${PREFIX}/bin
-MANPATH = ${DESTDIR}${PREFIX}/share/man/man1
+INSTALLPATH ?= ${DESTDIR}${PREFIX}/bin
+MANPATH ?= ${DESTDIR}${PREFIX}/share/man/man1
 
 ifeq ($(shell sh -c 'which ncurses5-config>/dev/null 2>/dev/null && echo y'), y)
 	CFLAGS += -Wall -g $$(ncurses5-config --cflags)
