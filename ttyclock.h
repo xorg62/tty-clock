@@ -48,7 +48,7 @@
 
 /* Macro */
 #define NORMFRAMEW 35
-#define SECFRAMEW  54
+#define SECFRAMEW  100
 #define DATEWINH   3
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
@@ -70,6 +70,7 @@ typedef struct
      struct
      {
           Bool second;
+          Bool millisecond;
           Bool screensaver;
           Bool twelve;
           Bool center;
@@ -100,6 +101,7 @@ typedef struct
           unsigned int hour[2];
           unsigned int minute[2];
           unsigned int second[2];
+          unsigned int ms[3];
           char datestr[256];
      } date;
 
