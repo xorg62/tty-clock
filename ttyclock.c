@@ -178,10 +178,19 @@ update_hour(void)
      int ihour;
      char tmpstr[128];
 
+     int iminute_old = ttyclock.tm->tm_min;
+
      ttyclock.lt = time(NULL);
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
          ttyclock.tm = gmtime(&(ttyclock.lt));
+     }
+
+     if(ttyclock.option.color_cycle && iminute_old != ttyclock.tm->tm_min)
+     {
+         ttyclock.option.color = (ttyclock.option.color + 1) % 8;
+         init_pair(1, ttyclock.bg, ttyclock.option.color);
+         init_pair(2, ttyclock.option.color, ttyclock.bg);;
      }
 
      ihour = ttyclock.tm->tm_hour;
@@ -554,7 +563,7 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxXnDC:f:d:T:a:")) != -1)
      {
           switch(c)
           {
@@ -563,16 +572,17 @@ main(int argc, char **argv)
                printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
+                      "    -X            Screensaver color cycle (1/min)                \n"
                       "    -x            Show box                                       \n"
                       "    -c            Set the clock at the center of the terminal    \n"
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
                       "    -u            Use UTC time                                   \n"
-              "    -T tty        Display the clock on the specified terminal    \n"
+                      "    -T tty        Display the clock on the specified terminal    \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
-              "    -n            Don't quit on keypress                         \n"
+                      "    -n            Don't quit on keypress                         \n"
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
@@ -598,6 +608,9 @@ main(int argc, char **argv)
                break;
           case 'S':
                ttyclock.option.screensaver = True;
+               break;
+          case 'X':
+               ttyclock.option.color_cycle = True;
                break;
           case 'c':
                ttyclock.option.center = True;
