@@ -79,11 +79,12 @@ typedef struct
           Bool box;
           Bool noquit;
           char format[100];
-          int color;
+          unsigned int color;
           Bool bold;
           long delay;
           Bool blink;
           long nsdelay;
+          Bool color_cycle;
      } option;
 
      /* Clock geometry */
