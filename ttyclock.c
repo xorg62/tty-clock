@@ -187,7 +187,7 @@ update_hour(void)
      ihour = ttyclock.tm->tm_hour;
 
      if(ttyclock.option.twelve)
-          ttyclock.meridiem = ((ihour > 12) ? PMSIGN : AMSIGN);
+          ttyclock.meridiem = ((ihour >= 12) ? PMSIGN : AMSIGN);
      else
           ttyclock.meridiem = "\0";
 
