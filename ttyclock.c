@@ -554,13 +554,13 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuz:vsScbtrhBxnDC:f:d:T:a:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-ivsScbtrahDBxn] [-u|-z [timezone]] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -569,10 +569,11 @@ main(int argc, char **argv)
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
                       "    -u            Use UTC time                                   \n"
-              "    -T tty        Display the clock on the specified terminal    \n"
+                      "    -z [tz]       Use the specified timezone                     \n"
+                      "    -T tty        Display the clock on the specified terminal    \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
-              "    -n            Don't quit on keypress                         \n"
+                      "    -n            Don't quit on keypress                         \n"
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
@@ -588,6 +589,10 @@ main(int argc, char **argv)
                break;
           case 'u':
                ttyclock.option.utc = True;
+               break;
+          case 'z':
+               setenv("TZ", optarg, true);
+               tzset();
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");

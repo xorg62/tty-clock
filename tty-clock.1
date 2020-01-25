@@ -8,7 +8,7 @@
 tty\-clock \- a terminal digital clock
 .SH "SYNOPSIS"
 .LP
-\fBtty\-clock [\-iuvsScbtrahDBxn] [\-C [\fI0\-7\fB]] [\-f \fIformat\fB] [\-d \fIdelay\fB] [\-a \fInsdelay\fB] \fB[\-T \fItty\fB]\fR
+\fBtty\-clock [\-ivsScbtrahDBxn] [\-u|\-z [\fItimezone\fB]] [\-C [\fI0\-7\fB]] [\-f \fIformat\fB] [\-d \fIdelay\fB] [\-a \fInsdelay\fB] \fB[\-T \fItty\fB]\fR
 .SH "DESCRIPTION"
 .LP
 \fItty\-clock\fR displays a simple digital clock on the terminal. Invoked without options
@@ -72,7 +72,10 @@ Use bold colors.
 Set the hour in 12h format.
 .TP
 \fB\-u\fR
-Use UTC time.
+Use UTC time. Overrides the \fBtimezone\fR option.
+.TP
+\fB\-z [timezone]\fR
+Use the specified timezone (e.g. "Europe/Paris"). Overriden by the \fBUTC time flag\fR.
 .TP
 \fB\-T\fR \fItty\fR
 Display the clock on the given \fItty\fR. \fItty\fR must be
