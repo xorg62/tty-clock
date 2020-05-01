@@ -41,17 +41,17 @@ init(void)
 
      /* Init ncurses */
      if (ttyclock.tty) {
-         FILE *ftty = fopen(ttyclock.tty, "r+");
-         if (!ftty) {
-             fprintf(stderr, "tty-clock: error: '%s' couldn't be opened: %s.\n",
-                     ttyclock.tty, strerror(errno));
-             exit(EXIT_FAILURE);
-         }
-         ttyclock.ttyscr = newterm(NULL, ftty, ftty);
-         assert(ttyclock.ttyscr != NULL);
-         set_term(ttyclock.ttyscr);
+          FILE *ftty = fopen(ttyclock.tty, "r+");
+          if (!ftty) {
+               fprintf(stderr, "tty-clock: error: '%s' couldn't be opened: %s.\n",
+                       ttyclock.tty, strerror(errno));
+               exit(EXIT_FAILURE);
+          }
+          ttyclock.ttyscr = newterm(NULL, ftty, ftty);
+          assert(ttyclock.ttyscr != NULL);
+          set_term(ttyclock.ttyscr);
      } else
-         initscr();
+          initscr();
 
      cbreak();
      noecho();
@@ -95,18 +95,18 @@ init(void)
      ttyclock.geo.h = 7;
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
-         ttyclock.tm = gmtime(&(ttyclock.lt));
+          ttyclock.tm = gmtime(&(ttyclock.lt));
      }
      ttyclock.lt = time(NULL);
      update_hour();
 
      /* Create clock win */
      ttyclock.framewin = newwin(ttyclock.geo.h,
-                                 ttyclock.geo.w,
-                                 ttyclock.geo.x,
-                                 ttyclock.geo.y);
+                                ttyclock.geo.w,
+                                ttyclock.geo.x,
+                                ttyclock.geo.y);
      if(ttyclock.option.box) {
-           box(ttyclock.framewin, 0, 0);
+          box(ttyclock.framewin, 0, 0);
      }
 
      if (ttyclock.option.bold)
@@ -116,9 +116,9 @@ init(void)
 
      /* Create the date win */
      ttyclock.datewin = newwin(DATEWINH, strlen(ttyclock.date.datestr) + 2,
-                                ttyclock.geo.x + ttyclock.geo.h - 1,
-                                ttyclock.geo.y + (ttyclock.geo.w / 2) -
-                                (strlen(ttyclock.date.datestr) / 2) - 1);
+                               ttyclock.geo.x + ttyclock.geo.h - 1,
+                               ttyclock.geo.y + (ttyclock.geo.w / 2) -
+                               (strlen(ttyclock.date.datestr) / 2) - 1);
      if(ttyclock.option.box && ttyclock.option.date) {
           box(ttyclock.datewin, 0, 0);
      }
@@ -166,10 +166,10 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
-    if (ttyclock.ttyscr)
-        delscreen(ttyclock.ttyscr);
+     if (ttyclock.ttyscr)
+          delscreen(ttyclock.ttyscr);
 
-    free(ttyclock.tty);
+     free(ttyclock.tty);
 }
 
 void
@@ -181,7 +181,7 @@ update_hour(void)
      ttyclock.lt = time(NULL);
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
-         ttyclock.tm = gmtime(&(ttyclock.lt));
+          ttyclock.tm = gmtime(&(ttyclock.lt));
      }
 
      ihour = ttyclock.tm->tm_hour;
@@ -322,13 +322,13 @@ clock_move(int x, int y, int w, int h)
           wresize(ttyclock.datewin, DATEWINH, strlen(ttyclock.date.datestr) + 2);
 
           if (ttyclock.option.box) {
-            box(ttyclock.datewin,  0, 0);
+               box(ttyclock.datewin,  0, 0);
           }
      }
 
      if (ttyclock.option.box)
      {
-        box(ttyclock.framewin, 0, 0);
+          box(ttyclock.framewin, 0, 0);
      }
 
      wrefresh(ttyclock.framewin);
@@ -400,14 +400,14 @@ set_box(Bool b)
      wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
 
      if(ttyclock.option.box) {
-         wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
-         wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
-         box(ttyclock.framewin, 0, 0);
-         box(ttyclock.datewin,  0, 0);
+          wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
+          wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
+          box(ttyclock.framewin, 0, 0);
+          box(ttyclock.datewin,  0, 0);
      }
      else {
-         wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-         wborder(ttyclock.datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+          wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+          wborder(ttyclock.datewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
      }
 
      wrefresh(ttyclock.datewin);
@@ -569,10 +569,10 @@ main(int argc, char **argv)
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
                       "    -u            Use UTC time                                   \n"
-              "    -T tty        Display the clock on the specified terminal    \n"
+                      "    -T tty        Display the clock on the specified terminal    \n"
                       "    -r            Do rebound the clock                           \n"
                       "    -f format     Set the date format                            \n"
-              "    -n            Don't quit on keypress                         \n"
+                      "    -n            Don't quit on keypress                         \n"
                       "    -v            Show tty-clock version                         \n"
                       "    -i            Show some info about tty-clock                 \n"
                       "    -h            Show this page                                 \n"
@@ -631,7 +631,7 @@ main(int argc, char **argv)
           case 'a':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock.option.nsdelay = atol(optarg);
-                break;
+               break;
           case 'x':
                ttyclock.option.box = True;
                break;
@@ -646,8 +646,8 @@ main(int argc, char **argv)
                               optarg);
                     exit(EXIT_FAILURE);
                } else {
-               free(ttyclock.tty);
-                  ttyclock.tty = strdup(optarg);
+                    free(ttyclock.tty);
+                    ttyclock.tty = strdup(optarg);
                }}
                break;
           case 'n':
