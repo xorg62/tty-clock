@@ -275,7 +275,7 @@ draw_clock(void)
           wrefresh(ttyclock.datewin);
      }
 
-     /* Draw second if the option is enable */
+     /* Draw second if the option is enabled */
      if(ttyclock.option.second)
      {
           /* Again 2 dot for number separation */
