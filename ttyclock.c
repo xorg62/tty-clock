@@ -151,8 +151,8 @@ signal_handler(int signal)
      case SIGINT:
      case SIGTERM:
           ttyclock.running = False;
-          /* Segmentation fault signal */
           break;
+          /* Segmentation fault signal */
      case SIGSEGV:
           endwin();
           fprintf(stderr, "Segmentation fault.\n");
