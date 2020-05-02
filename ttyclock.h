@@ -34,17 +34,18 @@
 #ifndef TTYCLOCK_H_INCLUDED
 #define TTYCLOCK_H_INCLUDED
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <assert.h>
+#include <errno.h>
+#include <getopt.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
-#include <signal.h>
-#include <ncurses.h>
 #include <unistd.h>
-#include <getopt.h>
+
+#include <ncurses.h>
 
 /* Macro */
 #define NORMFRAMEW 35
