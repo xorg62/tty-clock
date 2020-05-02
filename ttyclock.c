@@ -421,6 +421,10 @@ key_event(void)
 
      struct timespec length = { ttyclock.option.delay, ttyclock.option.nsdelay };
      
+     fd_set rfds;
+     FD_ZERO(&rfds);
+     FD_SET(STDIN_FILENO, &rfds);
+
      if (ttyclock.option.screensaver)
      {
           c = wgetch(stdscr);
@@ -518,16 +522,16 @@ key_event(void)
           set_box(!ttyclock.option.box);
           break;
 
-     default:
-          nanosleep(&length, NULL);
-          for(i = 0; i < 8; ++i)
-               if(c == (i + '0'))
-               {
-                    ttyclock.option.color = i;
-                    init_pair(1, ttyclock.bg, i);
-                    init_pair(2, i, ttyclock.bg);
-               }
+     case '0': case '1': case '2': case '3':
+     case '4': case '5': case '6': case '7':
+          i = c - '0';
+          ttyclock.option.color = i;
+          init_pair(1, ttyclock.bg, i);
+          init_pair(2, i, ttyclock.bg);
           break;
+
+     default:
+          pselect(1, &rfds, NULL, NULL, &length, NULL);
      }
 
      return;
