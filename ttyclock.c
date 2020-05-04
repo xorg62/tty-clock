@@ -76,7 +76,6 @@ init(void)
      /* Init signal handler */
      sig.sa_handler = signal_handler;
      sig.sa_flags   = 0;
-     sigaction(SIGWINCH, &sig, NULL);
      sigaction(SIGTERM,  &sig, NULL);
      sigaction(SIGINT,   &sig, NULL);
      sigaction(SIGSEGV,  &sig, NULL);
@@ -143,11 +142,6 @@ signal_handler(int signal)
 {
      switch(signal)
      {
-     case SIGWINCH:
-          endwin();
-          init();
-          break;
-          /* Interruption signal */
      case SIGINT:
      case SIGTERM:
           ttyclock.running = False;
@@ -445,6 +439,11 @@ key_event(void)
 
      switch(c = wgetch(stdscr))
      {
+     case KEY_RESIZE:
+          endwin();
+          init();
+          break;
+
      case KEY_UP:
      case 'k':
      case 'K':
