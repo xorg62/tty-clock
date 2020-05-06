@@ -55,9 +55,9 @@ init(void)
 
      cbreak();
      noecho();
-     keypad(stdscr, True);
+     keypad(stdscr, true);
      start_color();
-     curs_set(False);
+     curs_set(false);
      clear();
 
      /* Init default terminal color */
@@ -81,7 +81,7 @@ init(void)
      sigaction(SIGSEGV,  &sig, NULL);
 
      /* Init global struct */
-     ttyclock.running = True;
+     ttyclock.running = true;
      if(!ttyclock.geo.x)
           ttyclock.geo.x = 0;
      if(!ttyclock.geo.y)
@@ -121,11 +121,11 @@ init(void)
      if(ttyclock.option.box && ttyclock.option.date) {
           box(ttyclock.datewin, 0, 0);
      }
-     clearok(ttyclock.datewin, True);
+     clearok(ttyclock.datewin, true);
 
      set_center(ttyclock.option.center);
 
-     nodelay(stdscr, True);
+     nodelay(stdscr, true);
 
      if (ttyclock.option.date)
      {
@@ -144,7 +144,7 @@ signal_handler(int signal)
      {
      case SIGINT:
      case SIGTERM:
-          ttyclock.running = False;
+          ttyclock.running = false;
           break;
           /* Segmentation fault signal */
      case SIGSEGV:
@@ -370,11 +370,11 @@ set_second(void)
 }
 
 void
-set_center(Bool b)
+set_center(bool b)
 {
      if((ttyclock.option.center = b))
      {
-          ttyclock.option.rebound = False;
+          ttyclock.option.rebound = false;
 
           clock_move((LINES / 2 - (ttyclock.geo.h / 2)),
                      (COLS  / 2 - (ttyclock.geo.w / 2)),
@@ -386,7 +386,7 @@ set_center(Bool b)
 }
 
 void
-set_box(Bool b)
+set_box(bool b)
 {
      ttyclock.option.box = b;
 
@@ -422,9 +422,9 @@ key_event(void)
      if (ttyclock.option.screensaver)
      {
           c = wgetch(stdscr);
-          if(c != ERR && ttyclock.option.noquit == False)
+          if(c != ERR && ttyclock.option.noquit == false)
           {
-               ttyclock.running = False;
+               ttyclock.running = false;
           }
           else
           {
@@ -482,8 +482,8 @@ key_event(void)
 
      case 'q':
      case 'Q':
-          if (ttyclock.option.noquit == False)
-               ttyclock.running = False;
+          if (ttyclock.option.noquit == false)
+               ttyclock.running = false;
           break;
 
      case 's':
@@ -513,7 +513,7 @@ key_event(void)
      case 'R':
           ttyclock.option.rebound = !ttyclock.option.rebound;
           if(ttyclock.option.rebound && ttyclock.option.center)
-               ttyclock.option.center = False;
+               ttyclock.option.center = false;
           break;
 
      case 'x':
@@ -544,7 +544,7 @@ main(int argc, char **argv)
      /* Alloc ttyclock */
      memset(&ttyclock, 0, sizeof(ttyclock_t));
 
-     ttyclock.option.date = True;
+     ttyclock.option.date = true;
 
      /* Default date format */
      strncpy(ttyclock.option.format, "%F", sizeof (ttyclock.option.format));
@@ -553,7 +553,7 @@ main(int argc, char **argv)
      /* Default delay */
      ttyclock.option.delay = 1; /* 1FPS */
      ttyclock.option.nsdelay = 0; /* -0FPS */
-     ttyclock.option.blink = False;
+     ttyclock.option.blink = false;
 
      atexit(cleanup);
 
@@ -590,33 +590,33 @@ main(int argc, char **argv)
                exit(EXIT_SUCCESS);
                break;
           case 'u':
-               ttyclock.option.utc = True;
+               ttyclock.option.utc = true;
                break;
           case 'v':
                puts("TTY-Clock 2 © devel version");
                exit(EXIT_SUCCESS);
                break;
           case 's':
-               ttyclock.option.second = True;
+               ttyclock.option.second = true;
                break;
           case 'S':
-               ttyclock.option.screensaver = True;
+               ttyclock.option.screensaver = true;
                break;
           case 'c':
-               ttyclock.option.center = True;
+               ttyclock.option.center = true;
                break;
           case 'b':
-               ttyclock.option.bold = True;
+               ttyclock.option.bold = true;
                break;
           case 'C':
                if(atoi(optarg) >= 0 && atoi(optarg) < 8)
                     ttyclock.option.color = atoi(optarg);
                break;
           case 't':
-               ttyclock.option.twelve = True;
+               ttyclock.option.twelve = true;
                break;
           case 'r':
-               ttyclock.option.rebound = True;
+               ttyclock.option.rebound = true;
                break;
           case 'f':
                strncpy(ttyclock.option.format, optarg, 100);
@@ -626,17 +626,17 @@ main(int argc, char **argv)
                     ttyclock.option.delay = atol(optarg);
                break;
           case 'D':
-               ttyclock.option.date = False;
+               ttyclock.option.date = false;
                break;
           case 'B':
-               ttyclock.option.blink = True;
+               ttyclock.option.blink = true;
                break;
           case 'a':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock.option.nsdelay = atol(optarg);
                break;
           case 'x':
-               ttyclock.option.box = True;
+               ttyclock.option.box = true;
                break;
           case 'T': {
                struct stat sbuf;
@@ -654,7 +654,7 @@ main(int argc, char **argv)
                }}
                break;
           case 'n':
-               ttyclock.option.noquit = True;
+               ttyclock.option.noquit = true;
                break;
           }
      }
