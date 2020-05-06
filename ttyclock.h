@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
@@ -55,13 +56,11 @@
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
 
-typedef enum { False, True } Bool;
-
 /* Global ttyclock struct */
 typedef struct
 {
      /* while() boolean */
-     Bool running;
+     bool running;
 
      /* terminal variables */
      SCREEN *ttyscr;
@@ -71,20 +70,20 @@ typedef struct
      /* Running option */
      struct
      {
-          Bool second;
-          Bool screensaver;
-          Bool twelve;
-          Bool center;
-          Bool rebound;
-          Bool date;
-          Bool utc;
-          Bool box;
-          Bool noquit;
+          bool second;
+          bool screensaver;
+          bool twelve;
+          bool center;
+          bool rebound;
+          bool date;
+          bool utc;
+          bool box;
+          bool noquit;
           char format[100];
           int color;
-          Bool bold;
+          bool bold;
           long delay;
-          Bool blink;
+          bool blink;
           long nsdelay;
      } option;
 
@@ -124,15 +123,15 @@ void draw_number(int n, int x, int y);
 void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
 void set_second(void);
-void set_center(Bool b);
-void set_box(Bool b);
+void set_center(bool b);
+void set_box(bool b);
 void key_event(void);
 
 /* Global variable */
 ttyclock_t ttyclock;
 
 /* Number matrix */
-const Bool number[][15] =
+const bool number[][15] =
 {
      {1,1,1,1,0,1,1,0,1,1,0,1,1,1,1}, /* 0 */
      {0,0,1,0,0,1,0,0,1,0,0,1,0,0,1}, /* 1 */
