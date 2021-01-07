@@ -436,10 +436,10 @@ key_event(void)
           if(c != ERR && ttyclock.option.noquit == False)
           {
                ttyclock.running = False;
+               return;
           }
           else
           {
-               nanosleep(&length, NULL);
                for(i = 0; i < 8; ++i)
                     if(c == (i + '0'))
                     {
@@ -448,6 +448,7 @@ key_event(void)
                          init_pair(2, i, ttyclock.bg);
                     }
           }
+          nanosleep(&length, NULL);
           return;
      }
 

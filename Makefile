@@ -22,8 +22,8 @@ else ifeq ($(shell sh -c 'which ncursesw5-config>/dev/null 2>/dev/null && echo y
 		CFLAGS += -Wall -g $$(ncursesw5-config --cflags)
 		LDFLAGS += $$(ncursesw5-config --libs)
 else
-	CFLAGS += -Wall -g $$(pkg-config --cflags ncurses)
-	LDFLAGS += $$(pkg-config --libs ncurses)
+	CFLAGS += -Wall 
+	LDFLAGS += -lncurses
 endif
 
 tty-clock : ${SRC}
