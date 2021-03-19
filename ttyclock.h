@@ -86,6 +86,7 @@ typedef struct
           long delay;
           bool blink;
           long nsdelay;
+          bool elapsed;
      } option;
 
      /* Clock geometry */
@@ -108,6 +109,7 @@ typedef struct
      /* time.h utils */
      struct tm *tm;
      time_t lt;
+     time_t lt_origin;
 
      /* Clock member */
      char *meridiem;

@@ -97,6 +97,8 @@ init(void)
           ttyclock.tm = gmtime(&(ttyclock.lt));
      }
      ttyclock.lt = time(NULL);
+     ttyclock.lt_origin = ttyclock.lt;
+     
      update_hour();
 
      /* Create clock win */
@@ -171,11 +173,21 @@ update_hour(void)
 {
      int ihour;
      char tmpstr[128];
+     time_t shown_time;
 
      ttyclock.lt = time(NULL);
-     ttyclock.tm = localtime(&(ttyclock.lt));
-     if(ttyclock.option.utc) {
-          ttyclock.tm = gmtime(&(ttyclock.lt));
+     shown_time = ttyclock.lt;
+
+     if(ttyclock.option.elapsed)
+     {
+          shown_time -= ttyclock.lt_origin;
+          ttyclock.tm = gmtime(&(shown_time));
+     }
+     else
+     {
+          ttyclock.tm = localtime(&(shown_time));
+          if(ttyclock.option.utc)
+               ttyclock.tm = gmtime(&(shown_time));
      }
 
      ihour = ttyclock.tm->tm_hour;
@@ -534,6 +546,10 @@ key_event(void)
      case 'M':
           /* Sad: legacy "move left" is H, so "hour" is M :( */
           toggle_hour();
+
+     case 'e':
+     case 'E':
+          ttyclock.option.elapsed = !ttyclock.option.elapsed;
           break;
 
      case 't':
@@ -603,13 +619,13 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:e")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDHBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDHBxne] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -629,7 +645,8 @@ main(int argc, char **argv)
                       "    -H            Hide hour                                      \n"
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
+                      "    -e            Shows elapsed time.\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
@@ -705,6 +722,9 @@ main(int argc, char **argv)
                break;
           case 'n':
                ttyclock.option.noquit = true;
+               break;
+          case 'e':
+               ttyclock.option.elapsed = true;
                break;
           }
      }
