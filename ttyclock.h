@@ -44,9 +44,9 @@
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <locale.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <ncurses.h>
 
 /* Macro */
