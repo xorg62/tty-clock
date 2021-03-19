@@ -183,6 +183,12 @@ update_hour(void)
           shown_time -= ttyclock.lt_origin;
           ttyclock.tm = gmtime(&(shown_time));
      }
+     else if(ttyclock.option.countdown && ttyclock.option.timeout > 0)
+     {
+          shown_time -= ttyclock.lt_origin;
+          shown_time = ttyclock.option.timeout - shown_time;
+          ttyclock.tm = gmtime(&(shown_time));
+     }
      else
      {
           ttyclock.tm = localtime(&(shown_time));
@@ -221,6 +227,14 @@ update_hour(void)
      ttyclock.date.second[1] = ttyclock.tm->tm_sec % 10;
 
      return;
+}
+
+bool
+timed_out(void)
+{
+     if(ttyclock.lt_paused || !ttyclock.option.timeout)
+          return false;
+     return (ttyclock.lt >=  ttyclock.lt_origin + ttyclock.option.timeout);
 }
 
 int
@@ -643,13 +657,13 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDHC:f:d:T:a:e")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDHC:f:d:T:a:ep:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDHBxne] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDHBexne] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-p duration] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -670,6 +684,7 @@ main(int argc, char **argv)
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
                       "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
+                      "    -p duration   Set count down duration in seconds. Exit when done.\n"
                       "    -e            Shows elapsed time.\n");
                exit(EXIT_SUCCESS);
                break;
@@ -750,6 +765,13 @@ main(int argc, char **argv)
           case 'e':
                ttyclock.option.elapsed = true;
                break;
+          case 'p':
+               if(atol(optarg)>0) {
+                    ttyclock.option.countdown = true;
+                    ttyclock.option.timeout = atol(optarg);
+                    ttyclock.option.date = false;
+               }
+               break;
           }
      }
 
@@ -759,6 +781,8 @@ main(int argc, char **argv)
      {
           clock_rebound();
           update_hour();
+          if(timed_out())
+               break;
           draw_clock();
           key_event();
      }

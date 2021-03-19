@@ -86,6 +86,8 @@ typedef struct
           long delay;
           bool blink;
           long nsdelay;
+          long timeout;
+          bool countdown;
           bool elapsed;
      } option;
 
