@@ -50,6 +50,7 @@
 #include <ncurses.h>
 
 /* Macro */
+#define VERSIONSTR "2.4dev"
 #define FULLFRAMEW 54
 #define CLKFIELDW  19
 #define DATEWINH   3

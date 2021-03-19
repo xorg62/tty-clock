@@ -709,11 +709,11 @@ main(int argc, char **argv)
                exit(EXIT_SUCCESS);
                break;
           case 'v':
-               puts("TTY-Clock 2 © devel version");
+               puts("TTY-Clock " VERSIONSTR);
                exit(EXIT_SUCCESS);
                break;
           case 'i':
-               puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com), Grey (grey@greytheory.net)");
+               puts("TTY-Clock " VERSIONSTR " © by Martin Duquesnoy (xorg62@gmail.com), Grey (grey@greytheory.net)");
                exit(EXIT_SUCCESS);
                break;
 
