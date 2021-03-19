@@ -253,6 +253,13 @@ update_clock_layout(void)
 {
      int new_w;
      int y_adj;
+
+     if(!ttyclock.option.date)
+     {
+          wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
+          werase(ttyclock.datewin);
+          wrefresh(ttyclock.datewin);
+     }
  
      new_w = compute_screen_width();
      for(y_adj = 0; (ttyclock.geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
@@ -418,22 +425,6 @@ clock_rebound(void)
 }
 
 void
-toggle_second(void)
-{
-     ttyclock.option.second = !ttyclock.option.second;
-     update_clock_layout();
-     return;
-}
-
-void
-toggle_hour(void)
-{
-     ttyclock.option.hour = !ttyclock.option.hour;
-     update_clock_layout();
-     return;
-}
-
-void
 set_center(bool b)
 {
      if((ttyclock.option.center = b))
@@ -553,17 +544,25 @@ key_event(void)
 
      case 's':
      case 'S':
-          toggle_second();
+          ttyclock.option.second = !ttyclock.option.second;
+          update_clock_layout();
           break;
 
      case 'm':
      case 'M':
           /* Sad: legacy "move left" is H, so "hour" is M :( */
-          toggle_hour();
+          ttyclock.option.hour = !ttyclock.option.hour;
+          update_clock_layout();
+          break;
 
      case 'e':
      case 'E':
           ttyclock.option.elapsed = !ttyclock.option.elapsed;
+          if(ttyclock.option.elapsed)
+          {
+               ttyclock.option.date = false;
+               update_clock_layout();
+          }
           break;
 
      case 't':
@@ -764,6 +763,7 @@ main(int argc, char **argv)
                break;
           case 'e':
                ttyclock.option.elapsed = true;
+               ttyclock.option.date = false;
                break;
           case 'p':
                if(atol(optarg)>0) {
