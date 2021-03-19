@@ -555,6 +555,12 @@ key_event(void)
           update_clock_layout();
           break;
 
+     case 'd':
+     case 'D':
+          ttyclock.option.date = !ttyclock.option.date;
+          update_clock_layout();
+          break;
+
      case 'e':
      case 'E':
           ttyclock.option.elapsed = !ttyclock.option.elapsed;
