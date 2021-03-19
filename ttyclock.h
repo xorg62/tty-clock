@@ -50,8 +50,8 @@
 #include <ncurses.h>
 
 /* Macro */
-#define NORMFRAMEW 35
-#define SECFRAMEW  54
+#define FULLFRAMEW 54
+#define CLKFIELDW  19
 #define DATEWINH   3
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
@@ -76,6 +76,7 @@ typedef struct
           bool center;
           bool rebound;
           bool date;
+          bool hour;
           bool utc;
           bool box;
           bool noquit;
@@ -119,6 +120,7 @@ typedef struct
 void init(void);
 void signal_handler(int signal);
 void update_hour(void);
+int compute_screen_width(void);
 void draw_number(int n, int x, int y);
 void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
