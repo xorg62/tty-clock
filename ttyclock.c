@@ -397,7 +397,8 @@ set_box(bool b)
           wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
           wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
           box(ttyclock.framewin, 0, 0);
-          box(ttyclock.datewin,  0, 0);
+          if (ttyclock.option.date)
+               box(ttyclock.datewin,  0, 0);
      }
      else {
           wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
@@ -673,5 +674,6 @@ main(int argc, char **argv)
 
      return 0;
 }
+
 
 // vim: expandtab tabstop=5 softtabstop=5 shiftwidth=5
