@@ -37,6 +37,8 @@ void
 init(void)
 {
      struct sigaction sig;
+     setlocale(LC_TIME,"");
+
      ttyclock.bg = COLOR_BLACK;
 
      /* Init ncurses */
