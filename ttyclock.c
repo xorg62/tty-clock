@@ -643,7 +643,7 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:e")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDHC:f:d:T:a:e")) != -1)
      {
           switch(c)
           {
