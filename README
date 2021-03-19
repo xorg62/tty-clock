@@ -1,20 +1,39 @@
-usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty]
-    -s            Show seconds
-    -S            Screensaver mode
-    -x            Show box
-    -c            Set the clock at the center of the terminal
-    -C [0-7]      Set the clock color
-    -b            Use bold colors
-    -t            Set the hour in 12h format
-    -u            Use UTC time
-    -T tty        Display the clock on the specified terminal
-    -r            Do rebound the clock
-    -f format     Set the date format
-    -n            Don't quit on keypress
-    -v            Show tty-clock version
-    -i            Show some info about tty-clock
-    -h            Show this page
-    -D            Hide date
-    -B            Enable blinking colon
-    -d delay      Set the delay between two redraws of the clock. Default 1s.
-    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.
+tty-clock displays a simple digital clock, timer or countdown on the terminal.
+Invoked without options it will display the clock on the upper left corner of the screen on the terminal it was executed from.
+
+usage : tty-clock [-hvisHDtucrbxBeSn] [-f format] [-d delay] [-a nsdelay] [-C [0-7]] [-p duration] [-T tty]
+    -h            Show this page                                                   
+    -v            Show tty-clock version                                           
+    -i            Show some info about tty-clock                                   
+    -s            Show seconds                                                     
+    -H            Hide hour                                                        
+    -D            Hide date                                                        
+    -t            Set the hour in 12h format                                       
+    -u            Use UTC time                                                     
+    -f format     Set the date format                                              
+    -c            Set the clock at the center of the terminal                      
+    -r            Do rebound the clock                                             
+    -d delay      Set the delay between two redraws of the clock. Default 1s       
+    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns 
+    -C [0-7]      Set the clock color                                              
+    -B            Enable blinking colon                                            
+    -x            Show box                                                         
+    -b            Use bold colors                                                  
+    -e            Display elapsed time, not current time                           
+    -p duration   Set count down duration in seconds. Exit when done               
+    -S            Screensaver mode                                                 
+    -n            Don't quit on keypress                                           
+    -T tty        Display the clock on the specified terminal 
+
+To invoke tty-clock in screensaver mode with the clock display set to rebound and the update delay set to 1/10th of a second (10 FPS):
+
+  $ tty-clock -Sra 100000000 -d 0
+
+Exit after 30 minute have elapsed, showing hours and minutes centered in the window.
+
+  $ tty-clock -p 1800 -e -c
+
+Show a 1 minute and 10 seconds countdown in a box then exit. Hours are hidden, seconds are shown.
+
+  $ tty-clock -p 70 -x -Hs
+

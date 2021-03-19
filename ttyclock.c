@@ -662,92 +662,119 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDHC:f:d:T:a:ep:")) != -1)
+     while ((c = getopt(argc, argv, "hvisHDtuf:crd:a:C:Bxbep:SnT:")) != -1)
      {
+          /* "semantically ordered": please keep in sync with this switch, with the tty-clock.1 manpage and README */
+          /* Helper to generate the README: egrep '^ .*[ []-[a-zA-Z].*\\n"' ttyclock.c | sed -e 's/^ *"//' -e 's/\\n".*$//' -e 's/^\s*printf("//' */
           switch(c)
           {
+          /* general information */
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDHBexne] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-p duration] [-T tty] \n"
-                      "    -s            Show seconds                                   \n"
-                      "    -S            Screensaver mode                               \n"
-                      "    -x            Show box                                       \n"
-                      "    -c            Set the clock at the center of the terminal    \n"
-                      "    -C [0-7]      Set the clock color                            \n"
-                      "    -b            Use bold colors                                \n"
-                      "    -t            Set the hour in 12h format                     \n"
-                      "    -u            Use UTC time                                   \n"
-                      "    -T tty        Display the clock on the specified terminal    \n"
-                      "    -r            Do rebound the clock                           \n"
-                      "    -f format     Set the date format                            \n"
-                      "    -n            Don't quit on keypress                         \n"
-                      "    -v            Show tty-clock version                         \n"
-                      "    -i            Show some info about tty-clock                 \n"
-                      "    -h            Show this page                                 \n"
-                      "    -D            Hide date                                      \n"
-                      "    -H            Hide hour                                      \n"
-                      "    -B            Enable blinking colon                          \n"
-                      "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
-                      "    -p duration   Set count down duration in seconds. Exit when done.\n"
-                      "    -e            Shows elapsed time.\n");
+               printf("usage : tty-clock [-hvisHDtucrbxBeSn] [-f format] [-d delay] [-a nsdelay] [-C [0-7]] [-p duration] [-T tty]\n"
+                      "    -h            Show this page                                                   \n"
+                      "    -v            Show tty-clock version                                           \n"
+                      "    -i            Show some info about tty-clock                                   \n"
+                      "    -s            Show seconds                                                     \n"
+                      "    -H            Hide hour                                                        \n"
+                      "    -D            Hide date                                                        \n"
+                      "    -t            Set the hour in 12h format                                       \n"
+                      "    -u            Use UTC time                                                     \n"
+                      "    -f format     Set the date format                                              \n"
+                      "    -c            Set the clock at the center of the terminal                      \n"
+                      "    -r            Do rebound the clock                                             \n"
+                      "    -d delay      Set the delay between two redraws of the clock. Default 1s       \n"
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns \n"
+                      "    -C [0-7]      Set the clock color                                              \n"
+                      "    -B            Enable blinking colon                                            \n"
+                      "    -x            Show box                                                         \n"
+                      "    -b            Use bold colors                                                  \n"
+                      "    -e            Display elapsed time, not current time                           \n"
+                      "    -p duration   Set count down duration in seconds. Exit when done               \n"
+                      "    -S            Screensaver mode                                                 \n"
+                      "    -n            Don't quit on keypress                                           \n"
+                      "    -T tty        Display the clock on the specified terminal                      \n");
+               exit(EXIT_SUCCESS);
+               break;
+          case 'v':
+               puts("TTY-Clock 2 © devel version");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
                puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com), Grey (grey@greytheory.net)");
                exit(EXIT_SUCCESS);
                break;
-          case 'u':
-               ttyclock.option.utc = true;
-               break;
-          case 'v':
-               puts("TTY-Clock 2 © devel version");
-               exit(EXIT_SUCCESS);
-               break;
+
+          /* shown data */
           case 's':
                ttyclock.option.second = true;
                break;
-          case 'S':
-               ttyclock.option.screensaver = true;
+          case 'H':
+               ttyclock.option.hour = false;
                break;
-          case 'c':
-               ttyclock.option.center = true;
-               break;
-          case 'b':
-               ttyclock.option.bold = true;
-               break;
-          case 'C':
-               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
-                    ttyclock.option.color = atoi(optarg);
+          case 'D':
+               ttyclock.option.date = false;
                break;
           case 't':
                ttyclock.option.twelve = true;
                break;
-          case 'r':
-               ttyclock.option.rebound = true;
+
+          /* data format */
+          case 'u':
+               ttyclock.option.utc = true;
                break;
           case 'f':
                strncpy(ttyclock.option.format, optarg, 100);
+               break;
+
+          /* data layout */
+          case 'c':
+               ttyclock.option.center = true;
+               break;
+          case 'r':
+               ttyclock.option.rebound = true;
                break;
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 100)
                     ttyclock.option.delay = atol(optarg);
                break;
-          case 'D':
-               ttyclock.option.date = false;
-               break;
-          case 'H':
-               ttyclock.option.hour = false;
-               break;
-          case 'B':
-               ttyclock.option.blink = true;
-               break;
           case 'a':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock.option.nsdelay = atol(optarg);
                break;
+          case 'C':
+               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
+                    ttyclock.option.color = atoi(optarg);
+               break;
+          case 'B':
+               ttyclock.option.blink = true;
+               break;
           case 'x':
                ttyclock.option.box = true;
+               break;
+          case 'b':
+               ttyclock.option.bold = true;
+               break;
+
+          /* special modes */
+          case 'e':
+               ttyclock.option.elapsed = true;
+               ttyclock.option.date = false;
+               break;
+          case 'p':
+               if(atol(optarg)>0) {
+                    ttyclock.option.countdown = true;
+                    ttyclock.option.timeout = atol(optarg);
+                    ttyclock.option.date = false;
+               }
+               break;
+
+          /* screensaver */
+          case 'S':
+               ttyclock.option.screensaver = true;
+               break;
+          case 'n':
+               ttyclock.option.noquit = true;
                break;
           case 'T': {
                struct stat sbuf;
@@ -763,20 +790,6 @@ main(int argc, char **argv)
                     free(ttyclock.tty);
                     ttyclock.tty = strdup(optarg);
                }}
-               break;
-          case 'n':
-               ttyclock.option.noquit = true;
-               break;
-          case 'e':
-               ttyclock.option.elapsed = true;
-               ttyclock.option.date = false;
-               break;
-          case 'p':
-               if(atol(optarg)>0) {
-                    ttyclock.option.countdown = true;
-                    ttyclock.option.timeout = atol(optarg);
-                    ttyclock.option.date = false;
-               }
                break;
           }
      }
