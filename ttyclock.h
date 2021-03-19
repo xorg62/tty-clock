@@ -56,9 +56,15 @@
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
 
+/* #define EXIT_SUCESS 0
+ * #define EXIT_FAILURE 1 */
+#define EXIT_INTERRUPTED 2
+
 /* Global ttyclock struct */
 typedef struct
 {
+     int retcode;
+     
      /* while() boolean */
      bool running;
 

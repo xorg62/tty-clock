@@ -39,6 +39,13 @@ init(void)
      struct sigaction sig;
      ttyclock.bg = COLOR_BLACK;
 
+     /* Return codes:
+      *    0 (EXIT_SUCCESS) = terminated nicely, either with 'q' or with timeout (-p option)
+      *    1 (EXIT_FAILURE) = terminated abnormaly
+      *    2= terminated with signal (eg. control-C)
+      */
+     ttyclock.retcode = EXIT_SUCCESS;
+
      /* Init ncurses */
      if (ttyclock.tty) {
           FILE *ftty = fopen(ttyclock.tty, "r+");
@@ -146,10 +153,12 @@ signal_handler(int signal)
      {
      case SIGINT:
      case SIGTERM:
+          ttyclock.retcode = EXIT_INTERRUPTED;
           ttyclock.running = false;
           break;
           /* Segmentation fault signal */
      case SIGSEGV:
+          ttyclock.retcode = EXIT_FAILURE;
           endwin();
           fprintf(stderr, "Segmentation fault.\n");
           exit(EXIT_FAILURE);
@@ -539,7 +548,10 @@ key_event(void)
      case 'q':
      case 'Q':
           if (ttyclock.option.noquit == false)
+          {
                ttyclock.running = false;
+               ttyclock.retcode = EXIT_SUCCESS;
+          }
           break;
 
      case 's':
@@ -801,14 +813,17 @@ main(int argc, char **argv)
           clock_rebound();
           update_hour();
           if(timed_out())
+          {
+               ttyclock.retcode = EXIT_SUCCESS;
                break;
+          }
           draw_clock();
           key_event();
      }
 
      endwin();
 
-     return 0;
+     exit(ttyclock.retcode);
 }
 
 
