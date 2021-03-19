@@ -176,7 +176,7 @@ update_hour(void)
      time_t shown_time;
 
      ttyclock.lt = time(NULL);
-     shown_time = ttyclock.lt;
+     shown_time = (ttyclock.lt_paused ? ttyclock.lt_paused : ttyclock.lt);
 
      if(ttyclock.option.elapsed)
      {
@@ -278,7 +278,7 @@ draw_clock(void)
 {
      int xpos = 1;
      chtype dotcolor = COLOR_PAIR(1);
-     if (ttyclock.option.blink && time(NULL) % 2 == 0)
+     if (ttyclock.option.blink && time(NULL) % 2 == 0 && !ttyclock.lt_paused)
           dotcolor = COLOR_PAIR(2);
 
      /* Draw hour numbers */
@@ -589,6 +589,30 @@ key_event(void)
           init_pair(1, ttyclock.bg, i);
           init_pair(2, i, ttyclock.bg);
           break;
+
+     case 'z':
+     case 'Z':
+          if(ttyclock.lt_origin)
+               ttyclock.lt_origin = ttyclock.lt;
+          if(ttyclock.lt_paused)
+               ttyclock.lt_paused = ttyclock.lt;
+          break;
+
+     case ' ':
+          if(!ttyclock.lt_paused)
+               ttyclock.lt_paused = ttyclock.lt;
+          else
+          {
+               if(ttyclock.lt_origin)
+               {
+                    /* shift origin by the pause duration */
+                    ttyclock.lt_origin += ttyclock.lt - ttyclock.lt_paused;
+                    ttyclock.lt_paused = 0;
+               }
+               ttyclock.lt_paused = 0;
+          }
+          break;
+
 
      default:
           pselect(1, &rfds, NULL, NULL, &length, NULL);

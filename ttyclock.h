@@ -110,6 +110,7 @@ typedef struct
      struct tm *tm;
      time_t lt;
      time_t lt_origin;
+     time_t lt_paused;
 
      /* Clock member */
      char *meridiem;
