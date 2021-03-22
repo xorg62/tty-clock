@@ -127,7 +127,7 @@ Blink the colons, unless the clock is paused (see \fBCOMMANDS\fR).
 Show elapsed time instead of time of day. Date will be hidden.
 .TP
 \fB\-p\fR \fIduration\fR
-Switch to countdown mode or to timer mode if \fB\-e\fR is also specified.  Date will be hidden.
+Switch to countdown mode, or to timer mode if \fB\-e\fR is also specified. Date will be hidden. Exit when done.
 .TP
 \fB\-S\fR
 Screensaver mode. tty\-clock terminates when any key is pressed.
@@ -141,6 +141,10 @@ be sent to \fItty\-clock\fR in order to terminate its execution. (See \fBEXAMPLE
 Display the clock on the given \fItty\fR. \fItty\fR must be
 a valid character device to which the user has rw access permissions.
 (See \fBEXAMPLES\fR)
+.SH "EXIT STATUS"
+The exit status is 0 if the program is terminated either with the \fBq\fR command or if
+the timeout set with \fB\-p\fR is reached. Exit status is 1 if an error occurred,
+and 2 if the program was interrupted with a signal.
 .SH "EXAMPLES"
 .LP
 To invoke
