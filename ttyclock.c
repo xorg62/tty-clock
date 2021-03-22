@@ -1,6 +1,6 @@
 /*
  *      TTY-CLOCK Main file.
- *      Copyright © 2009-2018 tty-clock contributors
+ *      Copyright © 2009-2021 tty-clock contributors
  *      Copyright © 2008 Martin Duquesnoy <xorg62@gmail.com>
  *      All rights reserved.
  *
@@ -629,6 +629,20 @@ key_event(void)
                ttyclock.lt_origin = ttyclock.lt;
           if(ttyclock.lt_paused)
                ttyclock.lt_paused = ttyclock.lt;
+          break;
+
+     case '+':
+          if(ttyclock.lt_origin)
+               ttyclock.lt_origin += 60;
+          break;
+
+     case '-':
+          if(ttyclock.lt_origin)
+          {
+               ttyclock.lt_origin -= 60;
+               if(ttyclock.lt  >=  ttyclock.lt_origin + ttyclock.option.timeout)
+                    ttyclock.lt_paused= false; /* make it break */
+          }
           break;
 
      case ' ':
