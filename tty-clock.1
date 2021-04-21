@@ -1,6 +1,7 @@
-.\" This manpage was written by Carla Valenti <valenti.karla@gmail.com>
-.\" and Christian Giessen <cgie@informatik.uni-kiel.de> for tty-clock.
-.\" In details the command line options displayed by tty-clock -h as
+.\" This manpage was written by Carla Valenti <valenti.karla@gmail.com>,
+.\" Christian Giessen <cgie@informatik.uni-kiel.de> and Jeremie Francois
+.\" <jeremie@tecrd.com> for tty-clock.
+.\" It details the command line options displayed by tty-clock -h as
 .\" well as the keyboard commands.
 .TH "TTY-CLOCK" "1" "October 2013" "" "User Commands"
 .SH "NAME"
@@ -8,10 +9,10 @@
 tty\-clock \- a terminal digital clock
 .SH "SYNOPSIS"
 .LP
-\fBtty\-clock [\-iuvsScbtrahDBxn] [\-C [\fI0\-7\fB]] [\-f \fIformat\fB] [\-d \fIdelay\fB] [\-a \fInsdelay\fB] \fB[\-T \fItty\fB]\fR
+\fBtty\-clock [\-hvisHDtucrbxBeSn] [\-f \fIformat\fB]  [\-d \fIdelay\fB] [\-a \fInsdelay\fB] [\-C [\fI0\-7\fB]] [\-p \fIduration\fB] \fB[\-T \fItty\fB]\fR
 .SH "DESCRIPTION"
 .LP
-\fItty\-clock\fR displays a simple digital clock on the terminal. Invoked without options
+\fItty\-clock\fR displays a simple digital clock, timer or countdown on the terminal. Invoked without options
 it will display the clock on the upper left corner of the screen on the terminal it was
 executed from.
 .SH "COMMANDS"
@@ -19,76 +20,60 @@ executed from.
 \fItty\-clock\fR accepts a number of runtime keyboard commands, upper and lower case characters are
 treated identically.
 .TP
+S
+Toggle display of seconds. Default is hidden.
+.TP
+M
+Toggle display of hours. Default is visible.
+.TP
+D
+Toggle display of date. Default is visible unless \fB-e\fR or \fB-p\fR were used ( or countdown modes).
+.TP
+T
+Toggle between 12\-hour and 24\-hour clock format. Default is 24\-hour mode.
+.TP
+C
+Toggle the clock's position to \fBcentered\fR. When set the movement commands are disabled.
+.TP
+R
+Toggle to screensaver-like animated \fBrebound\fR along the edges of the terminal.
+.TP
 K,J,H,L
 vi\-style movement commands to set the position of the displayed clock.
-These commands have no effect when the \fBcentered\fR option is set.
+These commands have no effect when the \fBcentered\fR or \fBrebound\fR option is set.
 .TP
 [0\-7]
 Select a different color for displaying the clock.
 .TP
 B
-Toggles between bold and normal colors.
+Toggle between bold and normal colors.
 .TP
 X
-Toggles displaying a box around the clock. This option is disabled by default.
+Toggle display of boxes around the time and date. Default is none.
 .TP
-C
-Toggle the clock's position to \fBcentered\fR.
-When set the movement commands are disabled.
+E
+Toogle elapsed time mode. Default is either absolute time, or remaning time if \fB-p\fR was used.
 .TP
-R
-Set the clock to \fBrebound\fR along the edges of the terminal.
 .TP
-S
-Display seconds.
+<space>
+Pause and resume clock, timer or countdown.
 .TP
-T
-Switch time output to the 12\-hour format.
+Z
+Restart the timer or countdown (see \fB-p\fR below). This command has no effect on regular time display.
+.TP
++
+Add one minute to the countdown.
+.TP
+-
+Subtract one minute to the countdown.
 .TP
 Q
 Quit.
 .SH "OPTIONS"
 .LP
 .TP
-\fB\-s\fR
-Show seconds.
-.TP
-\fB\-S\fR
-Screensaver mode. tty\-clock terminates when any key is pressed.
-.TP
-\fB\-x\fR
-Show box.
-.TP
-\fB\-c\fR
-Set the clock at the center of the terminal.
-.TP
-\fB\-C\fR \fI[0\-7]\fR
-Set the clock color.
-.TP
-\fB\-b\fR
-Use bold colors.
-.TP
-\fB\-t\fR
-Set the hour in 12h format.
-.TP
-\fB\-u\fR
-Use UTC time.
-.TP
-\fB\-T\fR \fItty\fR
-Display the clock on the given \fItty\fR. \fItty\fR must be
-a valid character device to which the user has rw access permissions.
-(See \fBEXAMPLES\fR)
-.TP
-\fB\-r\fR
-Do rebound the clock.
-.TP
-\fB\-f\fR \fIformat\fR
-Set the date format as described in \fBstrftime(3)\fR.
-.TP
-\fB\-n\fR
-Do not quit the program when the Q key is pressed (or when any
-key is pressed while in \fBScreensaver\fR mode). A signal must
-be sent to \fItty\-clock\fR in order to terminate its execution. (See \fBEXAMPLES\fR)
+\fB\-h\fR
+Show usage information.
 .TP
 \fB\-v\fR
 Show tty\-clock version.
@@ -96,20 +81,70 @@ Show tty\-clock version.
 \fB\-i\fR
 Show some info about tty\-clock.
 .TP
-\fB\-h\fR
-Show usage information.
+\fB\-s\fR
+Show seconds.
+.TP
+\fB\-H\fR
+Hide hour.
 .TP
 \fB\-D\fR
-Hide the date.
+Hide date.
 .TP
-\fB\-B\fR
-Enable blinking colon.
+\fB\-t\fR
+Set the hour in 12h format.
+.TP
+\fB\-u\fR
+Use UTC time.
+.TP
+\fB\-f\fR \fIformat\fR
+Set the date format as described in \fBstrftime(3)\fR.
+.TP
+\fB\-c\fR
+Set the clock at the center of the terminal.
+.TP
+\fB\-r\fR
+Bounce the clock around the screen.
 .TP
 \fB\-d\fR \fIdelay\fR
 Set the delay (in seconds) between two redraws of the clock. Default 1s.
 .TP
 \fB\-a\fR \fInsdelay\fR
 Additional delay (in nanoseconds) between two redraws of the clock. Default 0ns.
+.TP
+\fB\-C\fR \fI[0\-7]\fR
+Set the clock color.
+.TP
+\fB\-b\fR
+Use bold colors.
+.TP
+\fB\-x\fR
+Draw boxes around clock and date.
+.TP
+\fB\-B\fR
+Blink the colons, unless the clock is paused (see \fBCOMMANDS\fR).
+.TP
+\fB\-e\fR
+Show elapsed time instead of time of day. Date will be hidden.
+.TP
+\fB\-p\fR \fIduration\fR
+Switch to countdown mode, or to timer mode if \fB\-e\fR is also specified. Date will be hidden. Exit when done.
+.TP
+\fB\-S\fR
+Screensaver mode. tty\-clock terminates when any key is pressed.
+.TP
+\fB\-n\fR
+Do not quit the program when the Q key is pressed (or when any
+key is pressed while in \fBScreensaver\fR mode). A signal must
+be sent to \fItty\-clock\fR in order to terminate its execution. (See \fBEXAMPLES\fR)
+.TP
+\fB\-T\fR \fItty\fR
+Display the clock on the given \fItty\fR. \fItty\fR must be
+a valid character device to which the user has rw access permissions.
+(See \fBEXAMPLES\fR)
+.SH "EXIT STATUS"
+The exit status is 0 if the program is terminated either with the \fBq\fR command or if
+the timeout set with \fB\-p\fR is reached. Exit status is 1 if an error occurred,
+and 2 if the program was interrupted with a signal.
 .SH "EXAMPLES"
 .LP
 To invoke
@@ -118,6 +153,14 @@ in screensaver mode with the clock display set to rebound and the update
 delay set to 1/10th of a second (10 FPS):
 .IP
 $ tty\-clock \-Sra 100000000 \-d 0
+.LP
+Exit after 30 minute have elapsed, showing hours and minutes centered in the window.
+.IP
+$ tty\-clock \-p 1800 \-e \-c
+.LP
+Show a 1 minute and 10 seconds countdown in a box then exit. Hours are hidden, seconds are shown.
+.IP
+$ tty\-clock \-p 70 -x \-Hs
 .LP
 The following example arranges for \fItty\-clock\fR to be displayed
 indefinitely on one of the Virtual Terminals on a Linux system

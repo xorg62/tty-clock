@@ -1,6 +1,6 @@
 /*
  *      TTY-CLOCK Main file.
- *      Copyright © 2009-2018 tty-clock contributors
+ *      Copyright © 2009-2021 tty-clock contributors
  *      Copyright © 2008 Martin Duquesnoy <xorg62@gmail.com>
  *      All rights reserved.
  *
@@ -40,6 +40,13 @@ init(void)
      setlocale(LC_TIME,"");
 
      ttyclock.bg = COLOR_BLACK;
+
+     /* Return codes:
+      *    0 (EXIT_SUCCESS) = terminated nicely, either with 'q' or with timeout (-p option)
+      *    1 (EXIT_FAILURE) = terminated abnormaly
+      *    2= terminated with signal (eg. control-C)
+      */
+     ttyclock.retcode = EXIT_SUCCESS;
 
      /* Init ncurses */
      if (ttyclock.tty) {
@@ -92,13 +99,15 @@ init(void)
           ttyclock.geo.a = 1;
      if(!ttyclock.geo.b)
           ttyclock.geo.b = 1;
-     ttyclock.geo.w = (ttyclock.option.second) ? SECFRAMEW : NORMFRAMEW;
+     ttyclock.geo.w = compute_screen_width();
      ttyclock.geo.h = 7;
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
           ttyclock.tm = gmtime(&(ttyclock.lt));
      }
      ttyclock.lt = time(NULL);
+     ttyclock.lt_origin = ttyclock.lt;
+     
      update_hour();
 
      /* Create clock win */
@@ -146,10 +155,12 @@ signal_handler(int signal)
      {
      case SIGINT:
      case SIGTERM:
+          ttyclock.retcode = EXIT_INTERRUPTED;
           ttyclock.running = false;
           break;
           /* Segmentation fault signal */
      case SIGSEGV:
+          ttyclock.retcode = EXIT_FAILURE;
           endwin();
           fprintf(stderr, "Segmentation fault.\n");
           exit(EXIT_FAILURE);
@@ -173,11 +184,27 @@ update_hour(void)
 {
      int ihour;
      char tmpstr[128];
+     time_t shown_time;
 
      ttyclock.lt = time(NULL);
-     ttyclock.tm = localtime(&(ttyclock.lt));
-     if(ttyclock.option.utc) {
-          ttyclock.tm = gmtime(&(ttyclock.lt));
+     shown_time = (ttyclock.lt_paused ? ttyclock.lt_paused : ttyclock.lt);
+
+     if(ttyclock.option.elapsed)
+     {
+          shown_time -= ttyclock.lt_origin;
+          ttyclock.tm = gmtime(&(shown_time));
+     }
+     else if(ttyclock.option.countdown && ttyclock.option.timeout > 0)
+     {
+          shown_time -= ttyclock.lt_origin;
+          shown_time = ttyclock.option.timeout - shown_time;
+          ttyclock.tm = gmtime(&(shown_time));
+     }
+     else
+     {
+          ttyclock.tm = localtime(&(shown_time));
+          if(ttyclock.option.utc)
+               ttyclock.tm = gmtime(&(shown_time));
      }
 
      ihour = ttyclock.tm->tm_hour;
@@ -213,6 +240,45 @@ update_hour(void)
      return;
 }
 
+bool
+timed_out(void)
+{
+     if(ttyclock.lt_paused || !ttyclock.option.timeout)
+          return false;
+     return (ttyclock.lt >=  ttyclock.lt_origin + ttyclock.option.timeout);
+}
+
+int
+compute_screen_width(void)
+{
+     int w = FULLFRAMEW;
+     if(!ttyclock.option.second)
+          w -= CLKFIELDW;
+     if(!ttyclock.option.hour)
+          w -= CLKFIELDW;
+     return w;
+}
+
+void
+update_clock_layout(void)
+{
+     int new_w;
+     int y_adj;
+
+     if(!ttyclock.option.date)
+     {
+          wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
+          werase(ttyclock.datewin);
+          wrefresh(ttyclock.datewin);
+     }
+ 
+     new_w = compute_screen_width();
+     for(y_adj = 0; (ttyclock.geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
+     clock_move(ttyclock.geo.x, (ttyclock.geo.y - y_adj), new_w, ttyclock.geo.h);
+     set_center(ttyclock.option.center);
+     return;
+}
+
 void
 draw_number(int n, int x, int y)
 {
@@ -242,46 +308,59 @@ draw_number(int n, int x, int y)
 void
 draw_clock(void)
 {
-     /* Draw hour numbers */
-     draw_number(ttyclock.date.hour[0], 1, 1);
-     draw_number(ttyclock.date.hour[1], 1, 8);
+     int xpos = 1;
      chtype dotcolor = COLOR_PAIR(1);
-     if (ttyclock.option.blink && time(NULL) % 2 == 0)
+     if (ttyclock.option.blink && time(NULL) % 2 == 0 && !ttyclock.lt_paused)
           dotcolor = COLOR_PAIR(2);
 
-     /* 2 dot for number separation */
-     wbkgdset(ttyclock.framewin, dotcolor);
-     mvwaddstr(ttyclock.framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock.framewin, 4, 16, "  ");
-
-     /* Draw minute numbers */
-     draw_number(ttyclock.date.minute[0], 1, 20);
-     draw_number(ttyclock.date.minute[1], 1, 27);
-
-     /* Draw the date */
-     if (ttyclock.option.bold)
-          wattron(ttyclock.datewin, A_BOLD);
-     else
-          wattroff(ttyclock.datewin, A_BOLD);
-
-     if (ttyclock.option.date)
+     /* Draw hour numbers */
+     if (ttyclock.option.hour)
      {
-          wbkgdset(ttyclock.datewin, (COLOR_PAIR(2)));
-          mvwprintw(ttyclock.datewin, (DATEWINH / 2), 1, ttyclock.date.datestr);
-          wrefresh(ttyclock.datewin);
+          draw_number(ttyclock.date.hour[0], 1, xpos);
+          xpos += 7;
+          draw_number(ttyclock.date.hour[1], 1, xpos);
+          xpos += 8;
+
+          /* 2 dot for number separation */
+          wbkgdset(ttyclock.framewin, dotcolor);
+          mvwaddstr(ttyclock.framewin, 2, xpos, "  ");
+          mvwaddstr(ttyclock.framewin, 4, xpos, "  ");
+          xpos += 4;
      }
 
+     /* Draw minute numbers */
+     draw_number(ttyclock.date.minute[0], 1, xpos);
+     xpos += 7;
+     draw_number(ttyclock.date.minute[1], 1, xpos);
+     xpos += 8;
+
      /* Draw second if the option is enabled */
-     if(ttyclock.option.second)
+     if (ttyclock.option.second)
      {
           /* Again 2 dot for number separation */
           wbkgdset(ttyclock.framewin, dotcolor);
-          mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
-          mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
+          mvwaddstr(ttyclock.framewin, 2, xpos, "  ");
+          mvwaddstr(ttyclock.framewin, 4, xpos, "  ");
+          xpos += 4;
 
           /* Draw second numbers */
-          draw_number(ttyclock.date.second[0], 1, 39);
-          draw_number(ttyclock.date.second[1], 1, 46);
+          draw_number(ttyclock.date.second[0], 1, xpos);
+          xpos += 7;
+          draw_number(ttyclock.date.second[1], 1, xpos);
+          xpos += 8;
+     }
+
+     /* Draw the date */
+     if (ttyclock.option.date)
+     {
+          if (ttyclock.option.bold)
+               wattron(ttyclock.datewin, A_BOLD);
+          else
+               wattroff(ttyclock.datewin, A_BOLD);
+
+          wbkgdset(ttyclock.datewin, (COLOR_PAIR(2)));
+          mvwprintw(ttyclock.datewin, (DATEWINH / 2), 1, ttyclock.date.datestr);
+          wrefresh(ttyclock.datewin);
      }
 
      return;
@@ -357,21 +436,6 @@ clock_rebound(void)
 }
 
 void
-set_second(void)
-{
-     int new_w = (((ttyclock.option.second = !ttyclock.option.second)) ? SECFRAMEW : NORMFRAMEW);
-     int y_adj;
-
-     for(y_adj = 0; (ttyclock.geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
-
-     clock_move(ttyclock.geo.x, (ttyclock.geo.y - y_adj), new_w, ttyclock.geo.h);
-
-     set_center(ttyclock.option.center);
-
-     return;
-}
-
-void
 set_center(bool b)
 {
      if((ttyclock.option.center = b))
@@ -399,7 +463,8 @@ set_box(bool b)
           wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
           wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
           box(ttyclock.framewin, 0, 0);
-          box(ttyclock.datewin,  0, 0);
+          if (ttyclock.option.date)
+               box(ttyclock.datewin,  0, 0);
      }
      else {
           wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
@@ -485,12 +550,39 @@ key_event(void)
      case 'q':
      case 'Q':
           if (ttyclock.option.noquit == false)
+          {
                ttyclock.running = false;
+               ttyclock.retcode = EXIT_SUCCESS;
+          }
           break;
 
      case 's':
      case 'S':
-          set_second();
+          ttyclock.option.second = !ttyclock.option.second;
+          update_clock_layout();
+          break;
+
+     case 'm':
+     case 'M':
+          /* Sad: legacy "move left" is H, so "hour" is M :( */
+          ttyclock.option.hour = !ttyclock.option.hour;
+          update_clock_layout();
+          break;
+
+     case 'd':
+     case 'D':
+          ttyclock.option.date = !ttyclock.option.date;
+          update_clock_layout();
+          break;
+
+     case 'e':
+     case 'E':
+          ttyclock.option.elapsed = !ttyclock.option.elapsed;
+          if(ttyclock.option.elapsed)
+          {
+               ttyclock.option.date = false;
+               update_clock_layout();
+          }
           break;
 
      case 't':
@@ -531,6 +623,44 @@ key_event(void)
           init_pair(2, i, ttyclock.bg);
           break;
 
+     case 'z':
+     case 'Z':
+          if(ttyclock.lt_origin)
+               ttyclock.lt_origin = ttyclock.lt;
+          if(ttyclock.lt_paused)
+               ttyclock.lt_paused = ttyclock.lt;
+          break;
+
+     case '+':
+          if(ttyclock.lt_origin)
+               ttyclock.lt_origin += 60;
+          break;
+
+     case '-':
+          if(ttyclock.lt_origin)
+          {
+               ttyclock.lt_origin -= 60;
+               if(ttyclock.lt  >=  ttyclock.lt_origin + ttyclock.option.timeout)
+                    ttyclock.lt_paused= false; /* make it break */
+          }
+          break;
+
+     case ' ':
+          if(!ttyclock.lt_paused)
+               ttyclock.lt_paused = ttyclock.lt;
+          else
+          {
+               if(ttyclock.lt_origin)
+               {
+                    /* shift origin by the pause duration */
+                    ttyclock.lt_origin += ttyclock.lt - ttyclock.lt_paused;
+                    ttyclock.lt_paused = 0;
+               }
+               ttyclock.lt_paused = 0;
+          }
+          break;
+
+
      default:
           pselect(1, &rfds, NULL, NULL, &length, NULL);
      }
@@ -547,6 +677,7 @@ main(int argc, char **argv)
      memset(&ttyclock, 0, sizeof(ttyclock_t));
 
      ttyclock.option.date = true;
+     ttyclock.option.hour = true;
 
      /* Default date format */
      strncpy(ttyclock.option.format, "%F", sizeof (ttyclock.option.format));
@@ -559,86 +690,119 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "hvisHDtuf:crd:a:C:Bxbep:SnT:")) != -1)
      {
+          /* "semantically ordered": please keep in sync with this switch, with the tty-clock.1 manpage and README */
+          /* Helper to generate the README: egrep '^ .*[ []-[a-zA-Z].*\\n"' ttyclock.c | sed -e 's/^ *"//' -e 's/\\n".*$//' -e 's/^\s*printf("//' */
           switch(c)
           {
+          /* general information */
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
-                      "    -s            Show seconds                                   \n"
-                      "    -S            Screensaver mode                               \n"
-                      "    -x            Show box                                       \n"
-                      "    -c            Set the clock at the center of the terminal    \n"
-                      "    -C [0-7]      Set the clock color                            \n"
-                      "    -b            Use bold colors                                \n"
-                      "    -t            Set the hour in 12h format                     \n"
-                      "    -u            Use UTC time                                   \n"
-                      "    -T tty        Display the clock on the specified terminal    \n"
-                      "    -r            Do rebound the clock                           \n"
-                      "    -f format     Set the date format                            \n"
-                      "    -n            Don't quit on keypress                         \n"
-                      "    -v            Show tty-clock version                         \n"
-                      "    -i            Show some info about tty-clock                 \n"
-                      "    -h            Show this page                                 \n"
-                      "    -D            Hide date                                      \n"
-                      "    -B            Enable blinking colon                          \n"
-                      "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
+               printf("usage : tty-clock [-hvisHDtucrbxBeSn] [-f format] [-d delay] [-a nsdelay] [-C [0-7]] [-p duration] [-T tty]\n"
+                      "    -h            Show this page                                                   \n"
+                      "    -v            Show tty-clock version                                           \n"
+                      "    -i            Show some info about tty-clock                                   \n"
+                      "    -s            Show seconds                                                     \n"
+                      "    -H            Hide hour                                                        \n"
+                      "    -D            Hide date                                                        \n"
+                      "    -t            Set the hour in 12h format                                       \n"
+                      "    -u            Use UTC time                                                     \n"
+                      "    -f format     Set the date format                                              \n"
+                      "    -c            Set the clock at the center of the terminal                      \n"
+                      "    -r            Do rebound the clock                                             \n"
+                      "    -d delay      Set the delay between two redraws of the clock. Default 1s       \n"
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns \n"
+                      "    -C [0-7]      Set the clock color                                              \n"
+                      "    -B            Enable blinking colon                                            \n"
+                      "    -x            Show box                                                         \n"
+                      "    -b            Use bold colors                                                  \n"
+                      "    -e            Display elapsed time, not current time                           \n"
+                      "    -p duration   Set count down duration in seconds. Exit when done               \n"
+                      "    -S            Screensaver mode                                                 \n"
+                      "    -n            Don't quit on keypress                                           \n"
+                      "    -T tty        Display the clock on the specified terminal                      \n");
+               exit(EXIT_SUCCESS);
+               break;
+          case 'v':
+               puts("TTY-Clock " VERSIONSTR);
                exit(EXIT_SUCCESS);
                break;
           case 'i':
-               puts("TTY-Clock 2 © by Martin Duquesnoy (xorg62@gmail.com), Grey (grey@greytheory.net)");
+               puts("TTY-Clock " VERSIONSTR " © by Martin Duquesnoy (xorg62@gmail.com), Grey (grey@greytheory.net)");
                exit(EXIT_SUCCESS);
                break;
-          case 'u':
-               ttyclock.option.utc = true;
-               break;
-          case 'v':
-               puts("TTY-Clock 2 © devel version");
-               exit(EXIT_SUCCESS);
-               break;
+
+          /* shown data */
           case 's':
                ttyclock.option.second = true;
                break;
-          case 'S':
-               ttyclock.option.screensaver = true;
+          case 'H':
+               ttyclock.option.hour = false;
                break;
-          case 'c':
-               ttyclock.option.center = true;
-               break;
-          case 'b':
-               ttyclock.option.bold = true;
-               break;
-          case 'C':
-               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
-                    ttyclock.option.color = atoi(optarg);
+          case 'D':
+               ttyclock.option.date = false;
                break;
           case 't':
                ttyclock.option.twelve = true;
                break;
-          case 'r':
-               ttyclock.option.rebound = true;
+
+          /* data format */
+          case 'u':
+               ttyclock.option.utc = true;
                break;
           case 'f':
                strncpy(ttyclock.option.format, optarg, 100);
+               break;
+
+          /* data layout */
+          case 'c':
+               ttyclock.option.center = true;
+               break;
+          case 'r':
+               ttyclock.option.rebound = true;
                break;
           case 'd':
                if(atol(optarg) >= 0 && atol(optarg) < 100)
                     ttyclock.option.delay = atol(optarg);
                break;
-          case 'D':
-               ttyclock.option.date = false;
-               break;
-          case 'B':
-               ttyclock.option.blink = true;
-               break;
           case 'a':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock.option.nsdelay = atol(optarg);
                break;
+          case 'C':
+               if(atoi(optarg) >= 0 && atoi(optarg) < 8)
+                    ttyclock.option.color = atoi(optarg);
+               break;
+          case 'B':
+               ttyclock.option.blink = true;
+               break;
           case 'x':
                ttyclock.option.box = true;
+               break;
+          case 'b':
+               ttyclock.option.bold = true;
+               break;
+
+          /* special modes */
+          case 'e':
+               ttyclock.option.elapsed = true;
+               ttyclock.option.date = false;
+               break;
+          case 'p':
+               if(atol(optarg)>0) {
+                    ttyclock.option.countdown = true;
+                    ttyclock.option.timeout = atol(optarg);
+                    ttyclock.option.date = false;
+               }
+               break;
+
+          /* screensaver */
+          case 'S':
+               ttyclock.option.screensaver = true;
+               break;
+          case 'n':
+               ttyclock.option.noquit = true;
                break;
           case 'T': {
                struct stat sbuf;
@@ -655,9 +819,6 @@ main(int argc, char **argv)
                     ttyclock.tty = strdup(optarg);
                }}
                break;
-          case 'n':
-               ttyclock.option.noquit = true;
-               break;
           }
      }
 
@@ -667,13 +828,19 @@ main(int argc, char **argv)
      {
           clock_rebound();
           update_hour();
+          if(timed_out())
+          {
+               ttyclock.retcode = EXIT_SUCCESS;
+               break;
+          }
           draw_clock();
           key_event();
      }
 
      endwin();
 
-     return 0;
+     exit(ttyclock.retcode);
 }
+
 
 // vim: expandtab tabstop=5 softtabstop=5 shiftwidth=5

@@ -50,15 +50,22 @@
 #include <ncurses.h>
 
 /* Macro */
-#define NORMFRAMEW 35
-#define SECFRAMEW  54
+#define VERSIONSTR "2.4dev"
+#define FULLFRAMEW 54
+#define CLKFIELDW  19
 #define DATEWINH   3
 #define AMSIGN     " [AM]"
 #define PMSIGN     " [PM]"
 
+/* #define EXIT_SUCESS 0
+ * #define EXIT_FAILURE 1 */
+#define EXIT_INTERRUPTED 2
+
 /* Global ttyclock struct */
 typedef struct
 {
+     int retcode;
+     
      /* while() boolean */
      bool running;
 
@@ -76,6 +83,7 @@ typedef struct
           bool center;
           bool rebound;
           bool date;
+          bool hour;
           bool utc;
           bool box;
           bool noquit;
@@ -85,6 +93,9 @@ typedef struct
           long delay;
           bool blink;
           long nsdelay;
+          long timeout;
+          bool countdown;
+          bool elapsed;
      } option;
 
      /* Clock geometry */
@@ -107,6 +118,8 @@ typedef struct
      /* time.h utils */
      struct tm *tm;
      time_t lt;
+     time_t lt_origin;
+     time_t lt_paused;
 
      /* Clock member */
      char *meridiem;
@@ -119,6 +132,7 @@ typedef struct
 void init(void);
 void signal_handler(int signal);
 void update_hour(void);
+int compute_screen_width(void);
 void draw_number(int n, int x, int y);
 void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
