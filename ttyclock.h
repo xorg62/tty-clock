@@ -73,6 +73,7 @@ typedef struct
           bool second;
           bool screensaver;
           bool twelve;
+          bool dozenal;
           bool center;
           bool rebound;
           bool date;
@@ -143,6 +144,8 @@ const bool number[][15] =
      {1,1,1,0,0,1,0,0,1,0,0,1,0,0,1}, /* 7 */
      {1,1,1,1,0,1,1,1,1,1,0,1,1,1,1}, /* 8 */
      {1,1,1,1,0,1,1,1,1,0,0,1,1,1,1}, /* 9 */
+     {1,0,1,1,0,1,1,1,1,1,0,1,1,0,1}, /* X */
+     {1,1,1,1,0,0,1,1,1,1,0,0,1,1,1}, /* E */
 };
 
 #endif /* TTYCLOCK_H_INCLUDED */

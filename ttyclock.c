@@ -82,6 +82,9 @@ init(void)
      sigaction(SIGINT,   &sig, NULL);
      sigaction(SIGSEGV,  &sig, NULL);
 
+     if (ttyclock.option.dozenal)
+          ttyclock.option.second = false;
+
      /* Init global struct */
      ttyclock.running = true;
      if(!ttyclock.geo.x)
@@ -180,6 +183,9 @@ update_hour(void)
           ttyclock.tm = gmtime(&(ttyclock.lt));
      }
 
+     if (ttyclock.option.dozenal)
+          ttyclock.option.twelve = false;
+
      ihour = ttyclock.tm->tm_hour;
 
      if(ttyclock.option.twelve)
@@ -209,6 +215,21 @@ update_hour(void)
      /* Set seconds */
      ttyclock.date.second[0] = ttyclock.tm->tm_sec / 10;
      ttyclock.date.second[1] = ttyclock.tm->tm_sec % 10;
+
+     if (ttyclock.option.dozenal)
+     {
+          /* Set digit 1 : 24/12 == 2 hours */
+          ttyclock.date.hour[0] = ttyclock.tm->tm_hour / 2;
+
+          /* Set digit 2 : 2*60/12 == 10 minutes */
+          ttyclock.date.hour[1] = ((ttyclock.tm->tm_hour % 2) * 60 + ttyclock.tm->tm_min) / 10;
+
+          /* Set digit 3 : 10*60/12 == 50 second */
+          ttyclock.date.minute[0] = (((ttyclock.tm->tm_min % 10) * 60) + ttyclock.tm->tm_sec) / 50;
+
+          /* Set digit 4 : 50/12 second */
+          ttyclock.date.minute[1] = ((((ttyclock.tm->tm_min % 10) * 60) + ttyclock.tm->tm_sec) % 50) * 12 / 50;
+     }
 
      return;
 }
@@ -249,14 +270,29 @@ draw_clock(void)
      if (ttyclock.option.blink && time(NULL) % 2 == 0)
           dotcolor = COLOR_PAIR(2);
 
-     /* 2 dot for number separation */
-     wbkgdset(ttyclock.framewin, dotcolor);
-     mvwaddstr(ttyclock.framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock.framewin, 4, 16, "  ");
+     if (ttyclock.option.dozenal)
+     {
+          /* Draw minute[0] numbers */
+          draw_number(ttyclock.date.minute[0], 1, 15);
 
-     /* Draw minute numbers */
-     draw_number(ttyclock.date.minute[0], 1, 20);
-     draw_number(ttyclock.date.minute[1], 1, 27);
+          /* 1 dot for number separation */
+          wbkgdset(ttyclock.framewin, dotcolor);
+          mvwaddstr(ttyclock.framewin, 5, 23, "  ");
+
+          /* Draw minute[1] numbers */
+          draw_number(ttyclock.date.minute[1], 1, 27);
+     }
+     else
+     {
+          /* 2 dot for number separation */
+          wbkgdset(ttyclock.framewin, dotcolor);
+          mvwaddstr(ttyclock.framewin, 2, 16, "  ");
+          mvwaddstr(ttyclock.framewin, 4, 16, "  ");
+
+          /* Draw minute numbers */
+          draw_number(ttyclock.date.minute[0], 1, 20);
+          draw_number(ttyclock.date.minute[1], 1, 27);
+     }
 
      /* Draw the date */
      if (ttyclock.option.bold)
@@ -361,6 +397,12 @@ set_second(void)
 {
      int new_w = (((ttyclock.option.second = !ttyclock.option.second)) ? SECFRAMEW : NORMFRAMEW);
      int y_adj;
+
+     if (ttyclock.option.dozenal)
+     {
+          ttyclock.option.second = false;
+          new_w = NORMFRAMEW;
+     }
 
      for(y_adj = 0; (ttyclock.geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
 
@@ -501,6 +543,17 @@ key_event(void)
           clock_move(ttyclock.geo.x, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
           break;
 
+     case 'z':
+     case 'Z':
+          ttyclock.option.dozenal = !ttyclock.option.dozenal;
+          /* Set the new ttyclock.date.datestr to resize date window */
+          update_hour();
+          if (ttyclock.option.dozenal)
+               set_second();
+          else
+               clock_move(ttyclock.geo.x, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
+          break;
+
      case 'c':
      case 'C':
           set_center(!ttyclock.option.center);
@@ -559,13 +612,13 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtzrhBxnDC:f:d:T:a:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtzrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -573,6 +626,7 @@ main(int argc, char **argv)
                       "    -C [0-7]      Set the clock color                            \n"
                       "    -b            Use bold colors                                \n"
                       "    -t            Set the hour in 12h format                     \n"
+                      "    -z            Set the clock in dozenal format                \n"
                       "    -u            Use UTC time                                   \n"
                       "    -T tty        Display the clock on the specified terminal    \n"
                       "    -r            Do rebound the clock                           \n"
@@ -616,6 +670,9 @@ main(int argc, char **argv)
                break;
           case 't':
                ttyclock.option.twelve = true;
+               break;
+          case 'z':
+               ttyclock.option.dozenal = true;
                break;
           case 'r':
                ttyclock.option.rebound = true;

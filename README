@@ -1,4 +1,4 @@
-usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty]
+usage : tty-clock [-iuvsScbtzrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty]
     -s            Show seconds
     -S            Screensaver mode
     -x            Show box
@@ -6,6 +6,7 @@ usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdel
     -C [0-7]      Set the clock color
     -b            Use bold colors
     -t            Set the hour in 12h format
+    -z            Set the clock in dozenal format
     -u            Use UTC time
     -T tty        Display the clock on the specified terminal
     -r            Do rebound the clock
