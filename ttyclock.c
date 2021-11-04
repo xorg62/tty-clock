@@ -267,7 +267,7 @@ draw_clock(void)
      if (ttyclock.option.date)
      {
           wbkgdset(ttyclock.datewin, (COLOR_PAIR(2)));
-          mvwprintw(ttyclock.datewin, (DATEWINH / 2), 1, ttyclock.date.datestr);
+          mvwprintw(ttyclock.datewin, (DATEWINH / 2), 1, "%s", ttyclock.date.datestr);
           wrefresh(ttyclock.datewin);
      }
 
