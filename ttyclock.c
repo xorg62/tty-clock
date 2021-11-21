@@ -200,6 +200,7 @@ update_hour(void)
      ttyclock.date.minute[1] = ttyclock.tm->tm_min % 10;
 
      /* Set date string */
+     strcpy(ttyclock.date.old_datestr, ttyclock.date.datestr);
      strftime(tmpstr,
               sizeof(tmpstr),
               ttyclock.option.format,
@@ -242,6 +243,15 @@ draw_number(int n, int x, int y)
 void
 draw_clock(void)
 {
+     if (ttyclock.option.date && !ttyclock.option.rebound &&
+               strcmp(ttyclock.date.datestr, ttyclock.date.old_datestr) != 0)
+     {
+          clock_move(ttyclock.geo.x,
+                     ttyclock.geo.y,
+                     ttyclock.geo.w,
+                     ttyclock.geo.h);
+     }
+
      /* Draw hour numbers */
      draw_number(ttyclock.date.hour[0], 1, 1);
      draw_number(ttyclock.date.hour[1], 1, 8);

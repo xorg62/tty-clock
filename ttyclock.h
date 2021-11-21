@@ -102,6 +102,7 @@ typedef struct
           unsigned int minute[2];
           unsigned int second[2];
           char datestr[256];
+          char old_datestr[256];
      } date;
 
      /* time.h utils */
