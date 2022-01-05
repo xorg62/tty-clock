@@ -720,8 +720,6 @@ time_t rounded_timestamp(void)
 
 struct timespec sleep_length(void)
 {
-     beep();
-
      static const long SECOND_IN_NANOSECONDS = 1000 * 1000 * 1000;
      static const long NINE_TENTHS = 900 * 1000 * 1000;
 
