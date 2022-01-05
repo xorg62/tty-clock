@@ -85,6 +85,7 @@ typedef struct
           long delay;
           bool blink;
           long nsdelay;
+          bool rounding_to_closest_second;
      } option;
 
      /* Clock geometry */
@@ -113,7 +114,6 @@ typedef struct
      char *meridiem;
      WINDOW *framewin;
      WINDOW *datewin;
-
 } ttyclock_t;
 
 /* Prototypes */
@@ -127,6 +127,8 @@ void set_second(void);
 void set_center(bool b);
 void set_box(bool b);
 void key_event(void);
+time_t timestamp(void);
+time_t rounded_timestamp(void);
 
 /* Global variable */
 ttyclock_t ttyclock;

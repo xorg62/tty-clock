@@ -98,7 +98,7 @@ init(void)
      if(ttyclock.option.utc) {
           ttyclock.tm = gmtime(&(ttyclock.lt));
      }
-     ttyclock.lt = time(NULL);
+     ttyclock.lt = timestamp();
      update_hour();
 
      /* Create clock win */
@@ -174,7 +174,7 @@ update_hour(void)
      int ihour;
      char tmpstr[128];
 
-     ttyclock.lt = time(NULL);
+     ttyclock.lt = timestamp();
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
           ttyclock.tm = gmtime(&(ttyclock.lt));
@@ -256,7 +256,7 @@ draw_clock(void)
      draw_number(ttyclock.date.hour[0], 1, 1);
      draw_number(ttyclock.date.hour[1], 1, 8);
      chtype dotcolor = COLOR_PAIR(1);
-     if (ttyclock.option.blink && time(NULL) % 2 == 0)
+     if (ttyclock.option.blink && timestamp() % 2 == 0)
           dotcolor = COLOR_PAIR(2);
 
      /* 2 dot for number separation */
@@ -566,6 +566,7 @@ main(int argc, char **argv)
      ttyclock.option.delay = 1; /* 1FPS */
      ttyclock.option.nsdelay = 0; /* -0FPS */
      ttyclock.option.blink = false;
+     ttyclock.option.rounding_to_closest_second = true;
 
      atexit(cleanup);
 
@@ -646,6 +647,7 @@ main(int argc, char **argv)
           case 'a':
                if(atol(optarg) >= 0 && atol(optarg) < 1000000000)
                     ttyclock.option.nsdelay = atol(optarg);
+               ttyclock.option.rounding_to_closest_second = false;
                break;
           case 'x':
                ttyclock.option.box = true;
@@ -684,6 +686,40 @@ main(int argc, char **argv)
      endwin();
 
      return 0;
+}
+
+time_t timestamp(void) {
+     if (ttyclock.option.rounding_to_closest_second)
+     {
+          return rounded_timestamp();
+     }
+     else
+     {
+          return time(NULL);
+     }
+}
+
+time_t rounded_timestamp(void) {
+     static const long HALF_SECOND_IN_NANOSECONDS = 500 * 1000 * 1000;
+     struct timespec result;
+
+     if (clock_gettime(CLOCK_REALTIME, &result) != 0)
+     {
+          fprintf(stderr,
+               "Failed to read time from CLOCK_REALTIME - errno: %d, error: %s\n",
+               errno,
+               strerror(errno));
+          exit(1);
+     }
+
+    if (result.tv_nsec >= HALF_SECOND_IN_NANOSECONDS)
+    {
+        return result.tv_sec + 1;
+    }
+    else
+    {
+        return result.tv_sec;
+    }
 }
 
 // vim: expandtab tabstop=5 softtabstop=5 shiftwidth=5
