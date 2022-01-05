@@ -113,7 +113,6 @@ typedef struct
      char *meridiem;
      WINDOW *framewin;
      WINDOW *datewin;
-
 } ttyclock_t;
 
 /* Prototypes */
@@ -127,6 +126,11 @@ void set_second(void);
 void set_center(bool b);
 void set_box(bool b);
 void key_event(void);
+time_t timestamp(void);
+time_t rounded_timestamp(void);
+struct timespec sleep_length(void);
+struct timespec simple_sleep_length(void);
+bool one_second_delay(void);
 
 /* Global variable */
 ttyclock_t ttyclock;
