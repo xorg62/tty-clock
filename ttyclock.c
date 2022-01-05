@@ -705,11 +705,7 @@ time_t rounded_timestamp(void) {
 
      if (clock_gettime(CLOCK_REALTIME, &result) != 0)
      {
-          fprintf(stderr,
-               "Failed to read time from CLOCK_REALTIME - errno: %d, error: %s\n",
-               errno,
-               strerror(errno));
-          exit(1);
+          return time(NULL);
      }
 
     if (result.tv_nsec >= HALF_SECOND_IN_NANOSECONDS)
