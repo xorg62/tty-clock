@@ -174,7 +174,6 @@ update_hour(void)
      int ihour;
      char tmpstr[128];
 
-     ttyclock.lt = time(NULL);
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
           ttyclock.tm = gmtime(&(ttyclock.lt));
@@ -256,7 +255,7 @@ draw_clock(void)
      draw_number(ttyclock.date.hour[0], 1, 1);
      draw_number(ttyclock.date.hour[1], 1, 8);
      chtype dotcolor = COLOR_PAIR(1);
-     if (ttyclock.option.blink && time(NULL) % 2 == 0)
+     if (ttyclock.option.blink && ttyclock.lt % 2 == 0)
           dotcolor = COLOR_PAIR(2);
 
      /* 2 dot for number separation */
@@ -425,7 +424,7 @@ key_event(void)
 {
      int i, c;
 
-     struct timespec length = { ttyclock.option.delay, ttyclock.option.nsdelay };
+     struct timespec length = sleep_length();
      
      fd_set rfds;
      FD_ZERO(&rfds);
@@ -679,11 +678,89 @@ main(int argc, char **argv)
           update_hour();
           draw_clock();
           key_event();
+          ttyclock.lt = timestamp();
      }
 
      endwin();
 
      return 0;
+}
+
+time_t timestamp(void)
+{
+     if (whole_seconds_delay())
+     {
+          return rounded_timestamp();
+     }
+     else
+     {
+          return time(NULL);
+     }
+}
+
+time_t rounded_timestamp(void)
+{
+     static const long HALF_SECOND_IN_NANOSECONDS = 500 * 1000 * 1000;
+     struct timespec currentTime;
+
+     if (clock_gettime(CLOCK_REALTIME, &currentTime) != 0)
+     {
+          return time(NULL);
+     }
+
+     if (currentTime.tv_nsec >= HALF_SECOND_IN_NANOSECONDS)
+     {
+          return currentTime.tv_sec + 1;
+     }
+     else
+     {
+          return currentTime.tv_sec;
+     }
+}
+
+struct timespec sleep_length(void)
+{
+     static const long SECOND_IN_NANOSECONDS = 1000 * 1000 * 1000;
+     static const long NINE_TENTHS = 900 * 1000 * 1000;
+
+     if (whole_seconds_delay())
+     {
+          struct timespec currentTime;
+
+          if (clock_gettime(CLOCK_REALTIME, &currentTime) == 0 &&
+               currentTime.tv_nsec > 0)
+          {
+               struct timespec result;
+
+               // avoiding sleeping for < 1 / 10 of a second
+               if (currentTime.tv_nsec < NINE_TENTHS) {
+                    result.tv_sec = ttyclock.option.delay - 1;
+               }
+               else
+               {
+                    result.tv_sec = ttyclock.option.delay;
+               }
+
+               result.tv_nsec = SECOND_IN_NANOSECONDS - currentTime.tv_nsec;
+               return result;
+          }
+     }
+
+     return simple_sleep_length();
+}
+
+struct timespec simple_sleep_length(void)
+{
+     struct timespec result;
+     result.tv_sec = ttyclock.option.delay;
+     result.tv_nsec = ttyclock.option.nsdelay;
+     return result;
+}
+
+bool whole_seconds_delay(void)
+{
+     return ttyclock.option.delay >= 1 &&
+          ttyclock.option.nsdelay == 0;
 }
 
 // vim: expandtab tabstop=5 softtabstop=5 shiftwidth=5
