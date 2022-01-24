@@ -10,6 +10,7 @@ INSTALLPATH ?= ${DESTDIR}${PREFIX}/bin
 MANPATH ?= ${DESTDIR}${PREFIX}/share/man/man1
 DOCKER ?= docker
 DOCKER_IMAGE ?= localhost/tty-clock
+DOCKER_TIMEZONE ?= UTC
 
 ifeq ($(shell sh -c 'which ncurses6-config>/dev/null 2>/dev/null && echo y'), y)
 	CFLAGS += -Wall -g $$(ncurses6-config --cflags)
@@ -61,5 +62,5 @@ clean :
 
 docker :
 
-	${DOCKER} build -t ${DOCKER_IMAGE} .
+	${DOCKER} build --build-arg=TIMEZONE=${DOCKER_TIMEZONE} -t ${DOCKER_IMAGE} .
 	@echo "Run the container: ${DOCKER} run --rm -it ${DOCKER_IMAGE} tty-clock --help"
