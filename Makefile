@@ -63,4 +63,4 @@ clean :
 docker :
 
 	${DOCKER} build --build-arg=TIMEZONE=${DOCKER_TIMEZONE} -t ${DOCKER_IMAGE} .
-	@echo "Run the container: ${DOCKER} run --rm -it ${DOCKER_IMAGE} tty-clock --help"
+	@echo "Run the container: ${DOCKER} run --rm -it  -e TZ=${DOCKER_TIMEZONE} ${DOCKER_IMAGE} tty-clock --help"
