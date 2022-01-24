@@ -9,6 +9,7 @@ PREFIX ?= /usr/local
 INSTALLPATH ?= ${DESTDIR}${PREFIX}/bin
 MANPATH ?= ${DESTDIR}${PREFIX}/share/man/man1
 DOCKER ?= docker
+DOCKER_IMAGE ?= localhost/tty-clock
 
 ifeq ($(shell sh -c 'which ncurses6-config>/dev/null 2>/dev/null && echo y'), y)
 	CFLAGS += -Wall -g $$(ncurses6-config --cflags)
@@ -60,5 +61,5 @@ clean :
 
 docker :
 
-	${DOCKER} build -t localhost/tty-clock .
-	@echo "Run the container: ${DOCKER} run --rm -it localhost/tty-clock tty-clock --help"
+	${DOCKER} build -t ${DOCKER_IMAGE} .
+	@echo "Run the container: ${DOCKER} run --rm -it ${DOCKER_IMAGE} tty-clock --help"
