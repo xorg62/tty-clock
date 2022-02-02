@@ -70,9 +70,6 @@ init(void)
      init_pair(0, ttyclock.bg, ttyclock.bg);
      init_pair(1, ttyclock.bg, ttyclock.option.color);
      init_pair(2, ttyclock.option.color, ttyclock.bg);
-//     init_pair(0, ttyclock.bg, ttyclock.bg);
-//     init_pair(1, ttyclock.bg, ttyclock.option.color);
-//     init_pair(2, ttyclock.option.color, ttyclock.bg);
      refresh();
 
      /* Init signal handler */
@@ -162,6 +159,7 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
+     /* Turn on cursor on VT100 compatible terminals */
      printf("\033[?25h");
 
      if (ttyclock.ttyscr)
@@ -234,9 +232,9 @@ draw_number(int n, int x, int y)
           else
                wattroff(ttyclock.framewin, A_BLINK);
 
-          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i/2])
-               ? 2*COLOR_PAIR(number[n][i/2]) | A_REVERSE
-               : 2*COLOR_PAIR(number[n][i/2]) | A_NORMAL
+          wbkgdset(ttyclock.framewin, number[n][i/2]
+               ? COLOR_PAIR(2) | A_REVERSE
+               : COLOR_PAIR(0) | A_NORMAL
           );
           mvwaddch(ttyclock.framewin, x, sy, ' ');
      }
@@ -292,7 +290,6 @@ draw_clock(void)
      {
           /* Again 2 dot for number separation */
           wbkgdset(ttyclock.framewin, dotcolor | A_REVERSE);
-
           mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
           mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
           wbkgdset(ttyclock.framewin, dotcolor | A_NORMAL);
@@ -335,6 +332,7 @@ clock_move(int x, int y, int w, int h)
                 ttyclock.geo.y + (ttyclock.geo.w / 2) - (strlen(ttyclock.date.datestr) / 2) - 1);
           wresize(ttyclock.datewin, DATEWINH, strlen(ttyclock.date.datestr) + 2);
 
+          /* Draw "T" box-drawing character for joining clock and date windows */
           if (ttyclock.option.box) {
                box(ttyclock.datewin,  0, 0);
                mvwaddch(ttyclock.datewin, 0, 0, ACS_TTEE);
@@ -420,7 +418,6 @@ set_box(bool b)
           wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
           box(ttyclock.framewin, 0, 0);
           box(ttyclock.datewin,  0, 0);
-
      }
      else {
           wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
@@ -430,6 +427,7 @@ set_box(bool b)
      wrefresh(ttyclock.datewin);
      wrefresh(ttyclock.framewin);
 
+     /* Draw "T" box-drawing character for joining clock and date windows */
      if(ttyclock.option.box) {
           mvwaddch(ttyclock.datewin, 0, 0, ACS_TTEE);
           mvwaddch(ttyclock.datewin, 0, strlen(ttyclock.date.datestr) + 1, ACS_TTEE);
@@ -569,6 +567,7 @@ main(int argc, char **argv)
 {
      int c;
 
+     /* Turn off cursor on VT100 compatible terminals */
      printf("\033[?25l");
 
      /* Alloc ttyclock */
