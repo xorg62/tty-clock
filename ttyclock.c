@@ -162,6 +162,8 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
+     printf("\033[?25h");
+
      if (ttyclock.ttyscr)
           delscreen(ttyclock.ttyscr);
 
@@ -232,7 +234,10 @@ draw_number(int n, int x, int y)
           else
                wattroff(ttyclock.framewin, A_BLINK);
 
-          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i/2]));
+          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i/2])
+               ? 2*COLOR_PAIR(number[n][i/2]) | A_REVERSE
+               : 2*COLOR_PAIR(number[n][i/2]) | A_NORMAL
+          );
           mvwaddch(ttyclock.framewin, x, sy, ' ');
      }
      wrefresh(ttyclock.framewin);
@@ -255,14 +260,15 @@ draw_clock(void)
      /* Draw hour numbers */
      draw_number(ttyclock.date.hour[0], 1, 1);
      draw_number(ttyclock.date.hour[1], 1, 8);
-     chtype dotcolor = COLOR_PAIR(1);
+     chtype dotcolor = COLOR_PAIR(2);
      if (ttyclock.option.blink && time(NULL) % 2 == 0)
-          dotcolor = COLOR_PAIR(2);
+          dotcolor = COLOR_PAIR(1);
 
      /* 2 dot for number separation */
-     wbkgdset(ttyclock.framewin, dotcolor);
+     wbkgdset(ttyclock.framewin, dotcolor | A_REVERSE);
      mvwaddstr(ttyclock.framewin, 2, 16, "  ");
      mvwaddstr(ttyclock.framewin, 4, 16, "  ");
+     wbkgdset(ttyclock.framewin, dotcolor | A_NORMAL);
 
      /* Draw minute numbers */
      draw_number(ttyclock.date.minute[0], 1, 20);
@@ -285,9 +291,11 @@ draw_clock(void)
      if(ttyclock.option.second)
      {
           /* Again 2 dot for number separation */
-          wbkgdset(ttyclock.framewin, dotcolor);
+          wbkgdset(ttyclock.framewin, dotcolor | A_REVERSE);
+
           mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
           mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
+          wbkgdset(ttyclock.framewin, dotcolor | A_NORMAL);
 
           /* Draw second numbers */
           draw_number(ttyclock.date.second[0], 1, 39);
@@ -329,6 +337,8 @@ clock_move(int x, int y, int w, int h)
 
           if (ttyclock.option.box) {
                box(ttyclock.datewin,  0, 0);
+               mvwaddch(ttyclock.datewin, 0, 0, ACS_TTEE);
+               mvwaddch(ttyclock.datewin, 0, strlen(ttyclock.date.datestr) + 1, ACS_TTEE);
           }
      }
 
@@ -410,6 +420,7 @@ set_box(bool b)
           wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
           box(ttyclock.framewin, 0, 0);
           box(ttyclock.datewin,  0, 0);
+
      }
      else {
           wborder(ttyclock.framewin, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
@@ -418,6 +429,11 @@ set_box(bool b)
 
      wrefresh(ttyclock.datewin);
      wrefresh(ttyclock.framewin);
+
+     if(ttyclock.option.box) {
+          mvwaddch(ttyclock.datewin, 0, 0, ACS_TTEE);
+          mvwaddch(ttyclock.datewin, 0, strlen(ttyclock.date.datestr) + 1, ACS_TTEE);
+     }
 }
 
 void
@@ -552,6 +568,8 @@ int
 main(int argc, char **argv)
 {
      int c;
+
+     printf("\033[?25l");
 
      /* Alloc ttyclock */
      memset(&ttyclock, 0, sizeof(ttyclock_t));
