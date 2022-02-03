@@ -218,6 +218,8 @@ void
 draw_number(int n, int x, int y)
 {
      int i, sy = y;
+     unsigned int on  = COLOR_PAIR(2) | A_REVERSE;
+     unsigned int off = COLOR_PAIR(0) | A_NORMAL;
 
      for(i = 0; i < 30; ++i, ++sy)
      {
@@ -233,8 +235,8 @@ draw_number(int n, int x, int y)
                wattroff(ttyclock.framewin, A_BLINK);
 
           wbkgdset(ttyclock.framewin, number[n][i/2]
-               ? COLOR_PAIR(2) | A_REVERSE
-               : COLOR_PAIR(0) | A_NORMAL
+               ? on
+               : off
           );
           mvwaddch(ttyclock.framewin, x, sy, ' ');
      }
