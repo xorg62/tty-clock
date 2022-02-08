@@ -227,7 +227,7 @@ draw_number(int n, int x, int y)
       *
       * pixel_off is anothter bitmask made by:
       * - COLOR_PAIR(0) which means "not visible"
-      * A_NORMAL is "not reverse" attribute
+      * - A_NORMAL is "not reverse" attribute
       *
       * so "pixel_on" is used to draw "block characters" which are reversed spaces,
       *    "pixel_off" is used to draw the "empty space".
