@@ -220,6 +220,18 @@ draw_number(int n, int x, int y)
      int i, sy = y;
      unsigned int pixel_on  = COLOR_PAIR(2) | A_REVERSE;
      unsigned int pixel_off = COLOR_PAIR(0) | A_NORMAL;
+     /*
+      * pixel_on is a bitmask made by:
+      * - COLOR_PAIR(2), defined by "init_color"
+      * - A_REVERSE is the attribute that defines reverse characters (reversed space is a big "pixel")
+      *
+      * pixel_off is anothter bitmask made by:
+      * - COLOR_PAIR(0) which means "not visible"
+      * A_NORMAL is "not reverse" attribute
+      *
+      * so "pixel_on" is used to draw "block characters" which are reversed spaces,
+      *    "pixel_off" is used to draw the "empty space".
+      */
 
      for(i = 0; i < 30; ++i, ++sy)
      {
