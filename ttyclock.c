@@ -70,9 +70,6 @@ init(void)
      init_pair(0, ttyclock.bg, ttyclock.bg);
      init_pair(1, ttyclock.bg, ttyclock.option.color);
      init_pair(2, ttyclock.option.color, ttyclock.bg);
-//     init_pair(0, ttyclock.bg, ttyclock.bg);
-//     init_pair(1, ttyclock.bg, ttyclock.option.color);
-//     init_pair(2, ttyclock.option.color, ttyclock.bg);
      refresh();
 
      /* Init signal handler */
@@ -162,6 +159,9 @@ signal_handler(int signal)
 void
 cleanup(void)
 {
+     /* Turn on cursor on VT100 compatible terminals */
+     printf("\033[?25h");
+
      if (ttyclock.ttyscr)
           delscreen(ttyclock.ttyscr);
 
@@ -218,6 +218,20 @@ void
 draw_number(int n, int x, int y)
 {
      int i, sy = y;
+     unsigned int pixel_on  = COLOR_PAIR(2) | A_REVERSE;
+     unsigned int pixel_off = COLOR_PAIR(0) | A_NORMAL;
+     /*
+      * pixel_on is a bitmask made by:
+      * - COLOR_PAIR(2), defined by "init_color"
+      * - A_REVERSE is the attribute that defines reverse characters (reversed space is a big "pixel")
+      *
+      * pixel_off is anothter bitmask made by:
+      * - COLOR_PAIR(0) which means "not visible"
+      * - A_NORMAL is "not reverse" attribute
+      *
+      * so "pixel_on" is used to draw "block characters" which are reversed spaces,
+      *    "pixel_off" is used to draw the "empty space".
+      */
 
      for(i = 0; i < 30; ++i, ++sy)
      {
@@ -232,7 +246,10 @@ draw_number(int n, int x, int y)
           else
                wattroff(ttyclock.framewin, A_BLINK);
 
-          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i/2]));
+          wbkgdset(ttyclock.framewin, number[n][i/2]
+               ? pixel_on
+               : pixel_off
+          );
           mvwaddch(ttyclock.framewin, x, sy, ' ');
      }
      wrefresh(ttyclock.framewin);
@@ -255,14 +272,15 @@ draw_clock(void)
      /* Draw hour numbers */
      draw_number(ttyclock.date.hour[0], 1, 1);
      draw_number(ttyclock.date.hour[1], 1, 8);
-     chtype dotcolor = COLOR_PAIR(1);
+     chtype dotcolor = COLOR_PAIR(2);
      if (ttyclock.option.blink && time(NULL) % 2 == 0)
-          dotcolor = COLOR_PAIR(2);
+          dotcolor = COLOR_PAIR(1);
 
      /* 2 dot for number separation */
-     wbkgdset(ttyclock.framewin, dotcolor);
+     wbkgdset(ttyclock.framewin, dotcolor | A_REVERSE);
      mvwaddstr(ttyclock.framewin, 2, 16, "  ");
      mvwaddstr(ttyclock.framewin, 4, 16, "  ");
+     wbkgdset(ttyclock.framewin, dotcolor | A_NORMAL);
 
      /* Draw minute numbers */
      draw_number(ttyclock.date.minute[0], 1, 20);
@@ -285,9 +303,10 @@ draw_clock(void)
      if(ttyclock.option.second)
      {
           /* Again 2 dot for number separation */
-          wbkgdset(ttyclock.framewin, dotcolor);
+          wbkgdset(ttyclock.framewin, dotcolor | A_REVERSE);
           mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
           mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
+          wbkgdset(ttyclock.framewin, dotcolor | A_NORMAL);
 
           /* Draw second numbers */
           draw_number(ttyclock.date.second[0], 1, 39);
@@ -327,8 +346,11 @@ clock_move(int x, int y, int w, int h)
                 ttyclock.geo.y + (ttyclock.geo.w / 2) - (strlen(ttyclock.date.datestr) / 2) - 1);
           wresize(ttyclock.datewin, DATEWINH, strlen(ttyclock.date.datestr) + 2);
 
+          /* Draw "T" box-drawing character for joining clock and date windows */
           if (ttyclock.option.box) {
                box(ttyclock.datewin,  0, 0);
+               mvwaddch(ttyclock.datewin, 0, 0, ACS_TTEE);
+               mvwaddch(ttyclock.datewin, 0, strlen(ttyclock.date.datestr) + 1, ACS_TTEE);
           }
      }
 
@@ -418,6 +440,12 @@ set_box(bool b)
 
      wrefresh(ttyclock.datewin);
      wrefresh(ttyclock.framewin);
+
+     /* Draw "T" box-drawing character for joining clock and date windows */
+     if(ttyclock.option.box) {
+          mvwaddch(ttyclock.datewin, 0, 0, ACS_TTEE);
+          mvwaddch(ttyclock.datewin, 0, strlen(ttyclock.date.datestr) + 1, ACS_TTEE);
+     }
 }
 
 void
@@ -552,6 +580,9 @@ int
 main(int argc, char **argv)
 {
      int c;
+
+     /* Turn off cursor on VT100 compatible terminals */
+     printf("\033[?25l");
 
      /* Alloc ttyclock */
      memset(&ttyclock, 0, sizeof(ttyclock_t));
