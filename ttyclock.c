@@ -252,21 +252,25 @@ draw_clock(void)
                      ttyclock.geo.h);
      }
 
+     /* x and y origin - top left corner of the clock */
+     int xorigin = ttyclock.option.nomargin && !ttyclock.option.box ? 0 : 1;
+     int yorigin = ttyclock.option.nomargin && !ttyclock.option.box ? 0 : 1;
+
      /* Draw hour numbers */
-     draw_number(ttyclock.date.hour[0], 1, 1);
-     draw_number(ttyclock.date.hour[1], 1, 8);
+     draw_number(ttyclock.date.hour[0], yorigin, xorigin);
+     draw_number(ttyclock.date.hour[1], yorigin, xorigin + 7);
      chtype dotcolor = COLOR_PAIR(1);
      if (ttyclock.option.blink && time(NULL) % 2 == 0)
           dotcolor = COLOR_PAIR(2);
 
      /* 2 dot for number separation */
      wbkgdset(ttyclock.framewin, dotcolor);
-     mvwaddstr(ttyclock.framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock.framewin, 4, 16, "  ");
+     mvwaddstr(ttyclock.framewin, yorigin + 1, xorigin + 15, "  ");
+     mvwaddstr(ttyclock.framewin, yorigin + 3, xorigin + 15, "  ");
 
      /* Draw minute numbers */
-     draw_number(ttyclock.date.minute[0], 1, 20);
-     draw_number(ttyclock.date.minute[1], 1, 27);
+     draw_number(ttyclock.date.minute[0], yorigin, xorigin + 19);
+     draw_number(ttyclock.date.minute[1], yorigin, xorigin + 26);
 
      /* Draw the date */
      if (ttyclock.option.bold)
@@ -277,7 +281,7 @@ draw_clock(void)
      if (ttyclock.option.date)
      {
           wbkgdset(ttyclock.datewin, (COLOR_PAIR(2)));
-          mvwprintw(ttyclock.datewin, (DATEWINH / 2), 1, "%s", ttyclock.date.datestr);
+          mvwprintw(ttyclock.datewin, yorigin + (DATEWINH / 2) - 1, xorigin, "%s", ttyclock.date.datestr);
           wrefresh(ttyclock.datewin);
      }
 
@@ -286,12 +290,12 @@ draw_clock(void)
      {
           /* Again 2 dot for number separation */
           wbkgdset(ttyclock.framewin, dotcolor);
-          mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
-          mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
+          mvwaddstr(ttyclock.framewin, yorigin + 1, xorigin + NORMFRAMEW - 1, "  ");
+          mvwaddstr(ttyclock.framewin, yorigin + 3, xorigin + NORMFRAMEW - 1, "  ");
 
           /* Draw second numbers */
-          draw_number(ttyclock.date.second[0], 1, 39);
-          draw_number(ttyclock.date.second[1], 1, 46);
+          draw_number(ttyclock.date.second[0], yorigin, xorigin + 38);
+          draw_number(ttyclock.date.second[1], yorigin, xorigin + 45);
      }
 
      return;
@@ -402,6 +406,9 @@ set_box(bool b)
 {
      ttyclock.option.box = b;
 
+     if (ttyclock.option.nomargin)
+          clock_move(ttyclock.geo.x, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
+
      wbkgdset(ttyclock.framewin, COLOR_PAIR(0));
      wbkgdset(ttyclock.datewin, COLOR_PAIR(0));
 
@@ -418,6 +425,15 @@ set_box(bool b)
 
      wrefresh(ttyclock.datewin);
      wrefresh(ttyclock.framewin);
+}
+
+void
+set_nomargin(bool b)
+{
+     ttyclock.option.nomargin = b;
+     clock_move(ttyclock.geo.x, ttyclock.geo.y, ttyclock.geo.w, ttyclock.geo.h);
+
+     return;
 }
 
 void
@@ -533,6 +549,11 @@ key_event(void)
           set_box(!ttyclock.option.box);
           break;
 
+     case 'm':
+     case 'M':
+          set_nomargin(!ttyclock.option.nomargin);
+          break;
+
      case '0': case '1': case '2': case '3':
      case '4': case '5': case '6': case '7':
           i = c - '0';
@@ -569,7 +590,7 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "miuvsScbtrhBxnDC:f:d:T:a:")) != -1)
      {
           switch(c)
           {
@@ -594,7 +615,8 @@ main(int argc, char **argv)
                       "    -D            Hide date                                      \n"
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
+                      "    -m            Disable margin, removing unused space around the clock.\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
@@ -667,6 +689,9 @@ main(int argc, char **argv)
                break;
           case 'n':
                ttyclock.option.noquit = true;
+               break;
+          case 'm':
+               ttyclock.option.nomargin = true;
                break;
           }
      }
