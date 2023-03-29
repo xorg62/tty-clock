@@ -1,3 +1,4 @@
+# tty-clock
 
 ## Installation
 
@@ -13,6 +14,7 @@ sudo mv tty-clock /usr/local/bin/tty-clock
 ```
 
 ## Commands 
+
 ```
 usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty]
     -s            Show seconds
