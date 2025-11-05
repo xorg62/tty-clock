@@ -92,8 +92,8 @@ init(void)
           ttyclock.geo.a = 1;
      if(!ttyclock.geo.b)
           ttyclock.geo.b = 1;
-     ttyclock.geo.w = (ttyclock.option.second) ? SECFRAMEW : NORMFRAMEW;
-     ttyclock.geo.h = 7;
+     ttyclock.geo.w = ((ttyclock.option.second) ? SECFRAMEW : NORMFRAMEW) * ttyclock.option.scale;
+     ttyclock.geo.h = 7 * ttyclock.option.scale;
      ttyclock.tm = localtime(&(ttyclock.lt));
      if(ttyclock.option.utc) {
           ttyclock.tm = gmtime(&(ttyclock.lt));
@@ -217,23 +217,37 @@ update_hour(void)
 void
 draw_number(int n, int x, int y)
 {
-     int i, sy = y;
-
-     for(i = 0; i < 30; ++i, ++sy)
+     int i, j, k;
+     int scale = ttyclock.option.scale;
+     
+     /* Number matrix is 3 columns × 5 rows = 15 cells */
+     /* Array is row-major: every 3 values = one row */
+     /* Each cell in original is 2 chars wide × 1 char tall */
+     /* With scaling, each cell becomes (2*scale) chars wide × scale chars tall */
+     
+     for(i = 0; i < 15; ++i)
      {
-          if(sy == y + 6)
-          {
-               sy = y;
-               ++x;
-          }
-
+          int row = i / 3;  /* Which row (0-4) */
+          int col = i % 3;  /* Which column (0-2) */
+          
           if (ttyclock.option.bold)
                wattron(ttyclock.framewin, A_BLINK);
           else
                wattroff(ttyclock.framewin, A_BLINK);
-
-          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i/2]));
-          mvwaddch(ttyclock.framewin, x, sy, ' ');
+          
+          wbkgdset(ttyclock.framewin, COLOR_PAIR(number[n][i]));
+          
+          /* Draw a scaled block for this cell */
+          for(j = 0; j < scale; ++j)  /* height */
+          {
+               for(k = 0; k < 2 * scale; ++k)  /* width (2 chars per cell) */
+               {
+                    mvwaddch(ttyclock.framewin, 
+                            x + row * scale + j,
+                            y + col * 2 * scale + k, 
+                            ' ');
+               }
+          }
      }
      wrefresh(ttyclock.framewin);
 
@@ -243,6 +257,9 @@ draw_number(int n, int x, int y)
 void
 draw_clock(void)
 {
+     int scale = ttyclock.option.scale;
+     int i, j;
+     
      if (ttyclock.option.date && !ttyclock.option.rebound &&
                strcmp(ttyclock.date.datestr, ttyclock.date.old_datestr) != 0)
      {
@@ -253,20 +270,26 @@ draw_clock(void)
      }
 
      /* Draw hour numbers */
-     draw_number(ttyclock.date.hour[0], 1, 1);
-     draw_number(ttyclock.date.hour[1], 1, 8);
+     draw_number(ttyclock.date.hour[0], 1 * scale, 1 * scale);
+     draw_number(ttyclock.date.hour[1], 1 * scale, 8 * scale);
      chtype dotcolor = COLOR_PAIR(1);
      if (ttyclock.option.blink && time(NULL) % 2 == 0)
           dotcolor = COLOR_PAIR(2);
 
-     /* 2 dot for number separation */
+     /* 2 dot for number separation - scale the dots */
      wbkgdset(ttyclock.framewin, dotcolor);
-     mvwaddstr(ttyclock.framewin, 2, 16, "  ");
-     mvwaddstr(ttyclock.framewin, 4, 16, "  ");
+     for(i = 0; i < scale; ++i)
+     {
+          for(j = 0; j < 2 * scale; ++j)
+          {
+               mvwaddch(ttyclock.framewin, 2 * scale + i, 16 * scale + j, ' ');
+               mvwaddch(ttyclock.framewin, 4 * scale + i, 16 * scale + j, ' ');
+          }
+     }
 
      /* Draw minute numbers */
-     draw_number(ttyclock.date.minute[0], 1, 20);
-     draw_number(ttyclock.date.minute[1], 1, 27);
+     draw_number(ttyclock.date.minute[0], 1 * scale, 20 * scale);
+     draw_number(ttyclock.date.minute[1], 1 * scale, 27 * scale);
 
      /* Draw the date */
      if (ttyclock.option.bold)
@@ -284,14 +307,20 @@ draw_clock(void)
      /* Draw second if the option is enabled */
      if(ttyclock.option.second)
      {
-          /* Again 2 dot for number separation */
+          /* Again 2 dot for number separation - scale the dots */
           wbkgdset(ttyclock.framewin, dotcolor);
-          mvwaddstr(ttyclock.framewin, 2, NORMFRAMEW, "  ");
-          mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
+          for(i = 0; i < scale; ++i)
+          {
+               for(j = 0; j < 2 * scale; ++j)
+               {
+                    mvwaddch(ttyclock.framewin, 2 * scale + i, NORMFRAMEW * scale + j, ' ');
+                    mvwaddch(ttyclock.framewin, 4 * scale + i, NORMFRAMEW * scale + j, ' ');
+               }
+          }
 
           /* Draw second numbers */
-          draw_number(ttyclock.date.second[0], 1, 39);
-          draw_number(ttyclock.date.second[1], 1, 46);
+          draw_number(ttyclock.date.second[0], 1 * scale, 39 * scale);
+          draw_number(ttyclock.date.second[1], 1 * scale, 46 * scale);
      }
 
      return;
@@ -369,7 +398,7 @@ clock_rebound(void)
 void
 set_second(void)
 {
-     int new_w = (((ttyclock.option.second = !ttyclock.option.second)) ? SECFRAMEW : NORMFRAMEW);
+     int new_w = (((ttyclock.option.second = !ttyclock.option.second)) ? SECFRAMEW : NORMFRAMEW) * ttyclock.option.scale;
      int y_adj;
 
      for(y_adj = 0; (ttyclock.geo.y - y_adj) > (COLS - new_w - 1); ++y_adj);
@@ -377,6 +406,44 @@ set_second(void)
      clock_move(ttyclock.geo.x, (ttyclock.geo.y - y_adj), new_w, ttyclock.geo.h);
 
      set_center(ttyclock.option.center);
+
+     return;
+}
+
+void
+cycle_scale(void)
+{
+     int new_scale = ttyclock.option.scale + 1;
+     int new_w;
+     int new_h;
+     int new_x;
+     int new_y;
+
+     if(new_scale > 4)
+          new_scale = 1;
+
+     ttyclock.option.scale = new_scale;
+
+     new_w = ((ttyclock.option.second ? SECFRAMEW : NORMFRAMEW) * new_scale);
+     new_h = 7 * new_scale;
+
+     new_x = ttyclock.geo.x;
+     new_y = ttyclock.geo.y;
+
+     if(new_x > (LINES - new_h - DATEWINH))
+          new_x = LINES - new_h - DATEWINH;
+     if(new_x < 0)
+          new_x = 0;
+
+     if(new_y > (COLS - new_w - 1))
+          new_y = COLS - new_w - 1;
+     if(new_y < 0)
+          new_y = 0;
+
+     clock_move(new_x, new_y, new_w, new_h);
+
+     if(ttyclock.option.center)
+          set_center(true);
 
      return;
 }
@@ -533,6 +600,11 @@ key_event(void)
           set_box(!ttyclock.option.box);
           break;
 
+    case 'z':
+    case 'Z':
+         cycle_scale();
+         break;
+
      case '0': case '1': case '2': case '3':
      case '4': case '5': case '6': case '7':
           i = c - '0';
@@ -566,16 +638,18 @@ main(int argc, char **argv)
      ttyclock.option.delay = 1; /* 1FPS */
      ttyclock.option.nsdelay = 0; /* -0FPS */
      ttyclock.option.blink = false;
+     /* Default scale */
+     ttyclock.option.scale = 1;
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:z:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-z scale] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -594,7 +668,8 @@ main(int argc, char **argv)
                       "    -D            Hide date                                      \n"
                       "    -B            Enable blinking colon                          \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
-                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
+                      "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n"
+                      "    -z scale      Scale the clock UI (1-4). Default 1.\n");
                exit(EXIT_SUCCESS);
                break;
           case 'i':
@@ -649,6 +724,10 @@ main(int argc, char **argv)
                break;
           case 'x':
                ttyclock.option.box = true;
+               break;
+          case 'z':
+               if(atoi(optarg) >= 1 && atoi(optarg) <= 4)
+                    ttyclock.option.scale = atoi(optarg);
                break;
           case 'T': {
                struct stat sbuf;

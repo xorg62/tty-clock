@@ -85,6 +85,7 @@ typedef struct
           long delay;
           bool blink;
           long nsdelay;
+          int scale;
      } option;
 
      /* Clock geometry */
@@ -124,6 +125,7 @@ void draw_number(int n, int x, int y);
 void draw_clock(void);
 void clock_move(int x, int y, int w, int h);
 void set_second(void);
+void cycle_scale(void);
 void set_center(bool b);
 void set_box(bool b);
 void key_event(void);

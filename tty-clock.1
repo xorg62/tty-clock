@@ -8,7 +8,7 @@
 tty\-clock \- a terminal digital clock
 .SH "SYNOPSIS"
 .LP
-\fBtty\-clock [\-iuvsScbtrahDBxn] [\-C [\fI0\-7\fB]] [\-f \fIformat\fB] [\-d \fIdelay\fB] [\-a \fInsdelay\fB] \fB[\-T \fItty\fB]\fR
+\fBtty\-clock [\-iuvsScbtrahDBxn] [\-C [\fI0\-7\fB]] [\-f \fIformat\fB] [\-d \fIdelay\fB] [\-a \fInsdelay\fB] [\-z \fIscale\fB] \fB[\-T \fItty\fB]\fR
 .SH "DESCRIPTION"
 .LP
 \fItty\-clock\fR displays a simple digital clock on the terminal. Invoked without options
@@ -110,6 +110,10 @@ Set the delay (in seconds) between two redraws of the clock. Default 1s.
 .TP
 \fB\-a\fR \fInsdelay\fR
 Additional delay (in nanoseconds) between two redraws of the clock. Default 0ns.
+.TP
+\fB\-z\fR \fIscale\fR
+Scale the clock UI. Valid values are 1\-4. At higher scales, the clock display
+will be proportionally larger. Default 1.
 .SH "EXAMPLES"
 .LP
 To invoke
