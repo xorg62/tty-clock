@@ -2,7 +2,8 @@
 #Under BSD License
 #See clock.c for the license detail.
 
-SRC = ttyclock.c ttyclock.h
+SRC = ttyclock.c
+HEADERS = ttyclock.h
 CC ?= gcc
 BIN ?= tty-clock
 PREFIX ?= /usr/local
@@ -26,7 +27,7 @@ else
 	LDFLAGS += $$(pkg-config --libs ncurses)
 endif
 
-tty-clock : ${SRC}
+tty-clock : ${SRC} ${HEADERS}
 
 	@echo "building ${SRC}"
 	${CC} ${CFLAGS} ${SRC} -o ${BIN} ${LDFLAGS}
