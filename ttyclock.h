@@ -105,6 +105,15 @@ typedef struct
           char old_datestr[256];
      } date;
 
+     /* Timer Data types */
+     struct
+     {
+         int remaining;
+         int timer_set;
+         bool running;
+         bool paused;
+     } timer;
+
      /* time.h utils */
      struct tm *tm;
      time_t lt;
@@ -115,6 +124,11 @@ typedef struct
      WINDOW *datewin;
 
 } ttyclock_t;
+
+typedef enum {
+     MODE_CLOCK,
+     MODE_TIMER
+} ttyclock_mode_t;
 
 /* Prototypes */
 void init(void);
@@ -130,6 +144,7 @@ void key_event(void);
 
 /* Global variable */
 ttyclock_t ttyclock;
+ttyclock_mode_t mode;
 
 /* Number matrix */
 const bool number[][15] =

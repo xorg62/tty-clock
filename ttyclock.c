@@ -215,6 +215,18 @@ update_hour(void)
 }
 
 void
+update_timer(void){
+    if(!ttyclock.timer.running){
+        return;
+    }
+    if(ttyclock.timer.remaining>0 && !ttyclock.timer.paused){
+        ttyclock.timer.remaining--;
+    }if(ttyclock.timer.remaining==1){
+        beep();
+    }
+}
+
+void
 draw_number(int n, int x, int y)
 {
      int i, sy = y;
@@ -243,6 +255,16 @@ draw_number(int n, int x, int y)
 void
 draw_clock(void)
 {
+    int h,m,s;
+     if (mode==MODE_CLOCK){
+            h = (ttyclock.date.hour[0]*10)+ttyclock.date.hour[1];
+            m = (ttyclock.date.minute[0]*10)+ttyclock.date.minute[1];
+            s = (ttyclock.date.second[0]*10)+ttyclock.date.second[1];
+     }else {
+            h = ttyclock.timer.remaining / 3600;
+            m = (ttyclock.timer.remaining % 3600) / 60;
+            s = ttyclock.timer.remaining % 60;
+     }
      if (ttyclock.option.date && !ttyclock.option.rebound &&
                strcmp(ttyclock.date.datestr, ttyclock.date.old_datestr) != 0)
      {
@@ -253,8 +275,8 @@ draw_clock(void)
      }
 
      /* Draw hour numbers */
-     draw_number(ttyclock.date.hour[0], 1, 1);
-     draw_number(ttyclock.date.hour[1], 1, 8);
+     draw_number((h/10)%10, 1, 1);
+     draw_number(h%10, 1, 8);
      chtype dotcolor = COLOR_PAIR(1);
      if (ttyclock.option.blink && time(NULL) % 2 == 0)
           dotcolor = COLOR_PAIR(2);
@@ -265,8 +287,8 @@ draw_clock(void)
      mvwaddstr(ttyclock.framewin, 4, 16, "  ");
 
      /* Draw minute numbers */
-     draw_number(ttyclock.date.minute[0], 1, 20);
-     draw_number(ttyclock.date.minute[1], 1, 27);
+     draw_number(m/10, 1, 20);
+     draw_number(m%10, 1, 27);
 
      /* Draw the date */
      if (ttyclock.option.bold)
@@ -282,7 +304,7 @@ draw_clock(void)
      }
 
      /* Draw second if the option is enabled */
-     if(ttyclock.option.second)
+     if(ttyclock.option.second || mode==MODE_TIMER)
      {
           /* Again 2 dot for number separation */
           wbkgdset(ttyclock.framewin, dotcolor);
@@ -290,8 +312,8 @@ draw_clock(void)
           mvwaddstr(ttyclock.framewin, 4, NORMFRAMEW, "  ");
 
           /* Draw second numbers */
-          draw_number(ttyclock.date.second[0], 1, 39);
-          draw_number(ttyclock.date.second[1], 1, 46);
+          draw_number(s/10, 1, 39);
+          draw_number(s%10, 1, 46);
      }
 
      return;
@@ -338,7 +360,7 @@ clock_move(int x, int y, int w, int h)
      }
 
      wrefresh(ttyclock.framewin);
-     wrefresh(ttyclock.datewin); 
+     wrefresh(ttyclock.datewin);
      return;
 }
 
@@ -426,7 +448,6 @@ key_event(void)
      int i, c;
 
      struct timespec length = { ttyclock.option.delay, ttyclock.option.nsdelay };
-     
      fd_set rfds;
      FD_ZERO(&rfds);
      FD_SET(STDIN_FILENO, &rfds);
@@ -541,6 +562,23 @@ key_event(void)
           init_pair(2, i, ttyclock.bg);
           break;
 
+    /* Timer Pause and Play */
+    case 'p':
+    case 'P':
+        if(mode==MODE_TIMER){
+            ttyclock.timer.paused=!ttyclock.timer.paused;
+        }
+        break;
+
+    /* Timer Reset */
+    case 'O':
+    case 'o':
+        if(mode==MODE_TIMER && ttyclock.timer.remaining==0){
+            ttyclock.timer.remaining=ttyclock.timer.timer_set+1;
+            ttyclock.timer.paused=false;
+        }
+        break;
+
      default:
           pselect(1, &rfds, NULL, NULL, &length, NULL);
      }
@@ -569,13 +607,13 @@ main(int argc, char **argv)
 
      atexit(cleanup);
 
-     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:")) != -1)
+     while ((c = getopt(argc, argv, "iuvsScbtrhBxnDC:f:d:T:a:M:")) != -1)
      {
           switch(c)
           {
           case 'h':
           default:
-               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
+               printf("usage : tty-clock [-iuvsScbtrahDBxn] [-M duration] [-C [0-7]] [-f format] [-d delay] [-a nsdelay] [-T tty] \n"
                       "    -s            Show seconds                                   \n"
                       "    -S            Screensaver mode                               \n"
                       "    -x            Show box                                       \n"
@@ -593,6 +631,7 @@ main(int argc, char **argv)
                       "    -h            Show this page                                 \n"
                       "    -D            Hide date                                      \n"
                       "    -B            Enable blinking colon                          \n"
+                      "    -M duration   Start a countdown timer (e.g. 30s, 5m, 1h)     \n"
                       "    -d delay      Set the delay between two redraws of the clock. Default 1s. \n"
                       "    -a nsdelay    Additional delay between two redraws in nanoseconds. Default 0ns.\n");
                exit(EXIT_SUCCESS);
@@ -668,6 +707,25 @@ main(int argc, char **argv)
           case 'n':
                ttyclock.option.noquit = true;
                break;
+          case 'M':
+               ttyclock.timer.running=true;
+               mode = MODE_TIMER;
+               char *end;
+               long val = strtol(optarg, &end, 10);
+               if(*end=='h'){
+                   ttyclock.timer.timer_set= val*3600;
+                   ttyclock.timer.remaining=ttyclock.timer.timer_set;
+               }else if(*end == 'm'){
+                   ttyclock.timer.timer_set= val*60;
+                   ttyclock.timer.remaining=ttyclock.timer.timer_set;
+               }else if(*end == 's'){
+                   ttyclock.timer.timer_set= val;
+                   ttyclock.timer.remaining=ttyclock.timer.timer_set;
+               }else{
+                   printf("Invalid timer format \n");
+                   exit(EXIT_FAILURE);
+               }
+               break;
           }
      }
 
@@ -676,9 +734,15 @@ main(int argc, char **argv)
      while(ttyclock.running)
      {
           clock_rebound();
-          update_hour();
-          draw_clock();
-          key_event();
+          if(mode==MODE_TIMER){
+              draw_clock();
+              key_event();
+              update_timer();
+          }else{
+              update_hour();
+              draw_clock();
+              key_event();
+          }
      }
 
      endwin();
